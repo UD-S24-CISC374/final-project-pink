@@ -238,14 +238,10 @@ class LobbyScene extends Phaser.Scene {
             );
 
             // Collision between player bullets and chorts
-            this.physics.add.collider(
-                this.bullets,
-                this.chorts,
-                (bullet, chort) => {
-                    // Decrease chort health when hit by player bullets
-                    this.handleBulletEnemyCollision(bullet, chort);
-                }
-            );
+            this.physics.add.collider(this.bullets, this.chorts, (bullet) => {
+                // Decrease chort health when hit by player bullets
+                this.handleBulletEnemyCollision(bullet);
+            });
 
             // Collision between chort bullets and player
             // Add collider between player and chorts' fireballs
@@ -297,9 +293,6 @@ class LobbyScene extends Phaser.Scene {
 
     private handleBulletEnemyCollision(
         bullet:
-            | Phaser.Types.Physics.Arcade.GameObjectWithBody
-            | Phaser.Tilemaps.Tile,
-        chort:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
             | Phaser.Tilemaps.Tile
     ) {
