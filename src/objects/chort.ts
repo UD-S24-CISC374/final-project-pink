@@ -88,6 +88,9 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
     }
 
     shootFireball() {
+        if (!this.active || !this.body || !this.body.enable) {
+            return; // Don't shoot if the Chort is destroyed
+        }
         //shoots fireballs
         // Create a new fireball at the Chort's position
         this.fireballs.maxSize = 10;
