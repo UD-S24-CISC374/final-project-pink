@@ -32,6 +32,13 @@ class Player {
 
         this.health -= damage;
     }
+    die() {
+        // Play death animation
+        this.playDeathAnimation();
+        // Stop the player from moving
+        this.player.setVelocity(0, 0);
+    }
+
     playDamageAnimation() {
         // Red tint animation
         this.player.setTint(0xff0001); // Set player to red tint
@@ -59,6 +66,10 @@ class Player {
                 this.player.clearTint(); // Ensure player appearance is reverted to normal
             }, flashDuration);
         }, 111); // Red tint duration
+    }
+    playDeathAnimation() {
+        // Change player appearance (e.g., tint it red)
+        this.player.setTint(0xff0000); // Set player to red tint
     }
 }
 

@@ -29,13 +29,13 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
             maxSize: 0,
             runChildUpdate: true,
         });
+    private health: number = 40; // Initial health for Chort
 
     constructor(
         scene: Phaser.Scene,
         x: number,
         y: number,
         texture: string,
-        player: Phaser.Physics.Arcade.Sprite,
         frame?: string | number
     ) {
         super(scene, x, y, texture, frame);
@@ -99,6 +99,17 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
 
         // Fire the fireball towards the player
         fireball.fire(this.targetPosition.x, this.targetPosition.y);
+    }
+
+    public takeDamage(damage: number) {
+        // Reduce Chort health
+        this.health -= damage;
+
+        // Check if Chort health is zero or less
+        if (this.health <= 0) {
+            // Destroy the Chort if health is zero or less
+            this.destroy();
+        }
     }
 
     preUpdate(t: number, dt: number) {

@@ -244,10 +244,16 @@ class LobbyScene extends Phaser.Scene {
             );
 
             // Collision between player bullets and chorts
-            this.physics.add.collider(this.bullets, this.chorts, (bullet) => {
-                // Decrease chort health when hit by player bullets
-                this.handleBulletEnemyCollision(bullet);
-            });
+            this.physics.add.collider(
+                this.bullets,
+                this.chorts,
+                (bullet, chort) => {
+                    // Decrease chort health when hit by player bullets
+                    (chort as Chort).takeDamage(10); // Assuming each bullet does 10 damage
+                    // Destroy the bullet
+                    bullet.destroy();
+                }
+            );
 
             // Collision between chort bullets and player
             this.chorts.children.iterate((chort) => {
@@ -296,18 +302,6 @@ class LobbyScene extends Phaser.Scene {
         }
     }
 
-    private handleBulletEnemyCollision(
-        bullet:
-            | Phaser.Types.Physics.Arcade.GameObjectWithBody
-            | Phaser.Tilemaps.Tile
-    ) {
-        if (bullet instanceof Bullet) {
-            bullet.destroy(); // Destroy the bullet
-            // Decrease chort health
-            // chort.damage(); // Example: You may need to implement a method to handle chort damage
-        }
-    }
-
     private handlePlayerEnemyBulletCollision(
         player:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
@@ -342,65 +336,80 @@ class LobbyScene extends Phaser.Scene {
     }
 
     update() {
-        // Check for keyboard input and move the player accordingly
-        const keyboard = this.input.keyboard;
+        if (this.gameState.player.health <= 0) {
+            // Player is dead, trigger death animation
+            this.gameState.player.die();
+            // You may also want to perform other actions, like respawning the player or ending the game
+        } else {
+            // Player is not dead, can move
+            // Check for keyboard input and move the player accordingly
+            const keyboard = this.input.keyboard;
 
-        if (this.input.activePointer.isDown) {
-            // Shoot a bullet from the player towards the mouse cursor
-            shootBullets(
-                this,
-                this.bullets!,
-                this.player!,
-                6, //shots per round
-                500, //milliseconds between shots
-                "bullet_blue" //image texture for bullet
-            );
-        }
+            if (this.input.activePointer.isDown) {
+                // Shoot a bullet from the player towards the mouse cursor
+                shootBullets(
+                    this,
+                    this.bullets!,
+                    this.player!,
+                    6, //shots per round
+                    500, //milliseconds between shots
+                    "bullet_blue" //image texture for bullet
+                );
+            }
 
-        if (keyboard) {
-            // Handle diagonal movement
-            if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
-            ) {
-                this.characterMovement.moveUpLeft();
-            } else if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
-            ) {
-                this.characterMovement.moveUpRight();
-            } else if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
-            ) {
-                this.characterMovement.moveDownLeft();
-            } else if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
-            ) {
-                this.characterMovement.moveDownRight();
-            } else {
-                // Handle individual directions
-                if (keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown) {
-                    this.characterMovement.moveUp();
-                } else if (
-                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown
+            if (keyboard) {
+                // Handle diagonal movement
+                if (
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown &&
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
                 ) {
-                    this.characterMovement.moveDown();
-                } else {
-                    this.characterMovement.stopY(); // Stop vertical movement if no up/down keys are pressed
-                }
-                if (keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
-                    this.characterMovement.moveLeft();
+                    this.characterMovement.moveUpLeft();
                 } else if (
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown &&
                     keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
                 ) {
-                    this.characterMovement.moveRight();
+                    this.characterMovement.moveUpRight();
+                } else if (
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown &&
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
+                ) {
+                    this.characterMovement.moveDownLeft();
+                } else if (
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown &&
+                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
+                ) {
+                    this.characterMovement.moveDownRight();
                 } else {
-                    this.characterMovement.stopX(); // Stop horizontal movement if no left/right keys are pressed
+                    // Handle individual directions
+                    if (
+                        keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown
+                    ) {
+                        this.characterMovement.moveUp();
+                    } else if (
+                        keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown
+                    ) {
+                        this.characterMovement.moveDown();
+                    } else {
+                        this.characterMovement.stopY(); // Stop vertical movement if no up/down keys are pressed
+                    }
+                    if (
+                        keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
+                    ) {
+                        this.characterMovement.moveLeft();
+                    } else if (
+                        keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
+                    ) {
+                        this.characterMovement.moveRight();
+                    } else {
+                        this.characterMovement.stopX(); // Stop horizontal movement if no left/right keys are pressed
+                    }
                 }
+                this.events.emit(
+                    "player-moved",
+                    this.player!.x,
+                    this.player!.y
+                ); //emits the player movement event for enemies to track player
             }
-            this.events.emit("player-moved", this.player!.x, this.player!.y); //emits the player movement event for enemies to track player
         }
     }
 }
