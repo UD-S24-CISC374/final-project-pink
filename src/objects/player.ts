@@ -1,22 +1,15 @@
 class Player {
-    //obviously we need to rework this alot but just wanted to get an idea up
-    name: string;
     hearts: number;
-    shields: number;
-    weapons: string[];
-    items: string[];
-    constructor(
-        name: string,
-        hearts: number,
-        shields: number,
-        weapons: string[],
-        items: string[]
-    ) {
-        this.name = name;
+    maxHearts: number;
+    health: number;
+
+    constructor(hearts: number, health: number) {
         this.hearts = hearts;
-        this.shields = shields;
-        this.weapons = weapons;
-        this.items = items;
+        this.health = health;
+    }
+
+    takeDamage(amount: number) {
+        this.health -= amount;
     }
 }
 

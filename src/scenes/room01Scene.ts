@@ -8,7 +8,6 @@ import ConsoleScene from "./consoleScene";
 import { Bullet } from "../objects/bullet";
 import { shootBullets } from "../util/shootBullets";
 
-
 class room01Scene extends Phaser.Scene {
     private gameState: gameState;
     private player?: Phaser.Physics.Arcade.Sprite;

@@ -9,11 +9,14 @@ import { gameState } from "../objects/gameState";
 import Chort from "../objects/chort";
 import { Bullet } from "../objects/bullet";
 
+import { sceneEvents } from "../util/eventCenter";
+
 class LobbyScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
+    private gameState: gameState;
 
     constructor() {
         super({ key: "LobbyScene" });
@@ -26,20 +29,18 @@ class LobbyScene extends Phaser.Scene {
         this.input.mouse?.disableContextMenu();
         this.input.setDefaultCursor("crosshair");
 
-        const player = new Player(
-            "Player 1",
-            5,
-            2,
-            ["Sword", "Bow"],
-            ["Potion", "Key"]
-        );
+        const player = new Player(5, 4);
         const initialLevel = 0;
-        const initialGameState = new gameState(
+        this.gameState = new gameState(
             player,
             initialLevel,
             false,
             "lobbyScene"
         );
+
+        this.scene.run("game-ui", {
+            gameState: this.gameState,
+        });
 
         const map = this.make.tilemap({ key: "lobby" });
         const tileset = map.addTilesetImage("tilemap", "tiles"); //name of tilemap ON TILED, then name of key in preloader scene
@@ -84,7 +85,7 @@ class LobbyScene extends Phaser.Scene {
                 this.player, //player
                 this, //current scene
                 100, //speed
-                initialGameState //for anim check (doesnt re-initialize anims more than once)
+                this.gameState //for anim check (doesnt re-initialize anims more than once)
             );
 
             //enemies
@@ -130,12 +131,7 @@ class LobbyScene extends Phaser.Scene {
                     this.bullets,
                     walls,
                     (object1, object2) => {
-                        //need this setup for collisions on groups for some reason
-                        if (object1 instanceof Bullet) {
-                            object1.destroy(); // Destroy the bullet when it hits the walls
-                        } else if (object2 instanceof Bullet) {
-                            object2.destroy(); // Destroy the bullet when it hits the walls
-                        }
+                        this.handleBulletTileCollision(object1, object2);
                     }
                 );
                 this.chorts.children.iterate(
@@ -149,11 +145,10 @@ class LobbyScene extends Phaser.Scene {
                             currentChort.fireballs, //fireball group stored in each chort instance
                             walls,
                             (object1, object2) => {
-                                if (object1 instanceof Bullet) {
-                                    object1.destroy(); // Destroy the bullet when it hits the walls
-                                } else if (object2 instanceof Bullet) {
-                                    object2.destroy(); // Destroy the bullet when it hits the walls
-                                }
+                                this.handleBulletTileCollision(
+                                    object1,
+                                    object2
+                                );
                             }
                         );
                         return true;
@@ -168,11 +163,7 @@ class LobbyScene extends Phaser.Scene {
                     structs,
                     (object1, object2) => {
                         //player bullets
-                        if (object1 instanceof Bullet) {
-                            object1.destroy();
-                        } else if (object2 instanceof Bullet) {
-                            object2.destroy();
-                        }
+                        this.handleBulletTileCollision(object1, object2);
                     }
                 );
                 this.chorts.children.iterate(
@@ -184,11 +175,10 @@ class LobbyScene extends Phaser.Scene {
                             currentChort.fireballs,
                             structs,
                             (object1, object2) => {
-                                if (object1 instanceof Bullet) {
-                                    object1.destroy();
-                                } else if (object2 instanceof Bullet) {
-                                    object2.destroy();
-                                }
+                                this.handleBulletTileCollision(
+                                    object1,
+                                    object2
+                                );
                             }
                         );
                         return true;
@@ -203,11 +193,7 @@ class LobbyScene extends Phaser.Scene {
                     this.bullets,
                     decor,
                     (object1, object2) => {
-                        if (object1 instanceof Bullet) {
-                            object1.destroy();
-                        } else if (object2 instanceof Bullet) {
-                            object2.destroy();
-                        }
+                        this.handleBulletTileCollision(object1, object2);
                     }
                 );
                 this.chorts.children.iterate(
@@ -219,11 +205,10 @@ class LobbyScene extends Phaser.Scene {
                             currentChort.fireballs,
                             decor,
                             (object1, object2) => {
-                                if (object1 instanceof Bullet) {
-                                    object1.destroy();
-                                } else if (object2 instanceof Bullet) {
-                                    object2.destroy();
-                                }
+                                this.handleBulletTileCollision(
+                                    object1,
+                                    object2
+                                );
                             }
                         );
                         return true;
@@ -234,12 +219,56 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.chorts, floor);
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
-                    initialGameState.curRoom = "room01Scene";
+                    this.gameState.curRoom = "room01Scene";
                     this.scene.start("room01Scene", {
-                        gameState: initialGameState,
+                        gameState: this.gameState,
                     });
                 });
             }
+
+            this.physics.add.collider(
+                this.player,
+                this.chorts,
+                () => {
+                    // Decrease player health when colliding with chorts
+                    this.handlePlayerEnemyCollision();
+                },
+                undefined,
+                this
+            );
+
+            // Collision between player bullets and chorts
+            this.physics.add.collider(
+                this.bullets,
+                this.chorts,
+                (bullet, chort) => {
+                    // Decrease chort health when hit by player bullets
+                    this.handleBulletEnemyCollision(bullet, chort);
+                }
+            );
+
+            // Collision between chort bullets and player
+            // Add collider between player and chorts' fireballs
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                // Check if fireballs group exists
+                this.physics.add.collider(
+                    this.player as Phaser.GameObjects.Sprite,
+                    currentChort.fireballs, // Collider between player and fireballs
+                    (player, fireball) => {
+                        this.handlePlayerEnemyBulletCollision(
+                            this.player as
+                                | Phaser.Types.Physics.Arcade.GameObjectWithBody
+                                | Phaser.Tilemaps.Tile,
+                            fireball
+                        );
+                    }, // Collision callback function
+                    undefined,
+                    this
+                );
+
+                return true;
+            });
 
             //camera follows player
             this.cameras.main.startFollow(this.player, true);
@@ -250,6 +279,57 @@ class LobbyScene extends Phaser.Scene {
                 this.player.height * 0.8
             );
         }
+    }
+    private handleBulletTileCollision(
+        obj1:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        obj2:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (obj1 instanceof Bullet) {
+            obj1.destroy();
+        } else if (obj2 instanceof Bullet) {
+            obj2.destroy();
+        }
+    }
+
+    private handleBulletEnemyCollision(
+        bullet:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        chort:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (bullet instanceof Bullet) {
+            bullet.destroy(); // Destroy the bullet
+            // Decrease chort health
+            // chort.damage(); // Example: You may need to implement a method to handle chort damage
+        }
+    }
+
+    private handlePlayerEnemyBulletCollision(
+        player:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        fireball:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (fireball instanceof Bullet) {
+            fireball.destroy();
+        }
+        this.gameState.player.takeDamage(1);
+
+        sceneEvents.emit("player-health-changed", this.gameState.player.health);
+    }
+
+    private handlePlayerEnemyCollision() {
+        this.gameState.player.takeDamage(1);
+
+        sceneEvents.emit("player-health-changed", this.gameState.player.health);
     }
 
     update() {

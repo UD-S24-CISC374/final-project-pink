@@ -7,6 +7,8 @@ export default class PreloadScene extends Phaser.Scene {
 
     preload() {
         this.load.image("bullet_blue", "assets/bullet_blue.png");
+        this.load.image("ui-heart-full", "assets/ui_heart_full.png");
+        this.load.image("ui-heart-empty", "assets/ui_heart_empty.png");
         this.load.spritesheet("robot_idle", "assets/sprites/robot_idle.png", {
             //all robot sprites from the game Enter the Gungeon. Accessed from https://www.spriters-resource.com/pc_computer/enterthegungeon/sheet/155565/
             frameWidth: 18,
