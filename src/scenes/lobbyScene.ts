@@ -3,10 +3,12 @@ import Player from "../objects/player";
 
 import { CONFIG } from "../config";
 import { CharacterMovement } from "../util/playerMovement";
-import { shootBullets } from "../util/shootBullets";
 
 import { gameState } from "../objects/gameState";
+
 import Chort from "../objects/chort";
+
+import { shootBullets } from "../util/shootBullets";
 import { Bullet } from "../objects/bullet";
 
 import { sceneEvents } from "../util/eventCenter";
@@ -28,20 +30,7 @@ class LobbyScene extends Phaser.Scene {
         //setting up crosshair
         this.input.mouse?.disableContextMenu();
         this.input.setDefaultCursor("crosshair");
-
-        const player = new Player(5, 4);
-        const initialLevel = 0;
-        this.gameState = new gameState(
-            player,
-            initialLevel,
-            false,
-            "lobbyScene"
-        );
-
-        this.scene.run("game-ui", {
-            gameState: this.gameState,
-        });
-
+        //setting up tilemap
         const map = this.make.tilemap({ key: "lobby" });
         const tileset = map.addTilesetImage("tilemap", "tiles"); //name of tilemap ON TILED, then name of key in preloader scene
         if (tileset) {
@@ -64,6 +53,28 @@ class LobbyScene extends Phaser.Scene {
             aboveFloor?.setScale(1);
             decor?.setScale(1);
 
+            //setting up player after layers are created
+            this.player = this.physics.add.sprite(176, 315, "robot_idle");
+            const player = new Player(this.player, 5, 5);
+            const initialLevel = 0;
+            this.gameState = new gameState(
+                player,
+                initialLevel,
+                false,
+                "lobbyScene"
+            );
+            //sets up util for character movement
+            this.characterMovement = new CharacterMovement(
+                this.player, //player
+                this, //current scene
+                100, //speed
+                this.gameState //for anim check (doesnt re-initialize anims more than once)
+            );
+            //loads ui (hearts, etc)
+            this.scene.run("game-ui", {
+                gameState: this.gameState,
+            });
+
             //to see walls highlighted on debugging
             const debugGraphics = this.add.graphics().setAlpha(0.7);
             if (CONFIG.physics.arcade.debug) {
@@ -79,15 +90,6 @@ class LobbyScene extends Phaser.Scene {
                 });
             }
 
-            //player
-            this.player = this.physics.add.sprite(176, 315, "robot_idle");
-            this.characterMovement = new CharacterMovement(
-                this.player, //player
-                this, //current scene
-                100, //speed
-                this.gameState //for anim check (doesnt re-initialize anims more than once)
-            );
-
             //enemies
             this.chorts = this.physics.add.group({
                 //group to store multiple chorts
@@ -102,6 +104,7 @@ class LobbyScene extends Phaser.Scene {
             this.chorts.get(600, 50, "chort"); //spawns a chort
             this.chorts.get(600, 50, "chort");
             this.events.on("player-moved", (x: number, y: number) => {
+                //allows chorts to track player
                 //on player movement, the chorts target x and y change
                 if (this.chorts)
                     this.chorts.children.iterate(
@@ -122,7 +125,7 @@ class LobbyScene extends Phaser.Scene {
             });
             this.bullets.maxSize = 100; //need to declare maxsize outside the group scope so it doesnt spawn an initial bullet in the top left
 
-            //declaring colliders
+            // Colliders for walls
             if (walls) {
                 this.physics.add.collider(this.player, walls);
                 this.physics.add.collider(this.chorts, walls);
@@ -155,6 +158,7 @@ class LobbyScene extends Phaser.Scene {
                     }
                 );
             }
+            // Colliders for structs
             if (structs) {
                 this.physics.add.collider(this.player, structs);
                 this.physics.add.collider(this.chorts, structs);
@@ -185,6 +189,7 @@ class LobbyScene extends Phaser.Scene {
                     }
                 );
             }
+            // Colliders for decor
             if (decor) {
                 this.physics.add.collider(this.player, decor);
                 this.physics.add.collider(this.chorts, decor);
@@ -215,6 +220,7 @@ class LobbyScene extends Phaser.Scene {
                     }
                 );
             }
+            // Colliders for floor
             if (floor) {
                 this.physics.add.collider(this.chorts, floor);
                 this.physics.add.collider(this.player, floor, () => {
@@ -225,7 +231,7 @@ class LobbyScene extends Phaser.Scene {
                     });
                 });
             }
-
+            // Collision between player and chorts
             this.physics.add.collider(
                 this.player,
                 this.chorts,
@@ -244,7 +250,6 @@ class LobbyScene extends Phaser.Scene {
             });
 
             // Collision between chort bullets and player
-            // Add collider between player and chorts' fireballs
             this.chorts.children.iterate((chort) => {
                 const currentChort = chort as Chort; // Cast to Chort type
                 // Check if fireballs group exists
@@ -255,10 +260,10 @@ class LobbyScene extends Phaser.Scene {
                         this.handlePlayerEnemyBulletCollision(
                             this.player as
                                 | Phaser.Types.Physics.Arcade.GameObjectWithBody
-                                | Phaser.Tilemaps.Tile,
+                                | Phaser.Tilemaps.Tile, //for type resolution...
                             fireball
                         );
-                    }, // Collision callback function
+                    },
                     undefined,
                     this
                 );
@@ -314,15 +319,26 @@ class LobbyScene extends Phaser.Scene {
         if (fireball instanceof Bullet) {
             fireball.destroy();
         }
-        this.gameState.player.takeDamage(1);
+        //gives player 'i' frames set in player.ts
+        if (!this.gameState.player.isInvincible) {
+            this.gameState.player.takeDamage(1);
 
-        sceneEvents.emit("player-health-changed", this.gameState.player.health);
+            sceneEvents.emit(
+                "player-health-changed",
+                this.gameState.player.health
+            );
+        }
     }
 
     private handlePlayerEnemyCollision() {
-        this.gameState.player.takeDamage(1);
-
-        sceneEvents.emit("player-health-changed", this.gameState.player.health);
+        //gives player 'i' frames set in player.ts
+        if (!this.gameState.player.isInvincible) {
+            this.gameState.player.takeDamage(1);
+            sceneEvents.emit(
+                "player-health-changed",
+                this.gameState.player.health
+            );
+        }
     }
 
     update() {

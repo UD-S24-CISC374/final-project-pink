@@ -11,6 +11,7 @@ export class CharacterMovement {
     private speed: number;
     private diagonalSpeed: number;
     private gameState: gameState;
+    private damageTime: 0;
 
     constructor(
         player: Phaser.Physics.Arcade.Sprite,
@@ -23,6 +24,7 @@ export class CharacterMovement {
         this.speed = speed;
         this.gameState = gameState;
         this.diagonalSpeed = this.speed / Math.sqrt(2);
+        this.damageTime = 0;
         if (!this.gameState.hasAnims) {
             this.initAnimations();
         }
