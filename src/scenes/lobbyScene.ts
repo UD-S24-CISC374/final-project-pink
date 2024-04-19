@@ -20,6 +20,7 @@ class LobbyScene extends Phaser.Scene {
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
     private gameState: gameState;
     private npc: Phaser.Physics.Arcade.Sprite;
+    private tutorialLevel: number = 0;
 
     constructor() {
         super({ key: "LobbyScene" });
@@ -71,10 +72,6 @@ class LobbyScene extends Phaser.Scene {
                 100, //speed
                 this.gameState //for anim check (doesnt re-initialize anims more than once)
             );
-            //loads ui (hearts, etc)
-            this.scene.run("game-ui", {
-                gameState: this.gameState,
-            });
 
             this.npc = this.physics.add.sprite(450, 300, "lobby_npc");
             this.npc.anims.play("npc_idle", true);
@@ -105,8 +102,6 @@ class LobbyScene extends Phaser.Scene {
                     }
                 },
             });
-            this.chorts.get(600, 50, "chort"); //spawns a chort
-            this.chorts.get(600, 50, "chort");
             this.events.on("player-moved", (x: number, y: number) => {
                 //allows chorts to track player
                 //on player movement, the chorts target x and y change
@@ -262,37 +257,32 @@ class LobbyScene extends Phaser.Scene {
                 }
             );
 
-            // Collision between chort bullets and player
-            this.chorts.children.iterate((chort) => {
-                const currentChort = chort as Chort; // Cast to Chort type
-                // Check if fireballs group exists
-                this.physics.add.collider(
-                    this.player as Phaser.GameObjects.Sprite,
-                    currentChort.fireballs, // Collider between player and fireballs
-                    (player, fireball) => {
-                        this.handlePlayerEnemyBulletCollision(
-                            this.player as
-                                | Phaser.Types.Physics.Arcade.GameObjectWithBody
-                                | Phaser.Tilemaps.Tile, //for type resolution...
-                            fireball
-                        );
-                    },
-                    undefined,
-                    this
-                );
-
-                return true;
-            });
             // NPC interaction
 
             const npcCollisionArea = this.add.zone(450, 300, 100, 100);
             this.physics.world.enable(npcCollisionArea); // Enable physics for the collision area
 
-            const messages: string[] = [
-                "Hello there, you seem to be lost.",
+            const messages1: string[] = [
+                "Hello there, you seem to be lost. (click to continue)",
                 "I can help you navigate this place.",
                 "We are within the walls of the Operating System itself.",
                 "An abstraction of what some people call the terminal...",
+            ];
+            const messages2: string[] = [
+                "To exit, you must travel to all the floors and defeat all the enemies.",
+                "Notice in the top left, how you now have 5 hearts.",
+            ];
+            const messages3: string[] = [
+                "You can also shoot, now clicking will also shoot the whole round of your gun.",
+            ];
+            const messages4: string[] = [
+                "Now I have spawned an enemy in the room above.",
+                "Go shoot it 4 times and eliminiate it.",
+                "But be careful they can get feisty.",
+            ];
+            const messages5: string[] = [
+                "Upon taking damage you get invincible frames.",
+                "You will flash blue for this duration.",
             ];
 
             // Event listener for 'e' key press to interact with NPC
@@ -307,9 +297,59 @@ class LobbyScene extends Phaser.Scene {
                         )
                     ) {
                         // Start the message scene when 'e' key is pressed and player is overlapping with NPC
-                        this.scene.run("MessageScene", {
-                            messages: messages, // Pass the messages array to the message scene
-                        });
+                        if (this.tutorialLevel == 0) {
+                            this.scene.run("MessageScene", {
+                                messages: messages1, // Pass the messages array to the message scene
+                            });
+                        }
+                        if (this.tutorialLevel == 1) {
+                            //loads ui (hearts, etc)
+                            this.scene.run("game-ui", {
+                                gameState: this.gameState,
+                            });
+                            this.scene.run("MessageScene", {
+                                messages: messages2,
+                            });
+                        }
+                        if (this.tutorialLevel == 2) {
+                            this.scene.run("MessageScene", {
+                                messages: messages3, // Pass the messages array to the message scene
+                            });
+                        }
+                        if (this.tutorialLevel == 3) {
+                            this.scene.run("MessageScene", {
+                                messages: messages4, // Pass the messages array to the message scene
+                            });
+                            this.chorts?.get(600, 50, "chort"); //spawns a chort
+                            // Collision between chort bullets and player
+                            this.chorts?.children.iterate((chort) => {
+                                const currentChort = chort as Chort; // Cast to Chort type
+                                // Check if fireballs group exists
+                                this.physics.add.collider(
+                                    this.player as Phaser.GameObjects.Sprite,
+                                    currentChort.fireballs, // Collider between player and fireballs
+                                    (player, fireball) => {
+                                        this.handlePlayerEnemyBulletCollision(
+                                            this.player as
+                                                | Phaser.Types.Physics.Arcade.GameObjectWithBody
+                                                | Phaser.Tilemaps.Tile, //for type resolution...
+                                            fireball
+                                        );
+                                    },
+                                    undefined,
+                                    this
+                                );
+
+                                return true;
+                            });
+                        }
+                        if (this.tutorialLevel == 4) {
+                            this.scene.run("MessageScene", {
+                                messages: messages5, // Pass the messages array to the message scene
+                            });
+                        }
+
+                        this.tutorialLevel++;
                     }
                 });
             }
@@ -391,7 +431,7 @@ class LobbyScene extends Phaser.Scene {
             // Check for keyboard input and move the player accordingly
             const keyboard = this.input.keyboard;
 
-            if (this.input.activePointer.isDown) {
+            if (this.input.activePointer.isDown && this.tutorialLevel >= 3) {
                 // Shoot a bullet from the player towards the mouse cursor
                 shootBullets(
                     this,

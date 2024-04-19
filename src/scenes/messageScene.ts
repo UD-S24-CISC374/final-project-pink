@@ -4,7 +4,7 @@ export default class MessageScene extends Phaser.Scene {
     private messages: string[]; // Array to hold tutorial messages
     private currentMessageIndex: number; // Index of the current message being displayed
     private messageText: Phaser.GameObjects.Text; // Text object to display messages
-    private delayBetweenLetters: number = 50; // Delay between displaying each letter in milliseconds
+    private delayBetweenLetters: number = 20; // Delay between displaying each letter in milliseconds
     private letterTimer?: Phaser.Time.TimerEvent; // Timer to control letter-by-letter display
 
     constructor() {
