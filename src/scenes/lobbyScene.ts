@@ -19,6 +19,7 @@ class LobbyScene extends Phaser.Scene {
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
     private gameState: gameState;
+    private npc: Phaser.Physics.Arcade.Sprite;
 
     constructor() {
         super({ key: "LobbyScene" });
@@ -75,6 +76,9 @@ class LobbyScene extends Phaser.Scene {
                 gameState: this.gameState,
             });
 
+            this.npc = this.physics.add.sprite(450, 300, "lobby_npc");
+            this.npc.anims.play("npc_idle", true);
+
             //to see walls highlighted on debugging
             const debugGraphics = this.add.graphics().setAlpha(0.7);
             if (CONFIG.physics.arcade.debug) {
@@ -129,6 +133,7 @@ class LobbyScene extends Phaser.Scene {
             if (walls) {
                 this.physics.add.collider(this.player, walls);
                 this.physics.add.collider(this.chorts, walls);
+                this.physics.add.collider(this.npc, walls);
                 this.physics.add.collider(
                     //player bullets
                     this.bullets,
@@ -162,6 +167,7 @@ class LobbyScene extends Phaser.Scene {
             if (structs) {
                 this.physics.add.collider(this.player, structs);
                 this.physics.add.collider(this.chorts, structs);
+                this.physics.add.collider(this.npc, structs);
                 this.physics.add.collider(
                     this.bullets,
                     structs,
@@ -193,6 +199,7 @@ class LobbyScene extends Phaser.Scene {
             if (decor) {
                 this.physics.add.collider(this.player, decor);
                 this.physics.add.collider(this.chorts, decor);
+                this.physics.add.collider(this.npc, decor);
                 this.physics.add.collider(
                     //player bullets
                     this.bullets,
@@ -276,6 +283,45 @@ class LobbyScene extends Phaser.Scene {
 
                 return true;
             });
+            // NPC interaction
+
+            const npcCollisionArea = this.add.zone(450, 300, 100, 100);
+            this.physics.world.enable(npcCollisionArea); // Enable physics for the collision area
+
+            const messages: string[] = [
+                "Hello there, you seem to be lost.",
+                "I can help you navigate this place.",
+                "We are within the walls of the Operating System itself.",
+                "An abstraction of what some people call the terminal...",
+            ];
+
+            // Event listener for 'e' key press to interact with NPC
+            if (this.input.keyboard) {
+                this.input.keyboard.on("keydown-E", () => {
+                    // Check if the player is overlapping with the collision area
+                    if (
+                        this.player &&
+                        Phaser.Geom.Intersects.RectangleToRectangle(
+                            this.player.getBounds(),
+                            npcCollisionArea.getBounds()
+                        )
+                    ) {
+                        // Start the message scene when 'e' key is pressed and player is overlapping with NPC
+                        this.scene.run("MessageScene", {
+                            messages: messages, // Pass the messages array to the message scene
+                        });
+                    }
+                });
+            }
+            //npc and player collider
+            this.npc.setImmovable(true);
+
+            this.physics.add.collider(this.npc, this.player);
+
+            this.npc.body?.setSize(
+                this.npc.width * 0.85,
+                this.npc.height * 0.8
+            );
 
             //camera follows player
             this.cameras.main.startFollow(this.player, true);
