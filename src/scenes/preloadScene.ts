@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import { createChortAnims } from "../anims/createChortAnims";
+import { createNpcAnims } from "../anims/createNpcAnims";
+
 export default class PreloadScene extends Phaser.Scene {
     constructor() {
         super({ key: "PreloadScene" });
@@ -9,6 +11,10 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("bullet_blue", "assets/bullet_blue.png");
         this.load.image("ui-heart-full", "assets/ui_heart_full.png");
         this.load.image("ui-heart-empty", "assets/ui_heart_empty.png");
+        this.load.spritesheet("lobby_npc", "assets/sprites/lobby_npc.png", {
+            frameWidth: 28,
+            frameHeight: 49,
+        });
         this.load.spritesheet("robot_idle", "assets/sprites/robot_idle.png", {
             //all robot sprites from the game Enter the Gungeon. Accessed from https://www.spriters-resource.com/pc_computer/enterthegungeon/sheet/155565/
             frameWidth: 18,
@@ -164,6 +170,7 @@ export default class PreloadScene extends Phaser.Scene {
 
     create() {
         createChortAnims(this.anims);
+        createNpcAnims(this.anims);
         this.scene.start("TitleScene");
     }
 }

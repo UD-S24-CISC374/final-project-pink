@@ -6,6 +6,7 @@ import LobbyScene from "./scenes/lobbyScene";
 import room01Scene from "./scenes/room01Scene";
 import ConsoleScene from "./scenes/consoleScene";
 import GameUI from "./scenes/uiScene";
+import MessageScene from "./scenes/messageScene";
 
 const DEFAULT_WIDTH = 400;
 const DEFAULT_HEIGHT = 250;
@@ -27,6 +28,7 @@ export const CONFIG = {
         TitleScene,
         LobbyScene,
         GameUI,
+        MessageScene,
         room01Scene,
         ConsoleScene,
     ],
