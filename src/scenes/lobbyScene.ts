@@ -362,9 +362,10 @@ class LobbyScene extends Phaser.Scene {
             this.physics.add.collider(this.npc, this.player);
 
             this.npc.body?.setSize(
-                this.npc.width * 0.85,
-                this.npc.height * 0.8
+                this.npc.width * 0.65,
+                this.npc.height * 0.7
             );
+            this.npc.body?.setOffset(5, 14);
 
             //camera follows player
             this.cameras.main.startFollow(this.player, true);
