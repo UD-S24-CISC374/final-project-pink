@@ -137,26 +137,6 @@ class LobbyScene extends Phaser.Scene {
                         this.handleBulletTileCollision(object1, object2);
                     }
                 );
-                this.chorts.children.iterate(
-                    //chort bullets
-                    (chort: Phaser.GameObjects.GameObject) => {
-                        //iterates through our chort group
-                        const currentChort = chort as Chort;
-
-                        this.physics.add.collider(
-                            //for each it adds a collider
-                            currentChort.fireballs, //fireball group stored in each chort instance
-                            walls,
-                            (object1, object2) => {
-                                this.handleBulletTileCollision(
-                                    object1,
-                                    object2
-                                );
-                            }
-                        );
-                        return true;
-                    }
-                );
             }
             // Colliders for structs
             if (structs) {
@@ -171,24 +151,6 @@ class LobbyScene extends Phaser.Scene {
                         this.handleBulletTileCollision(object1, object2);
                     }
                 );
-                this.chorts.children.iterate(
-                    //chort bullets
-                    (chort: Phaser.GameObjects.GameObject) => {
-                        const currentChort = chort as Chort;
-
-                        this.physics.add.collider(
-                            currentChort.fireballs,
-                            structs,
-                            (object1, object2) => {
-                                this.handleBulletTileCollision(
-                                    object1,
-                                    object2
-                                );
-                            }
-                        );
-                        return true;
-                    }
-                );
             }
             // Colliders for decor
             if (decor) {
@@ -201,24 +163,6 @@ class LobbyScene extends Phaser.Scene {
                     decor,
                     (object1, object2) => {
                         this.handleBulletTileCollision(object1, object2);
-                    }
-                );
-                this.chorts.children.iterate(
-                    //chort bullets
-                    (chort: Phaser.GameObjects.GameObject) => {
-                        const currentChort = chort as Chort;
-
-                        this.physics.add.collider(
-                            currentChort.fireballs,
-                            decor,
-                            (object1, object2) => {
-                                this.handleBulletTileCollision(
-                                    object1,
-                                    object2
-                                );
-                            }
-                        );
-                        return true;
                     }
                 );
             }
@@ -342,6 +286,65 @@ class LobbyScene extends Phaser.Scene {
 
                                 return true;
                             });
+                            if (walls)
+                                this.chorts?.children.iterate(
+                                    //chort bullets
+                                    (chort: Phaser.GameObjects.GameObject) => {
+                                        //iterates through our chort group
+                                        const currentChort = chort as Chort;
+
+                                        this.physics.add.collider(
+                                            //for each it adds a collider
+                                            currentChort.fireballs, //fireball group stored in each chort instance
+                                            walls,
+                                            (object1, object2) => {
+                                                this.handleBulletTileCollision(
+                                                    object1,
+                                                    object2
+                                                );
+                                            }
+                                        );
+                                        return true;
+                                    }
+                                );
+                            if (structs)
+                                this.chorts?.children.iterate(
+                                    //chort bullets
+                                    (chort: Phaser.GameObjects.GameObject) => {
+                                        const currentChort = chort as Chort;
+
+                                        this.physics.add.collider(
+                                            currentChort.fireballs,
+                                            structs,
+                                            (object1, object2) => {
+                                                this.handleBulletTileCollision(
+                                                    object1,
+                                                    object2
+                                                );
+                                            }
+                                        );
+                                        return true;
+                                    }
+                                );
+                            if (decor)
+                                this.chorts?.children.iterate(
+                                    //chort bullets
+                                    (chort: Phaser.GameObjects.GameObject) => {
+                                        const currentChort = chort as Chort;
+
+                                        this.physics.add.collider(
+                                            currentChort.fireballs,
+                                            decor,
+                                            (object1, object2) => {
+                                                this.handleBulletTileCollision(
+                                                    object1,
+                                                    object2
+                                                );
+                                            }
+                                        );
+                                        return true;
+                                    }
+                                );
                         }
                         if (this.tutorialLevel == 4) {
                             this.scene.run("MessageScene", {
