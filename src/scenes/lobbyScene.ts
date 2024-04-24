@@ -20,7 +20,9 @@ class LobbyScene extends Phaser.Scene {
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
     private gameState: gameState;
     private npc: Phaser.Physics.Arcade.Sprite;
-    private tutorialLevel: number = 0;
+    private npcZone: Phaser.GameObjects.Zone;
+    private eToInteractBubble: Phaser.GameObjects.Image;
+    private talkingBubble: Phaser.GameObjects.Image;
 
     constructor() {
         super({ key: "LobbyScene" });
@@ -58,10 +60,10 @@ class LobbyScene extends Phaser.Scene {
             //setting up player after layers are created
             this.player = this.physics.add.sprite(176, 315, "robot_idle");
             const player = new Player(this.player, 5, 5);
-            const initialLevel = 0;
             this.gameState = new gameState(
                 player,
-                initialLevel,
+                0, //level
+                0, //tutorial level
                 false,
                 "lobbyScene"
             );
@@ -203,8 +205,15 @@ class LobbyScene extends Phaser.Scene {
 
             // NPC interaction
 
-            const npcCollisionArea = this.add.zone(450, 300, 100, 100);
-            this.physics.world.enable(npcCollisionArea); // Enable physics for the collision area
+            this.eToInteractBubble = this.add
+                .image(430, 270, "eToInteractBubble")
+                .setVisible(false);
+            this.talkingBubble = this.add
+                .image(435, 282, "talkingBubble")
+                .setVisible(false);
+
+            this.npcZone = this.add.zone(450, 300, 100, 100);
+            this.physics.world.enable(this.npcZone); // Enable physics for the collision area
 
             const messages1: string[] = [
                 "Hello there, you seem to be lost. (click to continue)",
@@ -217,16 +226,23 @@ class LobbyScene extends Phaser.Scene {
                 "Notice in the top left, how you now have 5 hearts.",
             ];
             const messages3: string[] = [
-                "You can also shoot, now clicking will also shoot the whole round of your gun.",
+                "You can also shoot, now clicking will shoot your gun.",
+                "But don't go crazy with spamming, one click shoots your entire round.",
+                "Ammo is infinite too, you just need to worry about reloading.",
+                "Your bullets go towards your crosshair when fired.",
             ];
             const messages4: string[] = [
-                "Now I have spawned an enemy in the room above.",
-                "Go shoot it 4 times and eliminiate it.",
-                "But be careful they can get feisty.",
+                "I have spawned an abomination in the room above.",
+                "Go shoot and kill it now! We don't want to die yet.",
             ];
             const messages5: string[] = [
+                "They for sure can get fiesty.",
                 "Upon taking damage you get invincible frames.",
                 "You will flash blue for this duration.",
+            ];
+            const end: string[] = [
+                "Got nothing left to tell ya, blame the devs",
+                "rahhhhhhhh",
             ];
 
             // Event listener for 'e' key press to interact with NPC
@@ -237,34 +253,49 @@ class LobbyScene extends Phaser.Scene {
                         this.player &&
                         Phaser.Geom.Intersects.RectangleToRectangle(
                             this.player.getBounds(),
-                            npcCollisionArea.getBounds()
+                            this.npcZone.getBounds()
                         )
                     ) {
-                        // Start the message scene when 'e' key is pressed and player is overlapping with NPC
-                        if (this.tutorialLevel == 0) {
-                            this.scene.run("MessageScene", {
-                                messages: messages1, // Pass the messages array to the message scene
-                            });
-                        }
-                        if (this.tutorialLevel == 1) {
-                            //loads ui (hearts, etc)
-                            this.scene.run("game-ui", {
-                                gameState: this.gameState,
-                            });
-                            this.scene.run("MessageScene", {
-                                messages: messages2,
-                            });
-                        }
-                        if (this.tutorialLevel == 2) {
-                            this.scene.run("MessageScene", {
-                                messages: messages3, // Pass the messages array to the message scene
-                            });
-                        }
-                        if (this.tutorialLevel == 3) {
-                            this.scene.run("MessageScene", {
-                                messages: messages4, // Pass the messages array to the message scene
-                            });
-                            this.chorts?.get(600, 50, "chort"); //spawns a chort
+                        if (!this.gameState.interactingWithNpc) {
+                            this.gameState.interactingWithNpc = true;
+                            // Start the message scene when 'e' key is pressed and player is overlapping with NPC
+                            if (this.gameState.tutorialLevel == 0) {
+                                this.scene.run("MessageScene", {
+                                    messages: messages1, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                            } else if (this.gameState.tutorialLevel == 1) {
+                                //loads ui (hearts, etc)
+                                this.scene.run("game-ui", {
+                                    gameState: this.gameState,
+                                });
+                                this.scene.run("MessageScene", {
+                                    messages: messages2,
+                                    gameState: this.gameState,
+                                });
+                            } else if (this.gameState.tutorialLevel == 2) {
+                                this.scene.run("MessageScene", {
+                                    messages: messages3, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                            } else if (this.gameState.tutorialLevel == 3) {
+                                this.scene.run("MessageScene", {
+                                    messages: messages4, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                                this.chorts?.get(600, 50, "chort"); //spawns a chort
+                            } else if (this.gameState.tutorialLevel == 4) {
+                                this.scene.run("MessageScene", {
+                                    messages: messages5, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                            } else {
+                                this.scene.run("MessageScene", {
+                                    messages: end, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                                this.gameState.tutorialLevel--; //counteracting the add to tutLevel in message scene, i know this is bad practice blah blah blah
+                            }
                             // Collision between chort bullets and player
                             this.chorts?.children.iterate((chort) => {
                                 const currentChort = chort as Chort; // Cast to Chort type
@@ -346,25 +377,20 @@ class LobbyScene extends Phaser.Scene {
                                     }
                                 );
                         }
-                        if (this.tutorialLevel == 4) {
-                            this.scene.run("MessageScene", {
-                                messages: messages5, // Pass the messages array to the message scene
-                            });
-                        }
-
-                        this.tutorialLevel++;
                     }
                 });
             }
-            //npc and player collider
+            //npc and player collider/overlap stuff
+
             this.npc.setImmovable(true);
 
             this.physics.add.collider(this.npc, this.player);
 
             this.npc.body?.setSize(
-                this.npc.width * 0.85,
-                this.npc.height * 0.8
+                this.npc.width * 0.65,
+                this.npc.height * 0.7
             );
+            this.npc.body?.setOffset(5, 14);
 
             //camera follows player
             this.cameras.main.startFollow(this.player, true);
@@ -425,6 +451,26 @@ class LobbyScene extends Phaser.Scene {
     }
 
     update() {
+        const playerOverlappingNPC =
+            Phaser.Geom.Intersects.RectangleToRectangle(
+                this.player!.getBounds(),
+                this.npcZone.getBounds()
+            );
+
+        // Update visibility of speech bubbles based on player interaction with NPC
+        if (playerOverlappingNPC && !this.gameState.interactingWithNpc) {
+            // Player is overlapping with NPC but not interacting, show interaction bubble
+            this.eToInteractBubble.setVisible(true);
+            this.talkingBubble.setVisible(false);
+        } else if (this.gameState.interactingWithNpc) {
+            // Player is interacting with NPC, hide interaction bubble and show talking bubble
+            this.eToInteractBubble.setVisible(false);
+            this.talkingBubble.setVisible(true);
+        } else {
+            // Player is not overlapping with NPC, hide both bubbles
+            this.eToInteractBubble.setVisible(false);
+            this.talkingBubble.setVisible(false);
+        }
         if (this.gameState.player.health <= 0) {
             // Player is dead, trigger death animation
             this.gameState.player.die();
@@ -434,7 +480,10 @@ class LobbyScene extends Phaser.Scene {
             // Check for keyboard input and move the player accordingly
             const keyboard = this.input.keyboard;
 
-            if (this.input.activePointer.isDown && this.tutorialLevel >= 3) {
+            if (
+                this.input.activePointer.isDown &&
+                this.gameState.tutorialLevel >= 3
+            ) {
                 // Shoot a bullet from the player towards the mouse cursor
                 shootBullets(
                     this,

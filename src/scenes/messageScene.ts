@@ -1,7 +1,9 @@
 import Phaser from "phaser";
+import { gameState } from "../objects/gameState";
 
 export default class MessageScene extends Phaser.Scene {
     private messages: string[]; // Array to hold tutorial messages
+    private gameState: gameState;
     private currentMessageIndex: number; // Index of the current message being displayed
     private messageText: Phaser.GameObjects.Text; // Text object to display messages
     private delayBetweenLetters: number = 20; // Delay between displaying each letter in milliseconds
@@ -11,8 +13,9 @@ export default class MessageScene extends Phaser.Scene {
         super({ key: "MessageScene" });
     }
 
-    init(data: { messages: string[] }) {
+    init(data: { messages: string[]; gameState: gameState }) {
         this.messages = data.messages;
+        this.gameState = data.gameState;
         this.currentMessageIndex = 0;
     }
 
@@ -84,8 +87,9 @@ export default class MessageScene extends Phaser.Scene {
             // Display the next message
             this.showMessage(this.messages[this.currentMessageIndex]);
         } else {
-            // No more messages, end the tutorial or implement next steps
             // For now, just stop the scene
+            this.gameState.tutorialLevel++;
+            this.gameState.interactingWithNpc = false;
             this.scene.stop();
         }
     }

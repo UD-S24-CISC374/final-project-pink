@@ -46,7 +46,7 @@ export const CONFIG = {
         gamepad: false,
     },
     render: {
-        pixelArt: false,
+        pixelArt: true,
         antialias: true,
     },
     dom: {
