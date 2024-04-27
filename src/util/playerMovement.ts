@@ -4,13 +4,13 @@ import Phaser from "phaser";
 import { gameState } from "../objects/gameState";
 
 export class CharacterMovement {
-    private player: Phaser.Physics.Arcade.Sprite;
-    private scene: Phaser.Scene;
+    public player: Phaser.Physics.Arcade.Sprite;
+    public scene: Phaser.Scene;
     private xstop: boolean = true;
     private ystop: boolean = true;
-    private speed: number;
+    public speed: number;
     private diagonalSpeed: number;
-    private gameState: gameState;
+    public gameState: gameState;
     private damageTime: 0;
 
     constructor(
