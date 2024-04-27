@@ -7,11 +7,13 @@ import { gameState } from "../objects/gameState";
 import ConsoleScene from "./consoleScene";
 import { Bullet } from "../objects/bullet";
 import { shootBullets } from "../util/shootBullets";
+import { KeyboardManager } from "../util/keyboardManager";
 
 class room01Scene extends Phaser.Scene {
     private gameState: gameState;
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
+    private keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group;
     constructor() {
@@ -53,6 +55,7 @@ class room01Scene extends Phaser.Scene {
                 100,
                 this.gameState
             );
+            this.keyboardManager = new KeyboardManager(this.characterMovement);
 
             this.chorts = this.physics.add.group({
                 classType: Chort,
@@ -154,8 +157,6 @@ class room01Scene extends Phaser.Scene {
     }
     update() {
         // Check for keyboard input and move the player accordingly
-        const keyboard = this.input.keyboard;
-
         if (this.input.activePointer.isDown) {
             // Shoot a bullet from the player towards the mouse cursor
             shootBullets(
@@ -167,52 +168,7 @@ class room01Scene extends Phaser.Scene {
                 "bullet_blue" //image texture for bullet
             );
         }
-
-        if (keyboard) {
-            // Handle diagonal movement
-            if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
-            ) {
-                this.characterMovement.moveUpLeft();
-            } else if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
-            ) {
-                this.characterMovement.moveUpRight();
-            } else if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
-            ) {
-                this.characterMovement.moveDownLeft();
-            } else if (
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown &&
-                keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
-            ) {
-                this.characterMovement.moveDownRight();
-            } else {
-                // Handle individual directions
-                if (keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown) {
-                    this.characterMovement.moveUp();
-                } else if (
-                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown
-                ) {
-                    this.characterMovement.moveDown();
-                } else {
-                    this.characterMovement.stopY(); // Stop vertical movement if no up/down keys are pressed
-                }
-                if (keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
-                    this.characterMovement.moveLeft();
-                } else if (
-                    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
-                ) {
-                    this.characterMovement.moveRight();
-                } else {
-                    this.characterMovement.stopX(); // Stop horizontal movement if no left/right keys are pressed
-                }
-            }
-            this.events.emit("player-moved", this.player!.x, this.player!.y); //emits the player movement event for enemies to track player
-        }
+        this.keyboardManager.handleInput(); //updating player movement with new implementation
     }
 }
 export default room01Scene;
