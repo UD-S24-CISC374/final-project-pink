@@ -3,6 +3,23 @@ import Phaser from "phaser";
 //import { CONFIG } from "../config";
 import { CharacterMovement } from "../util/playerMovement";
 import { gameState } from "../objects/gameState";
+import { MatchResult, grammar } from "ohm-js";
+
+const g = grammar(`
+Command {
+    Command = Cd | Mv | Compile | Run | Cat | Rm | Ls | Help
+    Cd = #"cd " Path
+    Mv = #"mv " Path Path Option?
+    Compile = #"gcc " Path Option?
+    Run = "./" Path
+    Cat = #"cat " Path
+    Rm = #"rm " Option? Path
+    Ls = #"ls " Option?
+    Help = "help" ("cd" | "mv" | "compile" | "run" | "cat" | "rm" | "ls")?
+    Path = (("../" | "./" | "") location | ".." "" )
+    Option = "-o" | "-r" | "-l"
+    location = alnum+ ("/" location)?
+}`);
 
 class ConsoleScene extends Phaser.Scene {
     private numCommands: number = 0;
@@ -24,14 +41,14 @@ class ConsoleScene extends Phaser.Scene {
         this.load.html("consoleDisplay", "assets/text/consoleDisplay.html");
     }
     create() {
-        this.add.image(60, -75, "console").setOrigin(0);
+        this.add.image(60, 15, "console").setOrigin(0);
         //console.log(this.gameState);
 
         this.consoleText = this.add
-            .dom(220, 220)
+            .dom(220, 224)
             .createFromCache("consoleText");
         this.consoleDisplay = this.add
-            .dom(220, 85)
+            .dom(220, 16)
             .createFromCache("consoleDisplay");
         console.log(
             typeof this.consoleText,
@@ -87,7 +104,7 @@ class ConsoleScene extends Phaser.Scene {
             inputField.value = ""; // Clear input field
             const textBlockDiv = document.getElementById("textBlock");
             if (textBlockDiv) {
-                if (this.numCommands == 6) {
+                if (this.numCommands == 11) {
                     const newParagraph = document.createElement("p");
                     newParagraph.textContent = newText;
                     while (textBlockDiv.firstChild) {
