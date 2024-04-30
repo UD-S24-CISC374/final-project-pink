@@ -8,6 +8,7 @@ import ConsoleScene from "./consoleScene";
 import { Bullet } from "../objects/bullet";
 import { shootBullets } from "../util/shootBullets";
 import { KeyboardManager } from "../util/keyboardManager";
+import { sceneEvents } from "../util/eventCenter";
 
 class room01Scene extends Phaser.Scene {
     private gameState: gameState;
@@ -145,6 +146,9 @@ class room01Scene extends Phaser.Scene {
     }
     private switchScene() {
         console.log("it worked");
+        // this.characterMovement.stopX();
+        // this.characterMovement.stopY();
+
         this.scene.setVisible(true, "ConsoleScene");
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
@@ -152,8 +156,10 @@ class room01Scene extends Phaser.Scene {
         this.scene.run("ConsoleScene", {
             gameState: this.gameState,
         });
-
         this.scene.pause("room01Scene");
+        sceneEvents.emit("player-opened-console");
+        this.characterMovement.stopX();
+        this.characterMovement.stopY();
     }
     update() {
         // Check for keyboard input and move the player accordingly

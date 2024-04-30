@@ -17,7 +17,7 @@ import { sceneEvents } from "../util/eventCenter";
 class LobbyScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
-    private keyboardManager: KeyboardManager;
+    public keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
     private gameState: gameState;
@@ -228,10 +228,13 @@ class LobbyScene extends Phaser.Scene {
             const messages2: string[] = [
                 "To exit, you must travel to all the floors and defeat all the enemies.",
                 "Notice in the top left, how you now have 5 hearts.",
+                "You can also right click to dodge roll.",
+                "During a dodge roll...",
+                "you become immune to damage, and move a little faster.",
             ];
             const messages3: string[] = [
-                "You can also shoot, now clicking will shoot your gun.",
-                "But don't go crazy with spamming, one click shoots your entire round.",
+                "You can also shoot, now left clicking will shoot your gun.",
+                "One click shoots your entire round.",
                 "Ammo is infinite too, you just need to worry about reloading.",
                 "Your bullets go towards your crosshair when fired.",
             ];
@@ -432,8 +435,12 @@ class LobbyScene extends Phaser.Scene {
         if (fireball instanceof Bullet) {
             fireball.destroy();
         }
-        //gives player 'i' frames set in player.ts
-        if (!this.gameState.player.isInvincible) {
+        //checks if i frames are present or if player is dodging (no damage on either case)
+
+        if (
+            !this.gameState.invulnerable &&
+            !this.gameState.player.isInvincible
+        ) {
             this.gameState.player.takeDamage(1);
 
             sceneEvents.emit(
@@ -441,11 +448,15 @@ class LobbyScene extends Phaser.Scene {
                 this.gameState.player.health
             );
         }
+        this.keyboardManager.handlePlayerHit();
     }
 
     private handlePlayerEnemyCollision() {
-        //gives player 'i' frames set in player.ts
-        if (!this.gameState.player.isInvincible) {
+        //checks if i frames are present or if player is dodging (no damage on either case)
+        if (
+            !this.gameState.player.isInvincible &&
+            !this.gameState.invulnerable
+        ) {
             this.gameState.player.takeDamage(1);
             sceneEvents.emit(
                 "player-health-changed",
@@ -484,10 +495,15 @@ class LobbyScene extends Phaser.Scene {
             // Check for keyboard input and move the player accordingly
 
             if (
-                this.input.activePointer.isDown &&
-                this.gameState.tutorialLevel >= 3
+                this.input.activePointer.leftButtonDown() &&
+                this.gameState.tutorialLevel > 2
             ) {
-                // Shoot a bullet from the player towards the mouse cursor
+                this.gameState.leftButtonPressed = true;
+            } else if (
+                this.gameState.leftButtonPressed &&
+                this.input.activePointer.leftButtonReleased() &&
+                this.gameState.tutorialLevel > 2
+            ) {
                 shootBullets(
                     this,
                     this.bullets!,
@@ -496,8 +512,29 @@ class LobbyScene extends Phaser.Scene {
                     500, //milliseconds between shots
                     "bullet_blue" //image texture for bullet
                 );
+                this.gameState.leftButtonPressed = false;
             }
-            this.keyboardManager.handleInput(); //how we update player movment now
+
+            if (
+                this.input.activePointer.rightButtonDown() &&
+                !this.gameState.isDodging
+            ) {
+                this.gameState.rightButtonPressed = true;
+            } else if (
+                this.gameState.rightButtonPressed &&
+                this.input.activePointer.rightButtonReleased() &&
+                !this.gameState.isDodging
+            ) {
+                // Start dodge roll animation only if not already dodging
+                this.characterMovement.performDodgeRoll(
+                    this.keyboardManager.lastHorizontalDirection,
+                    this.keyboardManager.lastVerticalDirection
+                );
+                this.gameState.rightButtonPressed = false;
+            }
+
+            // Allow normal player movement only if not dodging
+            this.keyboardManager.handleInput();
         }
     }
 }

@@ -8,6 +8,11 @@ export class gameState {
     interactingWithNpc: boolean;
     hasAnims: boolean;
     curRoom: string;
+    isDodging: boolean;
+    invulnerable: boolean;
+    leftButtonPressed: boolean;
+    rightButtonPressed: boolean;
+
     constructor(
         player: Player,
         level: number,
@@ -21,5 +26,9 @@ export class gameState {
         this.interactingWithNpc = false;
         this.hasAnims = hasAnims;
         this.curRoom = curRoom;
+        this.isDodging = false;
+        this.invulnerable = false;
+        this.leftButtonPressed = false;
+        this.rightButtonPressed = false;
     }
 }
