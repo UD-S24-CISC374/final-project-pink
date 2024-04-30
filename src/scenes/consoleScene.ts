@@ -3,7 +3,26 @@ import Phaser from "phaser";
 //import { CONFIG } from "../config";
 import { CharacterMovement } from "../util/playerMovement";
 import { gameState } from "../objects/gameState";
-import { MatchResult, grammar } from "ohm-js";
+import { grammar } from "ohm-js";
+
+class node {
+    parentNode: node | null;
+    childNodes: node[] | null;
+    entities: string[] | null;
+}
+
+var room01: node = {
+    //room 01/starting room
+    parentNode: null,
+    childNodes: null,
+    entities: ["player", "chort1", "chort2", "chort3", "chort4"],
+};
+var room02: node = {
+    //room 01/starting room
+    parentNode: room01,
+    childNodes: null,
+    entities: ["chort1", "chort2", "chort3", "chort4"],
+};
 
 const g = grammar(`
 Command {
@@ -29,6 +48,7 @@ class ConsoleScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
+    private currentNode?: node;
     constructor() {
         super({ key: "ConsoleScene" });
     }
@@ -100,8 +120,12 @@ class ConsoleScene extends Phaser.Scene {
             const inputField = this.consoleText.getChildByID(
                 "consoleInput"
             ) as HTMLInputElement;
-            const newText = inputField.value;
+            var newText = inputField.value;
             inputField.value = ""; // Clear input field
+            if (!g.match(newText).succeeded()) {
+                newText =
+                    "Invalid command. Try using the help command for assistance.";
+            }
             const textBlockDiv = document.getElementById("textBlock");
             if (textBlockDiv) {
                 if (this.numCommands == 11) {

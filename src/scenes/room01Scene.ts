@@ -138,13 +138,15 @@ class room01Scene extends Phaser.Scene {
                 this.player.height * 0.8
             );
         }
-        const slashKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
+        const tabKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        slashKey?.on("down", this.switchScene, this);
+        tabKey?.on("down", this.switchScene, this);
     }
     private switchScene() {
         console.log("it worked");
+        //this.characterMovement.stopX();
+        //this.characterMovement.stopY();
         this.scene.setVisible(true, "ConsoleScene");
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
@@ -152,7 +154,6 @@ class room01Scene extends Phaser.Scene {
         this.scene.run("ConsoleScene", {
             gameState: this.gameState,
         });
-
         this.scene.pause("room01Scene");
     }
     update() {
