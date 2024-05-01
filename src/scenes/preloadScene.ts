@@ -159,6 +159,47 @@ export default class PreloadScene extends Phaser.Scene {
                 frameHeight: 23,
             }
         );
+        this.load.spritesheet(
+            "fireball_idle",
+            "assets/attacks/fireball_idle.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_shoot",
+            "assets/attacks/fireball_shoot.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_spawn",
+            "assets/attacks/fireball_spawn.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_target",
+            "assets/attacks/fireball_target.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_explode",
+            "assets/attacks/fireball_explode.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+
         this.load.image("tiles", "assets/tiles/tilemap.png");
         this.load.tilemapTiledJSON(
             "lobby",

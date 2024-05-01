@@ -16,6 +16,11 @@ class Player {
         this.player = player;
     }
 
+    healToAmount(healTo: number) {
+        this.hearts = healTo;
+        this.health = healTo;
+    }
+
     takeDamage(damage: number) {
         if (!this.isInvincible) {
             this.isInvincible = true;

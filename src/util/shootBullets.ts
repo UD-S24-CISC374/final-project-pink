@@ -26,20 +26,27 @@ export function shootBullets(
 
         // Use setTimeout to delay each shot
         setTimeout(() => {
-            const worldPosition = scene.input.activePointer.positionToCamera(
-                scene.cameras.main
-            ) as Phaser.Math.Vector2;
+            if (scene.scene.isActive()) {
+                //ensures no errors if player is shooting while switching scenes
+                const worldPosition =
+                    scene.input.activePointer.positionToCamera(
+                        scene.cameras.main
+                    ) as Phaser.Math.Vector2;
 
-            // get new bullet
-            let bullet = bullets.get(player.x, player.y, texture) as Bullet;
+                // get new bullet
+                let bullet = bullets.get(player.x, player.y, texture) as Bullet;
 
-            // Fire the bullet towards the target
-            bullet.fire(worldPosition.x, worldPosition.y);
+                // Fire the bullet towards the target
+                bullet.fire(worldPosition.x, worldPosition.y);
 
-            shotsFired++;
+                shotsFired++;
 
-            if (shotsFired === numShots) {
+                if (shotsFired === numShots) {
+                    shootingInProgress = false;
+                }
+            } else {
                 shootingInProgress = false;
+                return;
             }
         }, delay);
     }

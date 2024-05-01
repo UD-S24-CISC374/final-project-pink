@@ -31,4 +31,11 @@ export class gameState {
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
     }
+    public resetValuesOnSceneSwitch() {
+        this.isDodging = false;
+        this.invulnerable = false;
+        this.player.isInvincible = false;
+        this.leftButtonPressed = false;
+        this.rightButtonPressed = false;
+    }
 }

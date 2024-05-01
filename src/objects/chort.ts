@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Bullet } from "./bullet";
+import { Fireball } from "./fireball"; // Import the Fireball class
 
 enum Direction {
     UP,
@@ -9,12 +9,10 @@ enum Direction {
 }
 
 const randomDirection = (exclude: Direction) => {
-    //basically just ensures the next dierction is different than the previous direction
     let newDirection = Phaser.Math.Between(0, 3);
     while (newDirection === exclude) {
         newDirection = Phaser.Math.Between(0, 3);
     }
-
     return newDirection;
 };
 
@@ -22,15 +20,11 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
     private direction = randomDirection(Direction.RIGHT);
     private moveEvent: Phaser.Time.TimerEvent;
     private targetPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
-    public fireballs: Phaser.Physics.Arcade.Group =
-        this.scene.physics.add.group({
-            classType: Bullet,
-            key: "bullet_blue",
-            maxSize: 0,
-            runChildUpdate: true,
-        });
-    private health: number = 40; // Initial health for Chort
+    public fireballs: Phaser.Physics.Arcade.Group; // Remove the initialization
 
+    private health: number = 50; //default values... can be changed with the setter
+    private speed: number = 75;
+    private bulletSpeed: number = 200;
     constructor(
         scene: Phaser.Scene,
         x: number,
@@ -39,9 +33,7 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
         frame?: string | number
     ) {
         super(scene, x, y, texture, frame);
-
         scene.physics.world.on(
-            //allows collisions
             Phaser.Physics.Arcade.Events.TILE_COLLIDE,
             this.handleTileCollision,
             this
@@ -50,7 +42,6 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
         this.anims.play("chort_idle", true);
 
         this.moveEvent = scene.time.addEvent({
-            //randomly changes directions every 3 seconds
             delay: 3000,
             callback: () => {
                 this.direction = randomDirection(this.direction);
@@ -59,18 +50,28 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
         });
 
         scene.time.addEvent({
-            //randomly shoots every 3-6 seconds
-            delay: Phaser.Math.Between(3000, 6000), // Random delay between 3 to 6 seconds
+            delay: Phaser.Math.Between(3000, 6000),
             callback: this.shootFireball,
             callbackScope: this,
             loop: true,
         });
+
+        // Create the fireball group with Fireball class
+        this.fireballs = this.scene.physics.add.group({
+            classType: Fireball,
+            maxSize: 10, // Set the maximum size of the fireball group
+            runChildUpdate: true,
+        });
+    }
+
+    public setProperties(health: number, speed: number, bulletSpeed: number) {
+        this.health = health;
+        this.speed = speed;
+        this.bulletSpeed = bulletSpeed;
     }
 
     destroy(fromScene?: boolean) {
-        //dont worry about this but its necessary
         this.moveEvent.destroy();
-
         super.destroy(fromScene);
     }
 
@@ -78,40 +79,40 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
         if (go !== this) {
             return;
         }
-        //if the gameobject is a chort and there is a tile collision, switch directions
         this.direction = randomDirection(this.direction);
     }
 
     setTargetPosition(x: number, y: number) {
-        // to update target position on player-move event
         this.targetPosition.set(x, y);
     }
 
     shootFireball() {
         if (!this.active || !this.body || !this.body.enable) {
-            return; // Don't shoot if the Chort is destroyed
+            return;
         }
-        //shoots fireballs
-        // Create a new fireball at the Chort's position
-        this.fireballs.maxSize = 10;
+        // Get a fireball instance from the group
         let fireball = this.fireballs.get(
             this.x,
             this.y,
-            "bullet_blue"
-        ) as Bullet;
+            "fireball_shoot" // Use the appropriate texture key for the fireball
+        ) as Fireball;
+        fireball.setSpeed(this.bulletSpeed);
 
         // Fire the fireball towards the player
         fireball.fire(this.targetPosition.x, this.targetPosition.y);
     }
 
     public takeDamage(damage: number) {
-        // Reduce Chort health
         this.health -= damage;
-
-        // Check if Chort health is zero or less
         if (this.health <= 0) {
-            // Destroy the Chort if health is zero or less
-            this.destroy();
+            this.disableBody(true, true);
+            const explosion = this.scene.add
+                .sprite(this.x, this.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                this.destroy();
+            });
         }
     }
 
@@ -119,28 +120,24 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
         this.body?.setSize(this.width * 0.8, this.height * 0.8);
         super.preUpdate(t, dt);
 
-        const speed = 75;
-
-        switch (
-            this.direction //constantly looks for this.direction to change and changes the chorts direction on that change
-        ) {
+        switch (this.direction) {
             case Direction.UP:
-                this.setVelocity(0, -speed);
+                this.setVelocity(0, -this.speed);
                 this.anims.play("chort_idle", true);
                 break;
 
             case Direction.DOWN:
-                this.setVelocity(0, speed);
+                this.setVelocity(0, this.speed);
                 this.anims.play("chort_idle", true);
                 break;
 
             case Direction.LEFT:
-                this.setVelocity(-speed, 0);
+                this.setVelocity(-this.speed, 0);
                 this.anims.play("chort_walkLeft", true);
                 break;
 
             case Direction.RIGHT:
-                this.setVelocity(speed, 0);
+                this.setVelocity(this.speed, 0);
                 this.anims.play("chort_walkRight", true);
                 break;
         }

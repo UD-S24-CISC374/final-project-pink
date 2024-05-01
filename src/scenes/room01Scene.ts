@@ -9,6 +9,7 @@ import { Bullet } from "../objects/bullet";
 import { shootBullets } from "../util/shootBullets";
 import { KeyboardManager } from "../util/keyboardManager";
 import { sceneEvents } from "../util/eventCenter";
+import { Fireball } from "../objects/fireball";
 
 class room01Scene extends Phaser.Scene {
     private gameState: gameState;
@@ -50,6 +51,7 @@ class room01Scene extends Phaser.Scene {
                 });
             }
             this.player = this.physics.add.sprite(800, 900, "robot_idle");
+            this.gameState.player.player = this.player; //absolutely need this
             this.characterMovement = new CharacterMovement(
                 this.player,
                 this,
@@ -68,10 +70,14 @@ class room01Scene extends Phaser.Scene {
                 },
             });
 
-            this.chorts.get(800, 700, "chort");
-            this.chorts.get(800, 500, "chort");
-            this.chorts.get(1000, 700, "chort");
-            this.chorts.get(800, 1000, "chort");
+            const chort1 = this.chorts.get(800, 700, "chort");
+            chort1.setProperties(30, 50, 200);
+            const chort2 = this.chorts.get(800, 500, "chort");
+            chort2.setProperties(30, 75, 250);
+            const chort3 = this.chorts.get(1000, 700, "chort");
+            chort3.setProperties(30, 100, 200);
+            const chort4 = this.chorts.get(800, 1000, "chort");
+            chort4.setProperties(30, 30, 300);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the chorts target x and y change
@@ -100,12 +106,7 @@ class room01Scene extends Phaser.Scene {
                     this.bullets,
                     walls,
                     (object1, object2) => {
-                        //need this setup for collisions on groups for some reason
-                        if (object1 instanceof Bullet) {
-                            object1.destroy(); // Destroy the bullet when it hits the walls
-                        } else if (object2 instanceof Bullet) {
-                            object2.destroy(); // Destroy the bullet when it hits the walls
-                        }
+                        this.handleBulletTileCollision(object1, object2);
                     }
                 );
                 this.chorts.children.iterate(
@@ -119,18 +120,63 @@ class room01Scene extends Phaser.Scene {
                             currentChort.fireballs, //fireball group stored in each chort instance
                             walls,
                             (object1, object2) => {
-                                if (object1 instanceof Bullet) {
-                                    object1.destroy(); // Destroy the bullet when it hits the walls
-                                } else if (object2 instanceof Bullet) {
-                                    object2.destroy(); // Destroy the bullet when it hits the walls
-                                }
+                                this.handleFireballTileCollision(
+                                    object1,
+                                    object2
+                                );
                             }
                         );
                         return true;
                     }
                 );
             }
+            // Collision between player and chorts
+            this.physics.add.collider(
+                this.player,
+                this.chorts,
+                () => {
+                    // Decrease player health when colliding with chorts
+                    this.handlePlayerEnemyCollision();
+                },
+                undefined,
+                this
+            );
+
+            // Collision between player bullets and chorts
+            this.physics.add.collider(
+                this.bullets,
+                this.chorts,
+                (bullet, chort) => {
+                    // Decrease chort health when hit by player bullets
+                    (chort as Chort).takeDamage(10); // Assuming each bullet does 10 damage
+                    // Destroy the bullet
+                    bullet.destroy();
+                }
+            );
+            // Collision between chort bullets and player
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                // Check if fireballs group exists
+                this.physics.add.collider(
+                    this.player as Phaser.GameObjects.Sprite,
+                    currentChort.fireballs, // Collider between player and fireballs
+                    (player, fireball) => {
+                        this.handlePlayerEnemyFireballCollision(
+                            this.player as
+                                | Phaser.Types.Physics.Arcade.GameObjectWithBody
+                                | Phaser.Tilemaps.Tile, //for type resolution...
+                            fireball
+                        );
+                    },
+                    undefined,
+                    this
+                );
+
+                return true;
+            });
             //camera follows player
+            this.scene.run("game-ui", { gameState: this.gameState });
+            this.scene.bringToTop("game-ui");
             this.cameras.main.startFollow(this.player, true);
 
             //decreases player hitbox size
@@ -146,9 +192,6 @@ class room01Scene extends Phaser.Scene {
     }
     private switchScene() {
         console.log("it worked");
-        // this.characterMovement.stopX();
-        // this.characterMovement.stopY();
-
         this.scene.setVisible(true, "ConsoleScene");
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
@@ -161,20 +204,146 @@ class room01Scene extends Phaser.Scene {
         this.characterMovement.stopX();
         this.characterMovement.stopY();
     }
-    update() {
-        // Check for keyboard input and move the player accordingly
-        if (this.input.activePointer.isDown) {
-            // Shoot a bullet from the player towards the mouse cursor
-            shootBullets(
-                this,
-                this.bullets!,
-                this.player!,
-                6, //shots per round
-                500, //milliseconds between shots
-                "bullet_blue" //image texture for bullet
+    private handleBulletTileCollision(
+        obj1:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        obj2:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (obj1 instanceof Bullet) {
+            obj1.destroy();
+        } else if (obj2 instanceof Bullet) {
+            obj2.destroy();
+        }
+    }
+
+    private handleFireballTileCollision(
+        obj1:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        obj2:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (obj1 instanceof Fireball) {
+            obj1.disableBody(true, true);
+            const explosion = this.add
+                .sprite(obj1.x, obj1.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                obj1.destroy();
+            });
+        } else if (obj2 instanceof Fireball) {
+            obj2.disableBody(true, true);
+            const explosion = this.add
+                .sprite(obj2.x, obj2.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                obj2.destroy();
+            });
+        }
+    }
+
+    private handlePlayerEnemyFireballCollision(
+        player:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        fireball:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (fireball instanceof Fireball) {
+            fireball.disableBody(true, true);
+            const explosion = this.add
+                .sprite(fireball.x, fireball.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                fireball.destroy();
+            });
+        }
+        //checks if i frames are present or if player is dodging (no damage on either case)
+
+        if (
+            !this.gameState.invulnerable &&
+            !this.gameState.player.isInvincible
+        ) {
+            this.gameState.player.takeDamage(1);
+
+            sceneEvents.emit(
+                "player-health-changed",
+                this.gameState.player.health
             );
         }
-        this.keyboardManager.handleInput(); //updating player movement with new implementation
+        this.keyboardManager.handlePlayerHit();
+    }
+
+    private handlePlayerEnemyCollision() {
+        //checks if i frames are present or if player is dodging (no damage on either case)
+        if (
+            !this.gameState.player.isInvincible &&
+            !this.gameState.invulnerable
+        ) {
+            this.gameState.player.takeDamage(1);
+            sceneEvents.emit(
+                "player-health-changed",
+                this.gameState.player.health
+            );
+        }
+    }
+    update() {
+        // Check for keyboard input and move the player accordingly
+        if (this.gameState.player.health <= 0) {
+            // Player is dead, trigger death animation
+            this.gameState.player.die();
+            // You may also want to perform other actions, like respawning the player or ending the game
+        } else {
+            // Player is not dead, can move
+            // Check for keyboard input and move the player accordingly
+
+            if (this.input.activePointer.leftButtonDown()) {
+                this.gameState.leftButtonPressed = true;
+            } else if (
+                this.gameState.leftButtonPressed &&
+                this.input.activePointer.leftButtonReleased()
+            ) {
+                shootBullets(
+                    this,
+                    this.bullets!,
+                    this.player!,
+                    6, //shots per round
+                    500, //milliseconds between shots
+                    "bullet_blue" //image texture for bullet
+                );
+                this.gameState.leftButtonPressed = false;
+            }
+
+            if (
+                this.input.activePointer.rightButtonDown() &&
+                !this.gameState.isDodging
+            ) {
+                this.gameState.rightButtonPressed = true;
+            } else if (
+                this.gameState.rightButtonPressed &&
+                this.input.activePointer.rightButtonReleased() &&
+                !this.gameState.isDodging
+            ) {
+                // Start dodge roll animation only if not already dodging
+                this.characterMovement.performDodgeRoll(
+                    this.keyboardManager.lastHorizontalDirection,
+                    this.keyboardManager.lastVerticalDirection
+                );
+                this.gameState.rightButtonPressed = false;
+            }
+
+            // Allow normal player movement only if not dodging
+            if (this.gameState.player.health > 0)
+                this.keyboardManager.handleInput();
+        }
     }
 }
 export default room01Scene;
