@@ -13,6 +13,7 @@ import { shootBullets } from "../util/shootBullets";
 import { Bullet } from "../objects/bullet";
 
 import { sceneEvents } from "../util/eventCenter";
+import { Fireball } from "../objects/fireball";
 
 class LobbyScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
@@ -177,10 +178,15 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
                     this.gameState.curRoom = "room01Scene";
-                    this.keyboardManager.setOnConsole(true);
+                    this.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
                     this.scene.start("room01Scene", {
                         gameState: this.gameState,
                     });
+                    this.scene.stop();
                 });
             }
             // Collision between player and chorts
@@ -290,7 +296,24 @@ class LobbyScene extends Phaser.Scene {
                                     messages: messages4, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
-                                this.chorts?.get(600, 50, "chort"); //spawns a chort
+                                const chort1 = this.chorts?.get(
+                                    600,
+                                    50,
+                                    "chort"
+                                ); //spawns a chort
+                                chort1.setProperties(40, 75, 200); //sets the health, speed, projectile speed
+                                const chort2 = this.chorts?.get(
+                                    600,
+                                    50,
+                                    "chort"
+                                ); //spawns a chort
+                                chort2.setProperties(20, 150, 500); //sets the health, speed, projectile speed
+                                const chort3 = this.chorts?.get(
+                                    600,
+                                    50,
+                                    "chort"
+                                ); //spawns a chort
+                                chort3.setProperties(20, 30, 30); //sets the health, speed, projectile speed
                             } else if (this.gameState.tutorialLevel == 4) {
                                 this.scene.run("MessageScene", {
                                     messages: messages5, // Pass the messages array to the message scene
@@ -311,7 +334,7 @@ class LobbyScene extends Phaser.Scene {
                                     this.player as Phaser.GameObjects.Sprite,
                                     currentChort.fireballs, // Collider between player and fireballs
                                     (player, fireball) => {
-                                        this.handlePlayerEnemyBulletCollision(
+                                        this.handlePlayerEnemyFireballCollision(
                                             this.player as
                                                 | Phaser.Types.Physics.Arcade.GameObjectWithBody
                                                 | Phaser.Tilemaps.Tile, //for type resolution...
@@ -336,7 +359,7 @@ class LobbyScene extends Phaser.Scene {
                                             currentChort.fireballs, //fireball group stored in each chort instance
                                             walls,
                                             (object1, object2) => {
-                                                this.handleBulletTileCollision(
+                                                this.handleFireballTileCollision(
                                                     object1,
                                                     object2
                                                 );
@@ -355,7 +378,7 @@ class LobbyScene extends Phaser.Scene {
                                             currentChort.fireballs,
                                             structs,
                                             (object1, object2) => {
-                                                this.handleBulletTileCollision(
+                                                this.handleFireballTileCollision(
                                                     object1,
                                                     object2
                                                 );
@@ -374,7 +397,7 @@ class LobbyScene extends Phaser.Scene {
                                             currentChort.fireballs,
                                             decor,
                                             (object1, object2) => {
-                                                this.handleBulletTileCollision(
+                                                this.handleFireballTileCollision(
                                                     object1,
                                                     object2
                                                 );
@@ -424,7 +447,36 @@ class LobbyScene extends Phaser.Scene {
         }
     }
 
-    private handlePlayerEnemyBulletCollision(
+    private handleFireballTileCollision(
+        obj1:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        obj2:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (obj1 instanceof Fireball) {
+            obj1.disableBody(true, true);
+            const explosion = this.add
+                .sprite(obj1.x, obj1.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                obj1.destroy();
+            });
+        } else if (obj2 instanceof Fireball) {
+            obj2.disableBody(true, true);
+            const explosion = this.add
+                .sprite(obj2.x, obj2.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                obj2.destroy();
+            });
+        }
+    }
+
+    private handlePlayerEnemyFireballCollision(
         player:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
             | Phaser.Tilemaps.Tile,
@@ -432,8 +484,15 @@ class LobbyScene extends Phaser.Scene {
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
             | Phaser.Tilemaps.Tile
     ) {
-        if (fireball instanceof Bullet) {
-            fireball.destroy();
+        if (fireball instanceof Fireball) {
+            fireball.disableBody(true, true);
+            const explosion = this.add
+                .sprite(fireball.x, fireball.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                fireball.destroy();
+            });
         }
         //checks if i frames are present or if player is dodging (no damage on either case)
 
