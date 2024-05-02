@@ -17,31 +17,31 @@ var room01: node = {
     nodeName: "room01",
     parentNode: null,
     childNodes: null,
-    entities: ["player", "chort1", "chort2", "chort3", "chort4", "bullets"],
+    entities: ["player", "chort1", "chort2", "chort3", "chort4", "bullets.c"],
 };
 var room02: node = {
     nodeName: "room02",
     parentNode: room01,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
 };
 var room03: node = {
     nodeName: "room03",
     parentNode: room01,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
 };
 var room04: node = {
     nodeName: "room04",
     parentNode: room01,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
 };
 var room05: node = {
     nodeName: "room05",
     parentNode: room02,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
 };
 room01.childNodes = [room02, room03, room04];
 room02.childNodes = [room05];
@@ -54,7 +54,7 @@ Command {
     Compile = #"gcc " Path Option?
     Run = "./" Path
     Cat = #"cat "  Path
-    Rm = #"rm " Option? Path
+    Rm = #"rm " Path Option?
     Ls = "ls" (#" " Option)?
     Help = "help" ("cd" | "mv" | "compile" | "run" | "cat" | "rm" | "ls")?
     Path = (("../" | "./" | "") location | ".." "" )
@@ -92,12 +92,6 @@ class ConsoleScene extends Phaser.Scene {
         this.consoleDisplay = this.add
             .dom(220, 16)
             .createFromCache("consoleDisplay");
-        console.log(
-            typeof this.consoleText,
-            this.consoleText,
-            "hi there omg",
-            this.consoleDisplay
-        );
         //change back to the game scene.
         const slashKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.BACK_SLASH
@@ -149,8 +143,9 @@ class ConsoleScene extends Phaser.Scene {
                     " : Invalid command. Try using the help command for assistance.";
             } else {
                 var textSplit = newText.split(" ");
+                textSplit = textSplit.filter((str) => str !== "");
                 console.log(textSplit);
-                this.executeCommand(newText.split(" "));
+                this.executeCommand(textSplit);
             }
             //function call here
 
@@ -199,7 +194,7 @@ class ConsoleScene extends Phaser.Scene {
                     console.log("do nothing");
                 } else {
                     this.currentNode.childNodes?.forEach((item) => {
-                        console.log(element, item.nodeName);
+                        //console.log(element, item.nodeName);
                         if (item.nodeName == element) {
                             this.currentNode = item;
                         }
@@ -207,21 +202,95 @@ class ConsoleScene extends Phaser.Scene {
                 }
             });
         } else if (command[0] == "mv") {
-            console.log(command[1].split("/"));
+            const pathList = command[1].split("/");
+            const pathListTo = command[2].split("/");
+
+            if (pathList[pathList.length - 1] == "player") {
+                console.log("moving");
+                if (pathListTo[pathListTo.length - 1] == "room05") {
+                    this.currentNode.entities =
+                        this.currentNode.entities?.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room05.entities?.push("player");
+                } else if (pathListTo[pathListTo.length - 1] == "room04") {
+                    this.currentNode.entities =
+                        this.currentNode.entities?.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room04.entities?.push("player");
+                } else if (pathListTo[pathListTo.length - 1] == "room03") {
+                    this.currentNode.entities =
+                        this.currentNode.entities?.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room03.entities?.push("player");
+                } else if (pathListTo[pathListTo.length - 1] == "room02") {
+                    this.currentNode.entities =
+                        this.currentNode.entities?.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room02.entities?.push("player");
+                } else if (pathListTo[pathListTo.length - 1] == "room01") {
+                    this.currentNode.entities =
+                        this.currentNode.entities?.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room01.entities?.push("player");
+                } else if (pathListTo[pathListTo.length - 1] == "..") {
+                    this.currentNode.entities =
+                        this.currentNode.entities?.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    this.currentNode.parentNode?.entities?.push("player");
+                }
+            } else {
+                console.log("you do not have permission to move this");
+            }
+            console.log(pathList);
         } else if (command[0] == "gcc") {
-            console.log(command[1].split("/"));
+            const pathList = command[1].split("/");
+            if (pathList[pathList.length - 1].includes(".c")) {
+                console.log("compiling", pathList);
+                if (
+                    pathList.length == 1 ||
+                    (pathList.length == 2 && pathList[0] == ".")
+                ) {
+                    if (!this.currentNode.entities?.includes("a.out")) {
+                        this.currentNode.entities?.push("a.out");
+                    }
+                }
+            } else {
+                console.log("Err cannot compile a non c file.");
+            }
+            console.log(pathList);
         } else if (command[0] == "./") {
-            console.log(command[1].split("/"));
+            const pathList = command[1].split("/");
+            console.log(pathList);
         } else if (command[0] == "cat") {
-            console.log(command[1].split("/"));
+            const pathList = command[1].split("/");
+            if (
+                pathList[pathList.length - 1].includes(".out") ||
+                pathList[pathList.length - 1].includes(".txt") ||
+                pathList[pathList.length - 1].includes(".c")
+            ) {
+                console.log(pathList[pathList.length - 1]);
+            }
+            console.log(pathList);
         } else if (command[0] == "rm") {
-            console.log(command[1].split("/"));
+            const pathList = command[1].split("/");
+            if (pathList[pathList.length - 1] == "bullets.c") {
+                console.log("deleting bullets");
+            } else {
+                console.log("you do not have permission to delete this");
+            }
         } else if (command[0] == "ls") {
             this.currentNode.childNodes?.forEach((item) => {
                 console.log(item.nodeName);
             });
+            console.log(this.currentNode.entities);
         } else if (command[0] == "help") {
-            console.log(command[1].split("/"));
+            console.log("HELP");
         }
         console.log(this.currentNode);
     }
