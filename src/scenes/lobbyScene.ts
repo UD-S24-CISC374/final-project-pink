@@ -8,18 +8,18 @@ import { KeyboardManager } from "../util/keyboardManager";
 import { gameState } from "../objects/gameState";
 
 import Chort from "../objects/chort";
-
-import { shootBullets } from "../util/shootBullets";
 import { Bullet } from "../objects/bullet";
 
 import { sceneEvents } from "../util/eventCenter";
 import { Fireball } from "../objects/fireball";
+import { Gun } from "../objects/gun";
 
 class LobbyScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
     public keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
+    private gun?: Gun;
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
     private gameState: gameState;
     private npc: Phaser.Physics.Arcade.Sprite;
@@ -183,7 +183,9 @@ class LobbyScene extends Phaser.Scene {
                     this.scene.stop("game-ui");
                     this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
-                    this.scene.start("room04Scene", {
+                    this.gameState.player.guns = [];
+                    this.gameState.player.currentGun = undefined;
+                    this.scene.start("room01Scene", {
                         gameState: this.gameState,
                     });
                     this.scene.stop();
@@ -291,6 +293,21 @@ class LobbyScene extends Phaser.Scene {
                                     messages: messages3, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
+                                this.gun = new Gun(
+                                    this,
+                                    this.gameState,
+                                    this.player,
+                                    this.bullets!,
+                                    "gun_default", //gun texture
+                                    "bullet_blue", //bullet texture
+                                    300, //bullet speed
+                                    10, //bullet damage
+                                    5, //shots per round
+                                    600 //miliseconds between shots
+                                );
+                                this.gun.addToScene();
+                                this.gun.reload();
+                                this.gameState.player.addGun(this.gun);
                             } else if (this.gameState.tutorialLevel == 3) {
                                 this.scene.run("MessageScene", {
                                     messages: messages4, // Pass the messages array to the message scene
@@ -301,19 +318,7 @@ class LobbyScene extends Phaser.Scene {
                                     50,
                                     "chort"
                                 ); //spawns a chort
-                                chort1.setProperties(40, 75, 200); //sets the health, speed, projectile speed
-                                const chort2 = this.chorts?.get(
-                                    600,
-                                    50,
-                                    "chort"
-                                ); //spawns a chort
-                                chort2.setProperties(20, 150, 500); //sets the health, speed, projectile speed
-                                const chort3 = this.chorts?.get(
-                                    600,
-                                    50,
-                                    "chort"
-                                ); //spawns a chort
-                                chort3.setProperties(20, 30, 30); //sets the health, speed, projectile speed
+                                chort1.setProperties(30, 50, 350); //sets the health, speed, projectile speed
                             } else if (this.gameState.tutorialLevel == 4) {
                                 this.scene.run("MessageScene", {
                                     messages: messages5, // Pass the messages array to the message scene
@@ -563,14 +568,7 @@ class LobbyScene extends Phaser.Scene {
                 this.input.activePointer.leftButtonReleased() &&
                 this.gameState.tutorialLevel > 2
             ) {
-                shootBullets(
-                    this,
-                    this.bullets!,
-                    this.player!,
-                    6, //shots per round
-                    500, //milliseconds between shots
-                    "bullet_blue" //image texture for bullet
-                );
+                this.gun?.shoot();
                 this.gameState.leftButtonPressed = false;
             }
 
@@ -594,6 +592,10 @@ class LobbyScene extends Phaser.Scene {
 
             // Allow normal player movement only if not dodging
             this.keyboardManager.handleInput();
+            this.gun?.updatePosition(
+                this.keyboardManager.lastHorizontalDirection,
+                this.keyboardManager.lastVerticalDirection
+            );
         }
     }
 }

@@ -12,6 +12,7 @@ export class gameState {
     invulnerable: boolean;
     leftButtonPressed: boolean;
     rightButtonPressed: boolean;
+    eButtonPressed: boolean;
 
     constructor(
         player: Player,
@@ -30,6 +31,7 @@ export class gameState {
         this.invulnerable = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
+        this.eButtonPressed = false;
     }
     public resetValuesOnSceneSwitch() {
         this.isDodging = false;
@@ -37,5 +39,6 @@ export class gameState {
         this.player.isInvincible = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
+        this.eButtonPressed = false;
     }
 }
