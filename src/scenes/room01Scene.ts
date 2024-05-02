@@ -23,7 +23,7 @@ class room01Scene extends Phaser.Scene {
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
     private defaultGunBig?: Gun;
-    private allowConsole: boolean = true;
+    private allowConsole: boolean = false;
     constructor() {
         super({ key: "room01Scene" });
     }
@@ -347,7 +347,7 @@ class room01Scene extends Phaser.Scene {
                             gameState: this.gameState,
                         });
                         setTimeout(() => {
-                            this.allowConsole = false;
+                            this.allowConsole = true;
                         }, 5000);
                     }
                 }
