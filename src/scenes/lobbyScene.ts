@@ -13,11 +13,12 @@ import { shootBullets } from "../util/shootBullets";
 import { Bullet } from "../objects/bullet";
 
 import { sceneEvents } from "../util/eventCenter";
+import { Fireball } from "../objects/fireball";
 
 class LobbyScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
-    private keyboardManager: KeyboardManager;
+    public keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group; // Group to store bullets
     private gameState: gameState;
@@ -176,11 +177,16 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.chorts, floor);
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
-                    this.gameState.curRoom = "room01Scene";
-                    this.keyboardManager.setOnConsole(true);
-                    this.scene.start("room01Scene", {
+                    this.gameState.curRoom = "room04Scene";
+                    this.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+                    this.scene.start("room04Scene", {
                         gameState: this.gameState,
                     });
+                    this.scene.stop();
                 });
             }
             // Collision between player and chorts
@@ -228,10 +234,13 @@ class LobbyScene extends Phaser.Scene {
             const messages2: string[] = [
                 "To exit, you must travel to all the floors and defeat all the enemies.",
                 "Notice in the top left, how you now have 5 hearts.",
+                "You can also right click to dodge roll.",
+                "During a dodge roll...",
+                "you become immune to damage, and move a little faster.",
             ];
             const messages3: string[] = [
-                "You can also shoot, now clicking will shoot your gun.",
-                "But don't go crazy with spamming, one click shoots your entire round.",
+                "You can also shoot, now left clicking will shoot your gun.",
+                "One click shoots your entire round.",
                 "Ammo is infinite too, you just need to worry about reloading.",
                 "Your bullets go towards your crosshair when fired.",
             ];
@@ -287,7 +296,24 @@ class LobbyScene extends Phaser.Scene {
                                     messages: messages4, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
-                                this.chorts?.get(600, 50, "chort"); //spawns a chort
+                                const chort1 = this.chorts?.get(
+                                    600,
+                                    50,
+                                    "chort"
+                                ); //spawns a chort
+                                chort1.setProperties(40, 75, 200); //sets the health, speed, projectile speed
+                                const chort2 = this.chorts?.get(
+                                    600,
+                                    50,
+                                    "chort"
+                                ); //spawns a chort
+                                chort2.setProperties(20, 150, 500); //sets the health, speed, projectile speed
+                                const chort3 = this.chorts?.get(
+                                    600,
+                                    50,
+                                    "chort"
+                                ); //spawns a chort
+                                chort3.setProperties(20, 30, 30); //sets the health, speed, projectile speed
                             } else if (this.gameState.tutorialLevel == 4) {
                                 this.scene.run("MessageScene", {
                                     messages: messages5, // Pass the messages array to the message scene
@@ -308,7 +334,7 @@ class LobbyScene extends Phaser.Scene {
                                     this.player as Phaser.GameObjects.Sprite,
                                     currentChort.fireballs, // Collider between player and fireballs
                                     (player, fireball) => {
-                                        this.handlePlayerEnemyBulletCollision(
+                                        this.handlePlayerEnemyFireballCollision(
                                             this.player as
                                                 | Phaser.Types.Physics.Arcade.GameObjectWithBody
                                                 | Phaser.Tilemaps.Tile, //for type resolution...
@@ -333,7 +359,7 @@ class LobbyScene extends Phaser.Scene {
                                             currentChort.fireballs, //fireball group stored in each chort instance
                                             walls,
                                             (object1, object2) => {
-                                                this.handleBulletTileCollision(
+                                                this.handleFireballTileCollision(
                                                     object1,
                                                     object2
                                                 );
@@ -352,7 +378,7 @@ class LobbyScene extends Phaser.Scene {
                                             currentChort.fireballs,
                                             structs,
                                             (object1, object2) => {
-                                                this.handleBulletTileCollision(
+                                                this.handleFireballTileCollision(
                                                     object1,
                                                     object2
                                                 );
@@ -371,7 +397,7 @@ class LobbyScene extends Phaser.Scene {
                                             currentChort.fireballs,
                                             decor,
                                             (object1, object2) => {
-                                                this.handleBulletTileCollision(
+                                                this.handleFireballTileCollision(
                                                     object1,
                                                     object2
                                                 );
@@ -421,7 +447,36 @@ class LobbyScene extends Phaser.Scene {
         }
     }
 
-    private handlePlayerEnemyBulletCollision(
+    private handleFireballTileCollision(
+        obj1:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        obj2:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (obj1 instanceof Fireball) {
+            obj1.disableBody(true, true);
+            const explosion = this.add
+                .sprite(obj1.x, obj1.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                obj1.destroy();
+            });
+        } else if (obj2 instanceof Fireball) {
+            obj2.disableBody(true, true);
+            const explosion = this.add
+                .sprite(obj2.x, obj2.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                obj2.destroy();
+            });
+        }
+    }
+
+    private handlePlayerEnemyFireballCollision(
         player:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
             | Phaser.Tilemaps.Tile,
@@ -429,11 +484,22 @@ class LobbyScene extends Phaser.Scene {
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
             | Phaser.Tilemaps.Tile
     ) {
-        if (fireball instanceof Bullet) {
-            fireball.destroy();
+        if (fireball instanceof Fireball) {
+            fireball.disableBody(true, true);
+            const explosion = this.add
+                .sprite(fireball.x, fireball.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                fireball.destroy();
+            });
         }
-        //gives player 'i' frames set in player.ts
-        if (!this.gameState.player.isInvincible) {
+        //checks if i frames are present or if player is dodging (no damage on either case)
+
+        if (
+            !this.gameState.invulnerable &&
+            !this.gameState.player.isInvincible
+        ) {
             this.gameState.player.takeDamage(1);
 
             sceneEvents.emit(
@@ -441,11 +507,15 @@ class LobbyScene extends Phaser.Scene {
                 this.gameState.player.health
             );
         }
+        this.keyboardManager.handlePlayerHit();
     }
 
     private handlePlayerEnemyCollision() {
-        //gives player 'i' frames set in player.ts
-        if (!this.gameState.player.isInvincible) {
+        //checks if i frames are present or if player is dodging (no damage on either case)
+        if (
+            !this.gameState.player.isInvincible &&
+            !this.gameState.invulnerable
+        ) {
             this.gameState.player.takeDamage(1);
             sceneEvents.emit(
                 "player-health-changed",
@@ -484,10 +554,15 @@ class LobbyScene extends Phaser.Scene {
             // Check for keyboard input and move the player accordingly
 
             if (
-                this.input.activePointer.isDown &&
-                this.gameState.tutorialLevel >= 3
+                this.input.activePointer.leftButtonDown() &&
+                this.gameState.tutorialLevel > 2
             ) {
-                // Shoot a bullet from the player towards the mouse cursor
+                this.gameState.leftButtonPressed = true;
+            } else if (
+                this.gameState.leftButtonPressed &&
+                this.input.activePointer.leftButtonReleased() &&
+                this.gameState.tutorialLevel > 2
+            ) {
                 shootBullets(
                     this,
                     this.bullets!,
@@ -496,8 +571,29 @@ class LobbyScene extends Phaser.Scene {
                     500, //milliseconds between shots
                     "bullet_blue" //image texture for bullet
                 );
+                this.gameState.leftButtonPressed = false;
             }
-            this.keyboardManager.handleInput(); //how we update player movment now
+
+            if (
+                this.input.activePointer.rightButtonDown() &&
+                !this.gameState.isDodging
+            ) {
+                this.gameState.rightButtonPressed = true;
+            } else if (
+                this.gameState.rightButtonPressed &&
+                this.input.activePointer.rightButtonReleased() &&
+                !this.gameState.isDodging
+            ) {
+                // Start dodge roll animation only if not already dodging
+                this.characterMovement.performDodgeRoll(
+                    this.keyboardManager.lastHorizontalDirection,
+                    this.keyboardManager.lastVerticalDirection
+                );
+                this.gameState.rightButtonPressed = false;
+            }
+
+            // Allow normal player movement only if not dodging
+            this.keyboardManager.handleInput();
         }
     }
 }

@@ -87,7 +87,7 @@ export default class PreloadScene extends Phaser.Scene {
             }
         );
         this.load.spritesheet(
-            "robot_walk_D",
+            "robot_roll_D",
             "assets/sprites/robot_roll_down.png",
             {
                 frameWidth: 18,
@@ -159,12 +159,56 @@ export default class PreloadScene extends Phaser.Scene {
                 frameHeight: 23,
             }
         );
+        this.load.spritesheet(
+            "fireball_idle",
+            "assets/attacks/fireball_idle.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_shoot",
+            "assets/attacks/fireball_shoot.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_spawn",
+            "assets/attacks/fireball_spawn.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_target",
+            "assets/attacks/fireball_target.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            "fireball_explode",
+            "assets/attacks/fireball_explode.png",
+            {
+                frameWidth: 64,
+                frameHeight: 64,
+            }
+        );
+
         this.load.image("tiles", "assets/tiles/tilemap.png");
         this.load.tilemapTiledJSON(
             "lobby",
             "assets/tilemaps/lobby_room_new.json"
         );
         this.load.tilemapTiledJSON("room01", "assets/tilemaps/room01.json");
+        this.load.tilemapTiledJSON("room02", "assets/tilemaps/room02.json");
+        this.load.tilemapTiledJSON("room03", "assets/tilemaps/room03.json");
+        this.load.tilemapTiledJSON("room04", "assets/tilemaps/room04.json");
         this.load.image("console", "assets/consoleTemp.png");
         this.load.image("eToInteractBubble", "assets/bubble_etointeract.png");
         this.load.image("talkingBubble", "assets/bubble_talking.png");

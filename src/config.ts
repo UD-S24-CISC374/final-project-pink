@@ -4,6 +4,9 @@ import TitleScene from "./scenes/titleScene";
 
 import LobbyScene from "./scenes/lobbyScene";
 import room01Scene from "./scenes/room01Scene";
+import room02Scene from "./scenes/room02Scene";
+import room03Scene from "./scenes/room03Scene";
+import room04Scene from "./scenes/room04Scene";
 import ConsoleScene from "./scenes/consoleScene";
 import GameUI from "./scenes/uiScene";
 import MessageScene from "./scenes/messageScene";
@@ -30,6 +33,9 @@ export const CONFIG = {
         GameUI,
         MessageScene,
         room01Scene,
+        room02Scene,
+        room03Scene,
+        room04Scene,
         ConsoleScene,
     ],
     physics: {

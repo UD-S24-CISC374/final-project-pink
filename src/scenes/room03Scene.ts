@@ -11,7 +11,7 @@ import { KeyboardManager } from "../util/keyboardManager";
 import { sceneEvents } from "../util/eventCenter";
 import { Fireball } from "../objects/fireball";
 
-class room01Scene extends Phaser.Scene {
+class room03Scene extends Phaser.Scene {
     private gameState: gameState;
     private player?: Phaser.Physics.Arcade.Sprite;
     private characterMovement: CharacterMovement;
@@ -19,7 +19,7 @@ class room01Scene extends Phaser.Scene {
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group;
     constructor() {
-        super({ key: "room01Scene" });
+        super({ key: "room03Scene" });
     }
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
@@ -27,12 +27,12 @@ class room01Scene extends Phaser.Scene {
     preload() {}
 
     create() {
-        this.scene.bringToTop("room01Scene");
-        const map = this.make.tilemap({ key: "room01" });
+        this.scene.bringToTop("room03Scene");
+        const map = this.make.tilemap({ key: "room03" });
         const tileset = map.addTilesetImage("tilemap", "tiles"); //name of tilemap ON TILED, then name of key in preloader scene
         if (tileset) {
-            const ground = map.createLayer("ground1", tileset);
-            const walls = map.createLayer("walls1", tileset);
+            const ground = map.createLayer("ground", tileset);
+            const walls = map.createLayer("walls", tileset);
             walls?.setCollisionByProperty({ collides: true });
             walls?.setScale(1);
             ground?.setScale(1);
@@ -50,7 +50,7 @@ class room01Scene extends Phaser.Scene {
                     faceColor: new Phaser.Display.Color(30, 39, 37, 255),
                 });
             }
-            this.player = this.physics.add.sprite(800, 900, "robot_idle");
+            this.player = this.physics.add.sprite(725, 400, "robot_idle");
             this.gameState.player.player = this.player; //absolutely need this
             this.characterMovement = new CharacterMovement(
                 this.player,
@@ -70,14 +70,16 @@ class room01Scene extends Phaser.Scene {
                 },
             });
 
-            const chort1 = this.chorts.get(800, 700, "chort");
+            const chort1 = this.chorts.get(550, 400, "chort");
             chort1.setProperties(30, 50, 200);
-            const chort2 = this.chorts.get(800, 500, "chort");
+            const chort2 = this.chorts.get(400, 400, "chort");
             chort2.setProperties(30, 75, 250);
-            const chort3 = this.chorts.get(1000, 700, "chort");
+            const chort3 = this.chorts.get(300, 500, "chort");
             chort3.setProperties(30, 100, 200);
-            const chort4 = this.chorts.get(800, 1000, "chort");
+            const chort4 = this.chorts.get(400, 200, "chort");
             chort4.setProperties(30, 30, 300);
+            const chort5 = this.chorts.get(400, 600, "chort");
+            chort5.setProperties(30, 30, 300);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the chorts target x and y change
@@ -185,15 +187,13 @@ class room01Scene extends Phaser.Scene {
                 this.player.height * 0.8
             );
         }
-        const tabKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.TAB
+        const slashKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
         );
-        tabKey?.on("down", this.switchScene, this);
+        slashKey?.on("down", this.switchScene, this);
     }
     private switchScene() {
         console.log("it worked");
-        //this.characterMovement.stopX();
-        //this.characterMovement.stopY();
         this.scene.setVisible(true, "ConsoleScene");
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
@@ -201,7 +201,7 @@ class room01Scene extends Phaser.Scene {
         this.scene.run("ConsoleScene", {
             gameState: this.gameState,
         });
-        this.scene.pause("room01Scene");
+        this.scene.pause("room03Scene");
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
@@ -348,4 +348,4 @@ class room01Scene extends Phaser.Scene {
         }
     }
 }
-export default room01Scene;
+export default room03Scene;
