@@ -177,7 +177,7 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.chorts, floor);
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
-                    this.gameState.curRoom = "room01Scene";
+                    this.gameState.curRoom = "room04Scene";
                     this.events.off("player-moved");
                     sceneEvents.removeAllListeners();
                     this.scene.stop("game-ui");
