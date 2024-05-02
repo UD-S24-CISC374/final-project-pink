@@ -249,10 +249,10 @@ class room01Scene extends Phaser.Scene {
             );
         }
         //starting console scene
-        const slashKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
+        const tabKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        slashKey?.on("down", this.switchScene, this);
+        tabKey?.on("down", this.switchScene, this);
 
         if (this.input.keyboard) {
             this.input.keyboard.on("keydown-E", () => {

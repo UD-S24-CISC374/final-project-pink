@@ -4,6 +4,8 @@ import Phaser from "phaser";
 import { CharacterMovement } from "../util/playerMovement";
 import { gameState } from "../objects/gameState";
 import { grammar } from "ohm-js";
+import { sceneEvents } from "../util/eventCenter";
+import room01Scene from "./room01Scene";
 
 class node {
     nodeName: string;
@@ -206,7 +208,7 @@ class ConsoleScene extends Phaser.Scene {
             // add scene change
             const pathList = command[1].split("/");
             const pathListTo = command[2].split("/");
-
+            var tempScene: room01Scene;
             if (pathList[pathList.length - 1] == "player") {
                 console.log("moving");
                 if (pathListTo[pathListTo.length - 1] == "room05") {
@@ -215,36 +217,210 @@ class ConsoleScene extends Phaser.Scene {
                             (str) => str !== "player"
                         ) as string[];
                     room05.entities?.push("player");
+                    this.currentNode = room05;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "room05Scene";
+                    this.scene.start("room05Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room04") {
                     this.currentNode.entities =
                         this.currentNode.entities?.filter(
                             (str) => str !== "player"
                         ) as string[];
                     room04.entities?.push("player");
+                    this.currentNode = room04;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "room04Scene";
+                    this.scene.start("room04Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room03") {
                     this.currentNode.entities =
                         this.currentNode.entities?.filter(
                             (str) => str !== "player"
                         ) as string[];
                     room03.entities?.push("player");
+                    this.currentNode = room03;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "room03Scene";
+                    this.scene.start("room03Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room02") {
                     this.currentNode.entities =
                         this.currentNode.entities?.filter(
                             (str) => str !== "player"
                         ) as string[];
                     room02.entities?.push("player");
+                    this.currentNode = room02;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "room02Scene";
+                    this.scene.start("room02Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    //make sure the console is behind the game scene
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room01") {
                     this.currentNode.entities =
                         this.currentNode.entities?.filter(
                             (str) => str !== "player"
                         ) as string[];
                     room01.entities?.push("player");
+                    this.currentNode = room01;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "room01Scene";
+                    this.scene.start("room01Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "..") {
                     this.currentNode.entities =
                         this.currentNode.entities?.filter(
                             (str) => str !== "player"
                         ) as string[];
-                    this.currentNode.parentNode?.entities?.push("player");
+                    if (this.currentNode.parentNode) {
+                        this.currentNode.parentNode.entities?.push("player");
+                        this.currentNode = this.currentNode.parentNode;
+                        //(this.currentNode.parentNode?.nodeName);
+                    }
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    //console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.player.healToAmount(5);
+                    this.gameState.resetValuesOnSceneSwitch();
+                    console.log(this.currentNode, this.currentNode.parentNode);
+                    this.gameState.curRoom =
+                        this.currentNode.nodeName + "Scene";
+                    this.scene.start(this.currentNode.nodeName + "Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    //make sure the console is behind the game scene
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 }
             } else {
                 console.log("you do not have permission to move this");
@@ -288,10 +464,11 @@ class ConsoleScene extends Phaser.Scene {
             }
         } else if (command[0] == "ls") {
             this.currentNode.childNodes?.forEach((item) => {
-                console.log(item.nodeName);
+                console.log(item.nodeName); // add to output
             });
-            console.log(this.currentNode.entities);
+            console.log(this.currentNode.entities); // add to output
         } else if (command[0] == "help") {
+            //implement later
             console.log("HELP");
         }
         console.log(this.currentNode);
