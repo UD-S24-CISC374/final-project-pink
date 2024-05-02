@@ -8,7 +8,13 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("bullet_blue", "assets/bullet_blue.png");
+        this.load.image("bullet_blue", "assets/bullets/bullet_blue.png");
+        this.load.image("gun_default", "assets/weapons/gun_default.png");
+        this.load.image(
+            "gun_default_big",
+            "assets/weapons/gun_default_big.png"
+        );
+
         this.load.image("ui-heart-full", "assets/ui_heart_full.png");
         this.load.image("ui-heart-empty", "assets/ui_heart_empty.png");
         this.load.spritesheet("lobby_npc", "assets/sprites/lobby_npc.png", {
@@ -199,6 +205,10 @@ export default class PreloadScene extends Phaser.Scene {
                 frameHeight: 64,
             }
         );
+        this.load.spritesheet("wood_chest", "assets/chests/chest_1_wide.png", {
+            frameWidth: 32,
+            frameHeight: 24,
+        });
 
         this.load.image("tiles", "assets/tiles/tilemap.png");
         this.load.tilemapTiledJSON(
