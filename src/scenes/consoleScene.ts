@@ -181,7 +181,7 @@ class ConsoleScene extends Phaser.Scene {
                 command[1].includes(".c") ||
                 command[1].includes(".txt")
             ) {
-                console.log("location is not a directory");
+                console.log("location is not a directory"); //add this to output
             }
             pathList.forEach((element: string) => {
                 console.log(element);
@@ -189,7 +189,7 @@ class ConsoleScene extends Phaser.Scene {
                     if (this.currentNode.parentNode != null) {
                         this.currentNode = this.currentNode.parentNode;
                     } else {
-                        console.log("already in root directory");
+                        console.log("already in root directory"); // add this to output
                     }
                 } else if (element == ".") {
                     console.log("do nothing");
@@ -203,6 +203,7 @@ class ConsoleScene extends Phaser.Scene {
                 }
             });
         } else if (command[0] == "mv") {
+            // add scene change
             const pathList = command[1].split("/");
             const pathListTo = command[2].split("/");
 
@@ -262,14 +263,14 @@ class ConsoleScene extends Phaser.Scene {
                     }
                 }
             } else {
-                console.log("Err cannot compile a non c file.");
+                console.log("Err cannot compile a non c file."); // add to output
             }
             console.log(pathList);
         } else if (command[0] == "./") {
-            const pathList = command[1].split("/");
+            const pathList = command[1].split("/"); //this will be where the weapoon reload happens
             console.log(pathList);
         } else if (command[0] == "cat") {
-            const pathList = command[1].split("/");
+            const pathList = command[1].split("/"); //this will be where you can display weapon "files"
             if (
                 pathList[pathList.length - 1].includes(".out") ||
                 pathList[pathList.length - 1].includes(".txt") ||
@@ -283,7 +284,7 @@ class ConsoleScene extends Phaser.Scene {
             if (pathList[pathList.length - 1] == "bullets.c") {
                 console.log("deleting bullets");
             } else {
-                console.log("you do not have permission to delete this");
+                console.log("you do not have permission to delete this"); // add this to output
             }
         } else if (command[0] == "ls") {
             this.currentNode.childNodes?.forEach((item) => {
