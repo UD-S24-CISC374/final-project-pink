@@ -191,10 +191,10 @@ class room04Scene extends Phaser.Scene {
                 this.player.height * 0.8
             );
         }
-        const slashKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
+        const tabKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        slashKey?.on("down", this.switchScene, this);
+        tabKey?.on("down", this.switchScene, this);
 
         //changes current gun displayed and stops shooting on mouse wheel scroll
         this.input.on(

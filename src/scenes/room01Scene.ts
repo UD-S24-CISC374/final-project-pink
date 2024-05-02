@@ -249,10 +249,10 @@ class room01Scene extends Phaser.Scene {
             );
         }
         //starting console scene
-        const slashKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
+        const tabKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        slashKey?.on("down", this.switchScene, this);
+        tabKey?.on("down", this.switchScene, this);
 
         if (this.input.keyboard) {
             this.input.keyboard.on("keydown-E", () => {
@@ -395,6 +395,8 @@ class room01Scene extends Phaser.Scene {
     }
     private switchScene() {
         console.log("it worked");
+        //this.characterMovement.stopX();
+        //this.characterMovement.stopY();
         this.scene.setVisible(true, "ConsoleScene");
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
