@@ -177,7 +177,7 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.chorts, floor);
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
-                    this.gameState.curRoom = "room01Scenwe";
+                    this.gameState.curRoom = "room01Scene";
                     this.events.off("player-moved");
                     sceneEvents.removeAllListeners();
                     this.scene.stop("game-ui");
@@ -255,6 +255,9 @@ class LobbyScene extends Phaser.Scene {
                 "Upon taking damage you get invincible frames.",
                 "You will flash blue for this duration.",
             ];
+            const messages6: string[] = [
+                "Now you can start, walk into the VOID near the top of the room.",
+            ];
             const end: string[] = [
                 "Got nothing left to tell ya, blame the devs",
                 "rahhhhhhhh",
@@ -322,6 +325,11 @@ class LobbyScene extends Phaser.Scene {
                             } else if (this.gameState.tutorialLevel == 4) {
                                 this.scene.run("MessageScene", {
                                     messages: messages5, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                            } else if (this.gameState.tutorialLevel == 5) {
+                                this.scene.run("MessageScene", {
+                                    messages: messages6, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
                             } else {
