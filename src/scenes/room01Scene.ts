@@ -83,14 +83,14 @@ class room01Scene extends Phaser.Scene {
                 },
             });
 
-            const chort1 = this.chorts.get(800, 700, "chort");
-            chort1.setProperties(30, 50, 200);
-            const chort2 = this.chorts.get(800, 500, "chort");
-            chort2.setProperties(30, 75, 250);
-            const chort3 = this.chorts.get(1000, 700, "chort");
-            chort3.setProperties(30, 100, 200);
-            const chort4 = this.chorts.get(800, 1000, "chort");
-            chort4.setProperties(30, 30, 300);
+            // const chort1 = this.chorts.get(800, 700, "chort");
+            // chort1.setProperties(30, 50, 200);
+            // const chort2 = this.chorts.get(800, 500, "chort");
+            // chort2.setProperties(30, 75, 250);
+            // const chort3 = this.chorts.get(1000, 700, "chort");
+            // chort3.setProperties(30, 100, 200);
+            // const chort4 = this.chorts.get(800, 1000, "chort");
+            // chort4.setProperties(30, 30, 300);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the chorts target x and y change

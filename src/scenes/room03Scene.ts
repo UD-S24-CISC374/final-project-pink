@@ -17,6 +17,9 @@ class room03Scene extends Phaser.Scene {
     private keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group;
+    private chest: Phaser.Physics.Arcade.Sprite;
+    private chestZone: Phaser.GameObjects.Zone;
+    private chestOpened: boolean = false;
     constructor() {
         super({ key: "room03Scene" });
     }
@@ -69,16 +72,22 @@ class room03Scene extends Phaser.Scene {
                 },
             });
 
-            const chort1 = this.chorts.get(550, 400, "chort");
-            chort1.setProperties(30, 50, 200);
-            const chort2 = this.chorts.get(400, 400, "chort");
-            chort2.setProperties(30, 75, 250);
-            const chort3 = this.chorts.get(300, 500, "chort");
-            chort3.setProperties(30, 100, 200);
-            const chort4 = this.chorts.get(400, 200, "chort");
-            chort4.setProperties(30, 30, 300);
-            const chort5 = this.chorts.get(400, 600, "chort");
-            chort5.setProperties(30, 30, 300);
+            // const chort1 = this.chorts.get(550, 400, "chort");
+            // chort1.setProperties(30, 50, 200);
+            // const chort2 = this.chorts.get(400, 400, "chort");
+            // chort2.setProperties(30, 75, 250);
+            // const chort3 = this.chorts.get(300, 500, "chort");
+            // chort3.setProperties(30, 100, 200);
+            // const chort4 = this.chorts.get(400, 200, "chort");
+            // chort4.setProperties(30, 30, 300);
+            // const chort5 = this.chorts.get(400, 600, "chort");
+            // chort5.setProperties(30, 30, 300);
+
+            this.chest = this.physics.add.sprite(720, 200, "wood_chest");
+            this.chest.setImmovable(true);
+            this.chest.anims.play("wood_chest_closed");
+            this.chestZone = this.add.zone(700, 200, 50, 40);
+            this.physics.world.enable(this.chestZone);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the chorts target x and y change
@@ -181,6 +190,19 @@ class room03Scene extends Phaser.Scene {
 
                 return true;
             });
+
+            this.physics.add.collider(this.player, this.chest); //collider for player and chest
+            this.physics.add.collider(this.chorts, this.chest); //collider for chorts and chest
+
+            this.physics.add.collider(
+                //player bullets
+                this.bullets,
+                this.chest,
+                (object1, object2) => {
+                    this.handleBulletTileCollision(object1, object2);
+                }
+            );
+
             //camera follows player
             this.scene.run("game-ui", { gameState: this.gameState });
             this.scene.bringToTop("game-ui");
@@ -196,6 +218,45 @@ class room03Scene extends Phaser.Scene {
             Phaser.Input.Keyboard.KeyCodes.TAB
         );
         tabKey?.on("down", this.switchScene, this);
+
+        if (this.input.keyboard) {
+            this.input.keyboard.on("keydown-E", () => {
+                //opens chest and creates gun on e press
+                // Check if the player is overlapping with the collision area
+                if (
+                    !this.chestOpened &&
+                    !this.gameState.eButtonPressed &&
+                    this.player &&
+                    Phaser.Geom.Intersects.RectangleToRectangle(
+                        this.player.getBounds(),
+                        this.chestZone.getBounds()
+                    )
+                ) {
+                    this.chestOpened = true;
+                    this.gameState.eButtonPressed = true;
+                    setTimeout(() => {
+                        this.gameState.eButtonPressed = false;
+                    }, 500);
+
+                    this.chest.anims.play("wood_chest_open");
+
+                    this.gameState.player.health = 7; //increasing player health by one
+                    this.gameState.player.hearts = 7;
+                    this.scene.run("game-ui", {
+                        gameState: this.gameState,
+                    });
+
+                    const tip1 = [
+                        "You have gained another heart, Remember to use mv player room04!",
+                    ];
+                    this.scene.bringToTop("MessageScene");
+                    this.scene.run("MessageScene", {
+                        messages: tip1, // Pass the messages array to the message scene
+                        gameState: this.gameState,
+                    });
+                }
+            });
+        }
 
         //changes current gun displayed and stops shooting on mouse wheel scroll
         this.input.on(
