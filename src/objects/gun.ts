@@ -89,7 +89,6 @@ export class Gun {
         let shotsFired = 0;
 
         this.reload(); //for now just let the player shoot all the time until the command works, then use this to update and remove here
-        let totalDelay = numShots * shotDelay;
         for (let i = 0; i < numShots; i++) {
             // Calculate the delay for this shot
             let delay = i * shotDelay;

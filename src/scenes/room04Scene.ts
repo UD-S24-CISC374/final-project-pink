@@ -6,7 +6,6 @@ import Chort from "../objects/chort";
 import { gameState } from "../objects/gameState";
 import ConsoleScene from "./consoleScene";
 import { Bullet } from "../objects/bullet";
-import { shootBullets } from "../util/shootBullets";
 import { KeyboardManager } from "../util/keyboardManager";
 import { sceneEvents } from "../util/eventCenter";
 import { Fireball } from "../objects/fireball";
@@ -59,6 +58,9 @@ class room04Scene extends Phaser.Scene {
                 this.gameState
             );
             this.keyboardManager = new KeyboardManager(this.characterMovement);
+
+            this.gameState.player.addAllGunsToScene();
+            this.gameState.player.setAllGunsInvisibleExceptCurrent();
 
             this.chorts = this.physics.add.group({
                 classType: Chort,
@@ -193,6 +195,52 @@ class room04Scene extends Phaser.Scene {
             Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
         );
         slashKey?.on("down", this.switchScene, this);
+
+        //changes current gun displayed and stops shooting on mouse wheel scroll
+        this.input.on(
+            "wheel",
+            (
+                _pointer: Phaser.Input.Pointer,
+                _gameObjects: Phaser.GameObjects.GameObject[],
+                deltaX: number,
+                deltaY: number
+            ) => {
+                if (
+                    this.gameState.player.currentGun &&
+                    this.gameState.player.guns.length > 1
+                ) {
+                    this.gameState.player.currentGun.isReloaded = false;
+                }
+                // Check for mouse wheel up event to switch to the next gun
+                if (deltaY < 0) {
+                    this.gameState.player.changeGunIndex(1); // Move to the next gun
+                }
+                // Check for mouse wheel down event to switch to the previous gun
+                else if (deltaY > 0) {
+                    this.gameState.player.changeGunIndex(-1); // Move to the previous gun
+                }
+            }
+        );
+        //also allows for gun changing on left and right arrow keys
+        this.input.keyboard?.on("keydown-RIGHT", () => {
+            if (
+                this.gameState.player.currentGun &&
+                this.gameState.player.guns.length > 1
+            ) {
+                this.gameState.player.currentGun.isReloaded = false;
+                this.gameState.player.changeGunIndex(1); // Move to the next gun
+            }
+        });
+
+        this.input.keyboard?.on("keydown-LEFT", () => {
+            if (
+                this.gameState.player.currentGun &&
+                this.gameState.player.guns.length > 1
+            ) {
+                this.gameState.player.currentGun.isReloaded = false;
+                this.gameState.player.changeGunIndex(-1); // Move to the previous gun
+            }
+        });
     }
     private switchScene() {
         console.log("it worked");
@@ -313,19 +361,12 @@ class room04Scene extends Phaser.Scene {
                 this.gameState.leftButtonPressed = true;
             } else if (
                 this.gameState.leftButtonPressed &&
-                this.input.activePointer.leftButtonReleased()
+                this.input.activePointer.leftButtonReleased() &&
+                !this.gameState.isDodging
             ) {
-                shootBullets(
-                    this,
-                    this.bullets!,
-                    this.player!,
-                    6, //shots per round
-                    500, //milliseconds between shots
-                    "bullet_blue" //image texture for bullet
-                );
+                this.gameState.player.currentGun?.shoot();
                 this.gameState.leftButtonPressed = false;
             }
-
             if (
                 this.input.activePointer.rightButtonDown() &&
                 !this.gameState.isDodging
@@ -344,9 +385,18 @@ class room04Scene extends Phaser.Scene {
                 this.gameState.rightButtonPressed = false;
             }
 
+            if (this.gameState.isDodging && this.gameState.player.currentGun) {
+                this.gameState.player.currentGun.isReloaded = false;
+            }
+
             // Allow normal player movement only if not dodging
-            if (this.gameState.player.health > 0)
+            if (this.gameState.player.health > 0) {
                 this.keyboardManager.handleInput();
+                this.gameState.player.currentGun?.updatePosition(
+                    this.keyboardManager.lastHorizontalDirection,
+                    this.keyboardManager.lastVerticalDirection
+                );
+            }
         }
     }
 }

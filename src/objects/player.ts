@@ -21,6 +21,12 @@ class Player {
         this.guns = [];
     }
 
+    addAllGunsToScene() {
+        this.guns.forEach((gun) => {
+            gun.addToScene();
+        });
+    }
+
     getCurrentGunDamage(): number {
         if (this.currentGun) {
             return this.currentGun.bulletDamage;
