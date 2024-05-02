@@ -6,10 +6,10 @@ import Chort from "../objects/chort";
 import { gameState } from "../objects/gameState";
 import ConsoleScene from "./consoleScene";
 import { Bullet } from "../objects/bullet";
-import { shootBullets } from "../util/shootBullets";
 import { KeyboardManager } from "../util/keyboardManager";
 import { sceneEvents } from "../util/eventCenter";
 import { Fireball } from "../objects/fireball";
+import { Gun } from "../objects/gun";
 
 class room01Scene extends Phaser.Scene {
     private gameState: gameState;
@@ -18,6 +18,11 @@ class room01Scene extends Phaser.Scene {
     private keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
     private bullets?: Phaser.Physics.Arcade.Group;
+    private chest: Phaser.Physics.Arcade.Sprite;
+    private chestZone: Phaser.GameObjects.Zone;
+    private chestOpened: boolean = false;
+    private gunHitBox?: Phaser.GameObjects.Rectangle;
+    private defaultGunBig?: Gun;
     constructor() {
         super({ key: "room01Scene" });
     }
@@ -52,6 +57,7 @@ class room01Scene extends Phaser.Scene {
             }
             this.player = this.physics.add.sprite(800, 900, "robot_idle");
             this.gameState.player.player = this.player; //absolutely need this
+
             this.characterMovement = new CharacterMovement(
                 this.player,
                 this,
@@ -59,6 +65,12 @@ class room01Scene extends Phaser.Scene {
                 this.gameState
             );
             this.keyboardManager = new KeyboardManager(this.characterMovement);
+
+            this.chest = this.physics.add.sprite(700, 1025, "wood_chest");
+            this.chest.setImmovable(true);
+            this.chest.anims.play("wood_chest_closed");
+            this.chestZone = this.add.zone(700, 1025, 50, 40);
+            this.physics.world.enable(this.chestZone);
 
             this.chorts = this.physics.add.group({
                 classType: Chort,
@@ -98,6 +110,22 @@ class room01Scene extends Phaser.Scene {
                 runChildUpdate: true,
             });
 
+            const defaultGun = new Gun(
+                this,
+                this.gameState,
+                this.player,
+                this.bullets, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
+                "gun_default", //gun texture
+                "bullet_blue", //bullet texture (same as from this.bullets)
+                300, //bullet speed
+                9, //bullet damage
+                5, //shots per round
+                600 //miliseconds between shots
+            );
+            defaultGun.addToScene();
+            defaultGun.reload();
+            this.gameState.player.addGun(defaultGun);
+
             if (walls) {
                 this.physics.add.collider(this.player, walls);
                 this.physics.add.collider(this.chorts, walls);
@@ -130,6 +158,7 @@ class room01Scene extends Phaser.Scene {
                     }
                 );
             }
+
             // Collision between player and chorts
             this.physics.add.collider(
                 this.player,
@@ -148,7 +177,9 @@ class room01Scene extends Phaser.Scene {
                 this.chorts,
                 (bullet, chort) => {
                     // Decrease chort health when hit by player bullets
-                    (chort as Chort).takeDamage(10); // Assuming each bullet does 10 damage
+                    (chort as Chort).takeDamage(
+                        this.gameState.player.getCurrentGunDamage()
+                    ); // damages chorts with current guns damage
                     // Destroy the bullet
                     bullet.destroy();
                 }
@@ -174,6 +205,38 @@ class room01Scene extends Phaser.Scene {
 
                 return true;
             });
+
+            this.physics.add.collider(this.player, this.chest); //collider for player and chest
+            this.physics.add.collider(this.chorts, this.chest); //collider for chorts and chest
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                // Check if fireballs group exists
+                this.physics.add.collider(
+                    this.chest as Phaser.GameObjects.Sprite,
+                    currentChort.fireballs, // Collider between chest sprite and fireballs
+                    (chest, fireball) => {
+                        this.handleSpriteEnemyFireballCollision(
+                            this.chest as
+                                | Phaser.Types.Physics.Arcade.GameObjectWithBody
+                                | Phaser.Tilemaps.Tile, //for type resolution...
+                            fireball
+                        );
+                    },
+                    undefined,
+                    this
+                );
+
+                return true;
+            });
+            //collider for player bullets and chest
+            this.physics.add.collider(
+                //player bullets
+                this.bullets,
+                this.chest,
+                (object1, object2) => {
+                    this.handleBulletTileCollision(object1, object2);
+                }
+            );
             //camera follows player
             this.scene.run("game-ui", { gameState: this.gameState });
             this.scene.bringToTop("game-ui");
@@ -185,10 +248,150 @@ class room01Scene extends Phaser.Scene {
                 this.player.height * 0.8
             );
         }
+        //starting console scene
         const slashKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.FORWARD_SLASH
         );
         slashKey?.on("down", this.switchScene, this);
+
+        if (this.input.keyboard) {
+            this.input.keyboard.on("keydown-E", () => {
+                //opens chest and creates gun on e press
+                // Check if the player is overlapping with the collision area
+                if (
+                    !this.chestOpened &&
+                    !this.gameState.eButtonPressed &&
+                    this.player &&
+                    Phaser.Geom.Intersects.RectangleToRectangle(
+                        this.player.getBounds(),
+                        this.chestZone.getBounds()
+                    )
+                ) {
+                    this.chestOpened = true;
+                    this.gameState.eButtonPressed = true;
+                    setTimeout(() => {
+                        this.gameState.eButtonPressed = false;
+                    }, 500);
+
+                    this.chest.anims.play("wood_chest_open");
+                    this.defaultGunBig = new Gun(
+                        this,
+                        this.gameState,
+                        this.player,
+                        this.bullets!, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
+                        "gun_default_big", //gun texture
+                        "bullet_blue", //bullet texture (same as from this.bullets)
+                        300, //bullet speed
+                        4, //bullet damage
+                        12, //shots per round
+                        250 //miliseconds between shots
+                    );
+                    this.defaultGunBig.addToScene();
+                    this.defaultGunBig.reload();
+                    this.defaultGunBig.setVisible();
+                    this.gunHitBox = this.add.rectangle(
+                        this.defaultGunBig.gunImage.x,
+                        this.defaultGunBig.gunImage.y,
+                        this.defaultGunBig.gunImage.width,
+                        this.defaultGunBig.gunImage.height
+                    );
+                    this.physics.add.existing(this.gunHitBox);
+                    this.gunHitBox.setOrigin(0.5, 0.5);
+                    this.gunHitBox.setVisible(false); // Hide the hitbox
+                    const tip1 = ["Press 'e' on the gun to pick it up!"];
+                    this.scene.bringToTop("MessageScene");
+                    this.scene.run("MessageScene", {
+                        messages: tip1, // Pass the messages array to the message scene
+                        gameState: this.gameState,
+                    });
+                }
+            });
+            this.input.keyboard.on("keydown-E", () => {
+                //adds gun to inventory when pressing e on it
+                if (this.gunHitBox) {
+                    // Check if the player is overlapping with the collision area
+                    if (
+                        this.gameState.player.guns.length == 1 &&
+                        this.chestOpened &&
+                        !this.gameState.eButtonPressed &&
+                        this.player &&
+                        Phaser.Geom.Intersects.RectangleToRectangle(
+                            this.player.getBounds(),
+                            this.gunHitBox.getBounds()
+                        )
+                    ) {
+                        this.gameState.eButtonPressed = true;
+                        setTimeout(() => {
+                            this.gameState.eButtonPressed = false;
+                        }, 500);
+
+                        // Destroy the hitbox after a short delay
+                        setTimeout(() => {
+                            this.gunHitBox?.destroy();
+                        }, 1000);
+                        if (this.defaultGunBig)
+                            this.gameState.player.addGun(this.defaultGunBig);
+
+                        this.gameState.player.setAllGunsInvisibleExceptCurrent();
+                        const tip2 = [
+                            "Your new gun has been added to your inventory.",
+                            "New guns always come fully loaded, give it a shoot!",
+                            "Use the scroll wheel or arrow keys to switch to your other guns.",
+                            "DEV NOTE - eventually we want to make switching guns a command",
+                        ];
+                        this.scene.run("MessageScene", {
+                            messages: tip2, // Pass the messages array to the message scene
+                            gameState: this.gameState,
+                        });
+                    }
+                }
+            });
+        }
+        //changes current gun displayed and stops shooting on mouse wheel scroll
+        this.input.on(
+            "wheel",
+            (
+                _pointer: Phaser.Input.Pointer,
+                _gameObjects: Phaser.GameObjects.GameObject[],
+                deltaX: number,
+                deltaY: number
+            ) => {
+                if (
+                    this.gameState.player.currentGun &&
+                    this.gameState.player.guns.length > 1
+                ) {
+                    this.gameState.player.currentGun.isReloaded = false;
+                }
+                // Check for mouse wheel up event to switch to the next gun
+                if (deltaY < 0) {
+                    this.gameState.player.changeGunIndex(1); // Move to the next gun
+                }
+                // Check for mouse wheel down event to switch to the previous gun
+                else if (deltaY > 0) {
+                    this.gameState.player.changeGunIndex(-1); // Move to the previous gun
+                }
+            }
+        );
+        //also allows for gun changing on left and right arrow keys
+        this.input.keyboard?.on("keydown-RIGHT", () => {
+            if (
+                this.gameState.player.currentGun &&
+                this.gameState.player.guns.length > 1
+            ) {
+                this.gameState.player.currentGun.isReloaded = false;
+                this.gameState.player.changeGunIndex(1); // Move to the next gun
+            }
+        });
+
+        this.input.keyboard?.on("keydown-LEFT", () => {
+            if (
+                this.gameState.player.currentGun &&
+                this.gameState.player.guns.length > 1
+            ) {
+                this.gameState.player.currentGun.isReloaded = false;
+                this.gameState.player.changeGunIndex(-1); // Move to the previous gun
+            }
+        });
     }
     private switchScene() {
         console.log("it worked");
@@ -204,6 +407,9 @@ class room01Scene extends Phaser.Scene {
         this.characterMovement.stopX();
         this.characterMovement.stopY();
     }
+
+    //helper functions for colliders methods, need to make a seperate util file eventually
+
     private handleBulletTileCollision(
         obj1:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
@@ -282,6 +488,27 @@ class room01Scene extends Phaser.Scene {
         this.keyboardManager.handlePlayerHit();
     }
 
+    //basically the same as the one above, but player takes no damage
+    private handleSpriteEnemyFireballCollision(
+        sprite:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile,
+        fireball:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Tilemaps.Tile
+    ) {
+        if (fireball instanceof Fireball) {
+            fireball.disableBody(true, true);
+            const explosion = this.add
+                .sprite(fireball.x, fireball.y, "fireball_explode")
+                .play("fireball_explode");
+            explosion.once("animationcomplete", () => {
+                explosion.destroy(); // Destroy the explosion sprite when animation completes
+                fireball.destroy();
+            });
+        }
+    }
+
     private handlePlayerEnemyCollision() {
         //checks if i frames are present or if player is dodging (no damage on either case)
         if (
@@ -295,6 +522,7 @@ class room01Scene extends Phaser.Scene {
             );
         }
     }
+
     update() {
         // Check for keyboard input and move the player accordingly
         if (this.gameState.player.health <= 0) {
@@ -303,22 +531,15 @@ class room01Scene extends Phaser.Scene {
             // You may also want to perform other actions, like respawning the player or ending the game
         } else {
             // Player is not dead, can move
-            // Check for keyboard input and move the player accordingly
 
             if (this.input.activePointer.leftButtonDown()) {
                 this.gameState.leftButtonPressed = true;
             } else if (
                 this.gameState.leftButtonPressed &&
-                this.input.activePointer.leftButtonReleased()
+                this.input.activePointer.leftButtonReleased() &&
+                !this.gameState.isDodging
             ) {
-                shootBullets(
-                    this,
-                    this.bullets!,
-                    this.player!,
-                    6, //shots per round
-                    500, //milliseconds between shots
-                    "bullet_blue" //image texture for bullet
-                );
+                this.gameState.player.currentGun?.shoot();
                 this.gameState.leftButtonPressed = false;
             }
 
@@ -340,9 +561,18 @@ class room01Scene extends Phaser.Scene {
                 this.gameState.rightButtonPressed = false;
             }
 
+            if (this.gameState.isDodging && this.gameState.player.currentGun) {
+                this.gameState.player.currentGun.isReloaded = false;
+            }
+
             // Allow normal player movement only if not dodging
-            if (this.gameState.player.health > 0)
+            if (this.gameState.player.health > 0) {
                 this.keyboardManager.handleInput();
+                this.gameState.player.currentGun?.updatePosition(
+                    this.keyboardManager.lastHorizontalDirection,
+                    this.keyboardManager.lastVerticalDirection
+                );
+            }
         }
     }
 }

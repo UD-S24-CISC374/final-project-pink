@@ -161,8 +161,12 @@ The aesthetic of our game is pixel art dungeon: dark-colored and weathered brick
 -   Player model (possibility of adding a character select screen time permitting)
 -   [Robot Player](https://www.spriters-resource.com/pc_computer/enterthegungeon/sheet/155565/)
 -   Basic enemy (possibility of adding more variety of enemies based on boss completion time permitting)
+-   [Chort, Demon Enemy Sprites](https://0x72.itch.io/dungeontileset-ii)
+-   Enemy Attacks
+-   [Fireball](https://msfrantz.itch.io/free-fire-ball-pixel-art)
 -   Boss enemy (possibility of adding more bosses time permitting)
 -   Tutorial NPC - a similar model to the player that will walk to them through the mechanics of the game
+    [Tutorial NPC](https://pedrodis.itch.io/theforestcharacterpack2)
 -   Git Cat NPC - a cat that will give the player more commands to input that will allow for saving progress. It will spawn after the first boss is defeated.
 -   Textures:
     -   [Pixel Art Dungeon Tiles](https://mythic-nemesis.itch.io/pixel-dungeon-assets)
