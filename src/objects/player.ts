@@ -21,6 +21,24 @@ class Player {
         this.guns = [];
     }
 
+    changeGunScenes(newScene: Phaser.Scene) {
+        this.guns.forEach((gun) => {
+            gun.scene = newScene;
+        });
+    }
+
+    changeGunPlayer(player: Phaser.Physics.Arcade.Sprite) {
+        this.guns.forEach((gun) => {
+            gun.setPlayer(player);
+        });
+    }
+
+    changeBulletsGroup(bullets: Phaser.Physics.Arcade.Group) {
+        this.guns.forEach((gun) => {
+            gun.setBullets(bullets);
+        });
+    }
+
     addAllGunsToScene() {
         this.guns.forEach((gun) => {
             gun.addToScene();

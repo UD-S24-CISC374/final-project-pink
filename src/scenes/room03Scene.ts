@@ -59,9 +59,6 @@ class room03Scene extends Phaser.Scene {
             );
             this.keyboardManager = new KeyboardManager(this.characterMovement);
 
-            this.gameState.player.addAllGunsToScene();
-            this.gameState.player.setAllGunsInvisibleExceptCurrent();
-
             this.chorts = this.physics.add.group({
                 classType: Chort,
                 createCallback: (go) => {
@@ -101,6 +98,12 @@ class room03Scene extends Phaser.Scene {
                 maxSize: 100,
                 runChildUpdate: true,
             });
+            //all of this to load the guns back onto the scene
+            this.gameState.player.changeGunPlayer(this.player);
+            this.gameState.player.changeBulletsGroup(this.bullets);
+            this.gameState.player.changeGunScenes(this);
+            this.gameState.player.addAllGunsToScene();
+            this.gameState.player.setAllGunsInvisibleExceptCurrent();
 
             if (walls) {
                 this.physics.add.collider(this.player, walls);

@@ -40,5 +40,8 @@ export class gameState {
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
         this.eButtonPressed = false;
+        if (this.player.currentGun) {
+            this.player.currentGun.isReloaded = false;
+        }
     }
 }
