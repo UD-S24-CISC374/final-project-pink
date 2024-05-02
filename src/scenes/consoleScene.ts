@@ -111,6 +111,7 @@ class ConsoleScene extends Phaser.Scene {
         this.scene.resume(this.gameState.curRoom);
         this.scene.bringToTop(this.gameState.curRoom);
         this.scene.bringToTop("game-ui");
+        this.scene.bringToTop("MessageScene");
         this.scene.pause("ConsoleScene");
     }
     makeVisible() {
@@ -234,7 +235,6 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.stop(this.gameState.curRoom);
 
                     //reset gamestate
-                    this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
 
                     this.gameState.curRoom = "room05Scene";
@@ -268,7 +268,6 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.stop(this.gameState.curRoom);
 
                     //reset gamestate
-                    this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
 
                     this.gameState.curRoom = "room04Scene";
@@ -302,7 +301,6 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.stop(this.gameState.curRoom);
 
                     //reset gamestate
-                    this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
 
                     this.gameState.curRoom = "room03Scene";
@@ -336,7 +334,6 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.stop(this.gameState.curRoom);
 
                     //reset gamestate
-                    this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
 
                     this.gameState.curRoom = "room02Scene";
@@ -371,7 +368,6 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.stop(this.gameState.curRoom);
 
                     //reset gamestate
-                    this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
 
                     this.gameState.curRoom = "room01Scene";
@@ -408,7 +404,6 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.stop(this.gameState.curRoom);
 
                     //reset gamestate
-                    this.gameState.player.healToAmount(5);
                     this.gameState.resetValuesOnSceneSwitch();
                     console.log(this.currentNode, this.currentNode.parentNode);
                     this.gameState.curRoom =

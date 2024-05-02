@@ -103,6 +103,7 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
     }
 
     public takeDamage(damage: number) {
+        this.playDamageAnimation();
         this.health -= damage;
         if (this.health <= 0) {
             this.disableBody(true, true);
@@ -114,6 +115,16 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
                 this.destroy();
             });
         }
+    }
+    private playDamageAnimation() {
+        // Red tint animation
+        this.setTint(0xff0001); // Set player to red tint
+
+        // Set a timeout to revert player appearance after a short duration
+        setTimeout(() => {
+            // Revert player appearance to normal
+            this.clearTint();
+        }, 111); // Red tint duration
     }
 
     preUpdate(t: number, dt: number) {

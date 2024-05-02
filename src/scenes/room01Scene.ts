@@ -23,6 +23,7 @@ class room01Scene extends Phaser.Scene {
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
     private defaultGunBig?: Gun;
+    private allowConsole: boolean = false;
     constructor() {
         super({ key: "room01Scene" });
     }
@@ -59,7 +60,7 @@ class room01Scene extends Phaser.Scene {
             this.gameState.player.player = this.player; //absolutely need this
 
             this.characterMovement = new CharacterMovement(
-                this.player,
+                this.gameState.player.player,
                 this,
                 100,
                 this.gameState
@@ -337,12 +338,17 @@ class room01Scene extends Phaser.Scene {
                             "Your new gun has been added to your inventory.",
                             "New guns always come fully loaded, give it a shoot!",
                             "Use the scroll wheel or arrow keys to switch to your other guns.",
-                            "DEV NOTE - eventually we want to make switching guns a command",
+                            "Press Tab to open your command prompt, and backslash \\ to close it.",
+                            "To get to the next room, type 'mv player room02, and hit enter'",
+                            "You can use the same command with a different room # for other rooms!",
                         ];
                         this.scene.run("MessageScene", {
                             messages: tip2, // Pass the messages array to the message scene
                             gameState: this.gameState,
                         });
+                        setTimeout(() => {
+                            this.allowConsole = true;
+                        }, 5000);
                     }
                 }
             });
@@ -394,20 +400,22 @@ class room01Scene extends Phaser.Scene {
         });
     }
     private switchScene() {
-        console.log("it worked");
-        //this.characterMovement.stopX();
-        //this.characterMovement.stopY();
-        this.scene.setVisible(true, "ConsoleScene");
-        const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
-        this.scene.bringToTop("ConsoleScene");
-        consoleScene.makeVisible();
-        this.scene.run("ConsoleScene", {
-            gameState: this.gameState,
-        });
-        this.scene.pause("room01Scene");
-        sceneEvents.emit("player-opened-console");
-        this.characterMovement.stopX();
-        this.characterMovement.stopY();
+        if (this.allowConsole) {
+            console.log("it worked");
+            //this.characterMovement.stopX();
+            //this.characterMovement.stopY();
+            this.scene.setVisible(true, "ConsoleScene");
+            const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
+            this.scene.bringToTop("ConsoleScene");
+            consoleScene.makeVisible();
+            this.scene.run("ConsoleScene", {
+                gameState: this.gameState,
+            });
+            this.scene.pause("room01Scene");
+            sceneEvents.emit("player-opened-console");
+            this.characterMovement.stopX();
+            this.characterMovement.stopY();
+        }
     }
 
     //helper functions for colliders methods, need to make a seperate util file eventually
@@ -530,6 +538,7 @@ class room01Scene extends Phaser.Scene {
         if (this.gameState.player.health <= 0) {
             // Player is dead, trigger death animation
             this.gameState.player.die();
+            this.scene.pause();
             // You may also want to perform other actions, like respawning the player or ending the game
         } else {
             // Player is not dead, can move

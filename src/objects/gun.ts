@@ -3,7 +3,7 @@ import { Bullet } from "./bullet";
 import { gameState } from "./gameState";
 
 export class Gun {
-    private scene: Phaser.Scene;
+    public scene: Phaser.Scene;
     private gameState: gameState;
     private player: Phaser.Physics.Arcade.Sprite;
     private bullets: Phaser.Physics.Arcade.Group;
@@ -40,6 +40,12 @@ export class Gun {
         this.shotsPerRound = shotsPerRound;
         this.millisecondsBetweenShots = millisecondsBetweenShots;
     }
+    public setPlayer(player: Phaser.Physics.Arcade.Sprite) {
+        this.player = player;
+    }
+    public setBullets(bullets: Phaser.Physics.Arcade.Group) {
+        this.bullets = bullets;
+    }
 
     public reload() {
         //Jacob call this for the reload command, would be this.gameState.player.currentGun.reload() to do it
@@ -47,6 +53,7 @@ export class Gun {
     }
 
     public addToScene() {
+        this.scene;
         // Create the gun image using the texture name
         this.gunImage = this.scene.add.image(
             this.player.x,
