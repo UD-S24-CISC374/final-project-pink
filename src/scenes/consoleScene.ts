@@ -11,7 +11,7 @@ class node {
     nodeName: string;
     parentNode: node | null;
     childNodes: node[] | null;
-    entities: string[] | null;
+    entities: string[];
 }
 
 var room01: node = {
@@ -140,42 +140,44 @@ class ConsoleScene extends Phaser.Scene {
             const inputField = this.consoleText.getChildByID(
                 "consoleInput"
             ) as HTMLInputElement;
-            var newText = inputField.value;
+            var newText = [inputField.value];
             inputField.value = ""; // Clear input field
-            if (!g.match(newText).succeeded()) {
-                newText +=
-                    " : Invalid command. Try using the help command for assistance.";
+            if (!g.match(newText[0]).succeeded()) {
+                newText.push(
+                    "Invalid command. Try using the help command for assistance."
+                );
             } else {
-                var textSplit = newText.split(" ");
+                var textSplit = newText[0].split(" ");
                 textSplit = textSplit.filter((str) => str !== "");
                 console.log(textSplit);
-                this.executeCommand(textSplit);
+                newText.push(...this.executeCommand(textSplit)); // returns a list and pushes it to newText
             }
             //function call here
 
             const textBlockDiv = document.getElementById("textBlock");
             if (textBlockDiv) {
-                if (this.numCommands == 11) {
-                    const newParagraph = document.createElement("p");
-                    newParagraph.textContent = newText;
-                    while (textBlockDiv.firstChild) {
-                        textBlockDiv.removeChild(textBlockDiv.firstChild);
+                for (var i = 0; i < newText.length; i++) {
+                    if (this.numCommands == 11) {
+                        const newParagraph = document.createElement("p");
+                        newParagraph.textContent = newText[i];
+                        if (textBlockDiv.firstChild) {
+                            textBlockDiv.removeChild(textBlockDiv.firstChild);
+                        }
+                        textBlockDiv.appendChild(newParagraph);
+                    } else {
+                        // Append the new text to the existing content
+                        const newParagraph = document.createElement("p");
+                        newParagraph.textContent = newText[i];
+                        textBlockDiv.appendChild(newParagraph);
+                        this.numCommands++;
                     }
-                    textBlockDiv.appendChild(newParagraph);
-                    this.numCommands = 1;
-                } else {
-                    // Append the new text to the existing content
-                    const newParagraph = document.createElement("p");
-                    newParagraph.textContent = newText;
-                    textBlockDiv.appendChild(newParagraph);
-                    this.numCommands++;
                 }
             }
         }
     }
     update() {}
 
-    private executeCommand(command: string[]) {
+    private executeCommand(command: string[]): string[] {
         if (command[0] == "cd") {
             const pathList = command[1].split("/");
             console.log(pathList);
@@ -184,7 +186,7 @@ class ConsoleScene extends Phaser.Scene {
                 command[1].includes(".c") ||
                 command[1].includes(".txt")
             ) {
-                console.log("location is not a directory"); //add this to output
+                return ["location is not a directory"]; //add this to output
             }
             pathList.forEach((element: string) => {
                 console.log(element);
@@ -192,7 +194,7 @@ class ConsoleScene extends Phaser.Scene {
                     if (this.currentNode.parentNode != null) {
                         this.currentNode = this.currentNode.parentNode;
                     } else {
-                        console.log("already in root directory"); // add this to output
+                        return ["already in root directory"]; // add this to output
                     }
                 } else if (element == ".") {
                     console.log("do nothing");
@@ -214,10 +216,10 @@ class ConsoleScene extends Phaser.Scene {
                 console.log("moving");
                 if (pathListTo[pathListTo.length - 1] == "room05") {
                     this.currentNode.entities =
-                        this.currentNode.entities?.filter(
+                        this.currentNode.entities.filter(
                             (str) => str !== "player"
                         ) as string[];
-                    room05.entities?.push("player");
+                    room05.entities.push("player");
                     this.currentNode = room05;
                     //hide console
                     console.log(this.gameState.curRoom);
@@ -247,10 +249,10 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room04") {
                     this.currentNode.entities =
-                        this.currentNode.entities?.filter(
+                        this.currentNode.entities.filter(
                             (str) => str !== "player"
                         ) as string[];
-                    room04.entities?.push("player");
+                    room04.entities.push("player");
                     this.currentNode = room04;
                     //hide console
                     console.log(this.gameState.curRoom);
@@ -280,10 +282,10 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room03") {
                     this.currentNode.entities =
-                        this.currentNode.entities?.filter(
+                        this.currentNode.entities.filter(
                             (str) => str !== "player"
                         ) as string[];
-                    room03.entities?.push("player");
+                    room03.entities.push("player");
                     this.currentNode = room03;
                     //hide console
                     console.log(this.gameState.curRoom);
@@ -313,10 +315,10 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room02") {
                     this.currentNode.entities =
-                        this.currentNode.entities?.filter(
+                        this.currentNode.entities.filter(
                             (str) => str !== "player"
                         ) as string[];
-                    room02.entities?.push("player");
+                    room02.entities.push("player");
                     this.currentNode = room02;
                     //hide console
                     console.log(this.gameState.curRoom);
@@ -347,10 +349,10 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room01") {
                     this.currentNode.entities =
-                        this.currentNode.entities?.filter(
+                        this.currentNode.entities.filter(
                             (str) => str !== "player"
                         ) as string[];
-                    room01.entities?.push("player");
+                    room01.entities.push("player");
                     this.currentNode = room01;
                     //hide console
                     console.log(this.gameState.curRoom);
@@ -380,11 +382,11 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "..") {
                     this.currentNode.entities =
-                        this.currentNode.entities?.filter(
+                        this.currentNode.entities.filter(
                             (str) => str !== "player"
                         ) as string[];
                     if (this.currentNode.parentNode) {
-                        this.currentNode.parentNode.entities?.push("player");
+                        this.currentNode.parentNode.entities.push("player");
                         this.currentNode = this.currentNode.parentNode;
                         //(this.currentNode.parentNode?.nodeName);
                     }
@@ -416,6 +418,8 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop(this.gameState.curRoom);
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
+                } else {
+                    console.log("destination not found");
                 }
             } else {
                 console.log("you do not have permission to move this");
@@ -429,12 +433,12 @@ class ConsoleScene extends Phaser.Scene {
                     pathList.length == 1 ||
                     (pathList.length == 2 && pathList[0] == ".")
                 ) {
-                    if (!this.currentNode.entities?.includes("a.out")) {
-                        this.currentNode.entities?.push("a.out");
+                    if (!this.currentNode.entities.includes("a.out")) {
+                        this.currentNode.entities.push("a.out");
                     }
                 }
             } else {
-                console.log("Err cannot compile a non c file."); // add to output
+                return ["Err cannot compile a non c file."]; // add to output
             }
             console.log(pathList);
         } else if (command[0] == "./") {
@@ -453,20 +457,31 @@ class ConsoleScene extends Phaser.Scene {
         } else if (command[0] == "rm") {
             const pathList = command[1].split("/");
             if (pathList[pathList.length - 1] == "bullets.c") {
-                console.log("deleting bullets");
+                return ["deleting bullets"];
             } else {
-                console.log("you do not have permission to delete this"); // add this to output
+                return ["you do not have permission to delete this"]; // add this to output
             }
         } else if (command[0] == "ls") {
+            var tempList: string[] = [];
             this.currentNode.childNodes?.forEach((item) => {
-                console.log(item.nodeName); // add to output
+                tempList.push(item.nodeName); // add to output
             });
-            console.log(this.currentNode.entities); // add to output
+            tempList.push(...this.currentNode.entities); // add to output
+            return tempList;
         } else if (command[0] == "help") {
-            //implement later
-            console.log("HELP");
+            return [
+                "usable commands include:",
+                "cd",
+                "mv",
+                "gcc",
+                "./",
+                "rm",
+                "cat (not implemented yet)",
+                "press '\\' to exit the terminal",
+            ];
         }
-        console.log(this.currentNode);
+        //console.log(this.currentNode);
+        return [];
     }
 }
 export default ConsoleScene;
