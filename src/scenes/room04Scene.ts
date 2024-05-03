@@ -72,18 +72,18 @@ class room04Scene extends Phaser.Scene {
                 },
             });
 
-            // const chort = this.chorts.get(600, 500, "chort");
-            // chort.setProperties(30, 75, 250);
-            // const chort2 = this.chorts.get(400, 400, "chort");
-            // chort2.setProperties(30, 75, 250);
-            // const chort3 = this.chorts.get(300, 500, "chort");
-            // chort3.setProperties(30, 100, 200);
-            // const chort4 = this.chorts.get(400, 200, "chort");
-            // chort4.setProperties(30, 30, 300);
-            // const chort5 = this.chorts.get(400, 600, "chort");
-            // chort5.setProperties(30, 30, 300);
-            // const chort6 = this.chorts.get(725, 100, "chort");
-            // chort6.setProperties(30, 30, 300);
+            const chort = this.chorts.get(600, 500, "chort");
+            chort.setProperties(30, 75, 250);
+            const chort2 = this.chorts.get(400, 400, "chort");
+            chort2.setProperties(30, 75, 250);
+            const chort3 = this.chorts.get(300, 500, "chort");
+            chort3.setProperties(30, 100, 200);
+            const chort4 = this.chorts.get(400, 200, "chort");
+            chort4.setProperties(30, 30, 300);
+            const chort5 = this.chorts.get(400, 600, "chort");
+            chort5.setProperties(30, 30, 300);
+            const chort6 = this.chorts.get(725, 100, "chort");
+            chort6.setProperties(30, 30, 300);
 
             this.chest = this.physics.add.sprite(720, 25, "wood_chest");
             this.chest.setImmovable(true);
