@@ -241,6 +241,7 @@ class room01Scene extends Phaser.Scene {
             //camera follows player
             this.scene.run("game-ui", { gameState: this.gameState });
             this.scene.bringToTop("game-ui");
+            this.scene.bringToTop("HelpButton");
             this.cameras.main.startFollow(this.player, true);
 
             //decreases player hitbox size
@@ -339,8 +340,8 @@ class room01Scene extends Phaser.Scene {
                             "New guns always come fully loaded, give it a shoot!",
                             "Use the scroll wheel or arrow keys to switch to your other guns.",
                             "Press Tab to open your command prompt, and backslash \\ to close it.",
-                            "To get to the next room, type 'mv player room02, and hit enter'",
-                            "You can use the same command with a different room # for other rooms!",
+                            "To get to the next room, type 'mv player room02' and hit enter",
+                            "Change the room # for access to other rooms!",
                         ];
                         this.scene.run("MessageScene", {
                             messages: tip2, // Pass the messages array to the message scene

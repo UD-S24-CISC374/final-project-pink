@@ -24,8 +24,13 @@ class LobbyScene extends Phaser.Scene {
     private gameState: gameState;
     private npc: Phaser.Physics.Arcade.Sprite;
     private npcZone: Phaser.GameObjects.Zone;
+    private gameNpc: Phaser.Physics.Arcade.Sprite;
+    private gameNpcZone: Phaser.GameObjects.Zone;
     private eToInteractBubble: Phaser.GameObjects.Image;
     private talkingBubble: Phaser.GameObjects.Image;
+    private eToInteractBubble2: Phaser.GameObjects.Image;
+    private talkingBubble2: Phaser.GameObjects.Image;
+    private canStart: boolean = false;
 
     constructor() {
         super({ key: "LobbyScene" });
@@ -81,6 +86,8 @@ class LobbyScene extends Phaser.Scene {
 
             this.npc = this.physics.add.sprite(450, 300, "lobby_npc");
             this.npc.anims.play("npc_idle", true);
+            this.gameNpc = this.physics.add.sprite(180, 130, "game_npc");
+            this.gameNpc.anims.play("game_npc_idle", true);
 
             //to see walls highlighted on debugging
             const debugGraphics = this.add.graphics().setAlpha(0.7);
@@ -135,6 +142,7 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.player, walls);
                 this.physics.add.collider(this.chorts, walls);
                 this.physics.add.collider(this.npc, walls);
+                this.physics.add.collider(this.gameNpc, walls);
                 this.physics.add.collider(
                     //player bullets
                     this.bullets,
@@ -149,6 +157,8 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.player, structs);
                 this.physics.add.collider(this.chorts, structs);
                 this.physics.add.collider(this.npc, structs);
+                this.physics.add.collider(this.gameNpc, structs);
+
                 this.physics.add.collider(
                     this.bullets,
                     structs,
@@ -163,6 +173,8 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.player, decor);
                 this.physics.add.collider(this.chorts, decor);
                 this.physics.add.collider(this.npc, decor);
+                this.physics.add.collider(this.gameNpc, decor);
+
                 this.physics.add.collider(
                     //player bullets
                     this.bullets,
@@ -177,18 +189,20 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.chorts, floor);
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
-                    this.gameState.curRoom = "room01Scene";
-                    this.events.off("player-moved");
-                    sceneEvents.removeAllListeners();
-                    this.scene.stop("game-ui");
-                    this.gameState.player.healToAmount(5);
-                    this.gameState.resetValuesOnSceneSwitch();
-                    this.gameState.player.guns = [];
-                    this.gameState.player.currentGun = undefined;
-                    this.scene.start("room01Scene", {
-                        gameState: this.gameState,
-                    });
-                    this.scene.stop();
+                    if (this.canStart) {
+                        this.gameState.curRoom = "room01Scene";
+                        this.events.off("player-moved");
+                        sceneEvents.removeAllListeners();
+                        this.scene.stop("game-ui");
+                        this.gameState.player.healToAmount(5);
+                        this.gameState.resetValuesOnSceneSwitch();
+                        this.gameState.player.guns = [];
+                        this.gameState.player.currentGun = undefined;
+                        this.scene.start("room01Scene", {
+                            gameState: this.gameState,
+                        });
+                        this.scene.stop();
+                    }
                 });
             }
             // Collision between player and chorts
@@ -223,13 +237,22 @@ class LobbyScene extends Phaser.Scene {
             this.talkingBubble = this.add
                 .image(435, 282, "talkingBubble")
                 .setVisible(false);
+            this.eToInteractBubble2 = this.add
+                .image(155, 110, "eToInteractBubble")
+                .setVisible(false);
+            this.talkingBubble2 = this.add
+                .image(160, 122, "talkingBubble")
+                .setVisible(false);
 
             this.npcZone = this.add.zone(450, 300, 100, 100);
             this.physics.world.enable(this.npcZone); // Enable physics for the collision area
 
+            this.gameNpcZone = this.add.zone(180, 130, 150, 150);
+            this.physics.world.enable(this.gameNpcZone);
+
             const messages1: string[] = [
-                "Hello there, you seem to be lost. (click to continue)",
-                "I can help you navigate this place.",
+                "Hello there, you seem to be lost.",
+                "I [Wozo] can help you navigate this place.",
                 "We are within the walls of the Operating System itself.",
                 "An abstraction of what some people call the terminal...",
             ];
@@ -237,7 +260,7 @@ class LobbyScene extends Phaser.Scene {
                 "To exit, you must travel to all the floors and defeat all the enemies.",
                 "Notice in the top left, how you now have 5 hearts.",
                 "You can also right click to dodge roll.",
-                "During a dodge roll...",
+                "you must be moving during a dodge roll, and ...",
                 "you become immune to damage, and move a little faster.",
             ];
             const messages3: string[] = [
@@ -256,7 +279,8 @@ class LobbyScene extends Phaser.Scene {
                 "You will flash blue for this duration.",
             ];
             const messages6: string[] = [
-                "Now you can start, walk into the VOID near the top of the room.",
+                "Now you can start, go talk to Rafiiki.",
+                "You will then gain access to the dungeon.",
             ];
             const end: string[] = [
                 "Got nothing left to tell ya, blame the devs",
@@ -282,6 +306,7 @@ class LobbyScene extends Phaser.Scene {
                                     messages: messages1, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
+                                this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 1) {
                                 //loads ui (hearts, etc)
                                 this.scene.run("game-ui", {
@@ -291,6 +316,7 @@ class LobbyScene extends Phaser.Scene {
                                     messages: messages2,
                                     gameState: this.gameState,
                                 });
+                                this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 2) {
                                 this.scene.run("MessageScene", {
                                     messages: messages3, // Pass the messages array to the message scene
@@ -311,6 +337,7 @@ class LobbyScene extends Phaser.Scene {
                                 this.gun.addToScene();
                                 this.gun.reload();
                                 this.gameState.player.addGun(this.gun);
+                                this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 3) {
                                 this.scene.run("MessageScene", {
                                     messages: messages4, // Pass the messages array to the message scene
@@ -322,22 +349,24 @@ class LobbyScene extends Phaser.Scene {
                                     "chort"
                                 ); //spawns a chort
                                 chort1.setProperties(30, 50, 350); //sets the health, speed, projectile speed
+                                this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 4) {
                                 this.scene.run("MessageScene", {
                                     messages: messages5, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
+                                this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 5) {
                                 this.scene.run("MessageScene", {
                                     messages: messages6, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
+                                this.gameState.tutorialLevel++;
                             } else {
                                 this.scene.run("MessageScene", {
                                     messages: end, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
-                                this.gameState.tutorialLevel--; //counteracting the add to tutLevel in message scene, i know this is bad practice blah blah blah
                             }
                             // Collision between chort bullets and player
                             this.chorts?.children.iterate((chort) => {
@@ -423,13 +452,90 @@ class LobbyScene extends Phaser.Scene {
                     }
                 });
             }
+            // Check if the player is overlapping with the collision area
+
+            if (this.input.keyboard) {
+                this.input.keyboard.on("keydown-E", () => {
+                    // Check if the player is overlapping with the collision area
+                    if (
+                        this.player &&
+                        Phaser.Geom.Intersects.RectangleToRectangle(
+                            this.player.getBounds(),
+                            this.gameNpcZone.getBounds()
+                        )
+                    ) {
+                        if (!this.gameState.interactingWithNpc) {
+                            this.gameState.interactingWithNpc = true;
+                            if (this.gameState.tutorialLevel < 6) {
+                                const gamemessage1 = [
+                                    "I am Rafiiki, the VOID gaurdian.",
+                                    "I sense you may not be ready for what lurks ahead...",
+                                    "Talk or keep talking to Wozo, he is down in the other room",
+                                ];
+                                this.scene.run("MessageScene", {
+                                    messages: gamemessage1, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                            } else {
+                                if (!this.canStart) {
+                                    this.gameNpc.anims.play(
+                                        "game_npc_walk",
+                                        true
+                                    );
+                                    this.tweens.add({
+                                        targets: this.gameNpc,
+                                        x: this.gameNpc.x + 50, // Adjust the value based on how far you want the NPC to move
+                                        duration: 2000, // Adjust the duration of the movement
+                                        onComplete: () => {
+                                            // Once the movement is complete, play the idle animation
+                                            this.gameNpc.anims.play(
+                                                "game_npc_idle",
+                                                true
+                                            );
+                                            // Set interactingWithNpc back to false after the movement
+                                            this.gameState.interactingWithNpc =
+                                                false;
+                                        },
+                                    });
+                                    this.tweens.add({
+                                        targets: this.talkingBubble2,
+                                        x: this.talkingBubble2.x + 50, // Adjust the value based on how far you want the NPC to move
+                                        duration: 2000, // Adjust the duration of the movement
+                                    });
+                                    this.tweens.add({
+                                        targets: this.eToInteractBubble2,
+                                        x: this.eToInteractBubble2.x + 50, // Adjust the value based on how far you want the NPC to move
+                                        duration: 2000, // Adjust the duration of the movement
+                                    });
+                                    const gamemessage2 = [
+                                        "You seem to be ready now, and also one more thing",
+                                        "Don't forget to dodge roll...  proceed to the VOID",
+                                    ];
+                                    this.scene.run("MessageScene", {
+                                        messages: gamemessage2, // Pass the messages array to the message scene
+                                        gameState: this.gameState,
+                                    });
+                                    this.canStart = true;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
             //npc and player collider/overlap stuff
 
             this.npc.setImmovable(true);
+            this.gameNpc.setImmovable(true);
 
             this.physics.add.collider(this.npc, this.player);
+            this.physics.add.collider(this.gameNpc, this.player);
 
             this.npc.body?.setSize(
+                this.npc.width * 0.65,
+                this.npc.height * 0.7
+            );
+            this.gameNpc.body?.setSize(
                 this.npc.width * 0.65,
                 this.npc.height * 0.7
             );
@@ -443,6 +549,8 @@ class LobbyScene extends Phaser.Scene {
                 this.player.width * 0.85,
                 this.player.height * 0.8
             );
+
+            this.scene.run("HelpButton");
         }
     }
     private handleBulletTileCollision(
@@ -543,13 +651,34 @@ class LobbyScene extends Phaser.Scene {
                 this.player!.getBounds(),
                 this.npcZone.getBounds()
             );
-
+        const playerOverlappingGameNPC =
+            Phaser.Geom.Intersects.RectangleToRectangle(
+                this.player!.getBounds(),
+                this.gameNpcZone.getBounds()
+            );
         // Update visibility of speech bubbles based on player interaction with NPC
         if (playerOverlappingNPC && !this.gameState.interactingWithNpc) {
             // Player is overlapping with NPC but not interacting, show interaction bubble
             this.eToInteractBubble.setVisible(true);
             this.talkingBubble.setVisible(false);
-        } else if (this.gameState.interactingWithNpc) {
+            this.eToInteractBubble2.setVisible(false);
+            this.talkingBubble2.setVisible(false);
+        } else if (
+            playerOverlappingGameNPC &&
+            !this.gameState.interactingWithNpc
+        ) {
+            this.eToInteractBubble.setVisible(false);
+            this.talkingBubble.setVisible(false);
+            this.eToInteractBubble2.setVisible(true);
+            this.talkingBubble2.setVisible(false);
+        } else if (this.gameState.interactingWithNpc && playerOverlappingNPC) {
+            // Player is interacting with NPC, hide interaction bubble and show talking bubble
+            this.eToInteractBubble.setVisible(false);
+            this.talkingBubble.setVisible(true);
+        } else if (
+            this.gameState.interactingWithNpc &&
+            playerOverlappingGameNPC
+        ) {
             // Player is interacting with NPC, hide interaction bubble and show talking bubble
             this.eToInteractBubble.setVisible(false);
             this.talkingBubble.setVisible(true);
@@ -557,6 +686,27 @@ class LobbyScene extends Phaser.Scene {
             // Player is not overlapping with NPC, hide both bubbles
             this.eToInteractBubble.setVisible(false);
             this.talkingBubble.setVisible(false);
+            this.eToInteractBubble2.setVisible(false);
+            this.talkingBubble2.setVisible(false);
+        }
+        if (playerOverlappingGameNPC && !this.gameState.interactingWithNpc) {
+            // Player is overlapping with NPC but not interacting, show interaction bubble
+            if (!this.canStart) {
+                this.eToInteractBubble2.setVisible(true);
+            } else {
+                this.eToInteractBubble2.setVisible(false);
+            }
+            this.talkingBubble2.setVisible(false);
+        } else if (this.gameState.interactingWithNpc) {
+            // Player is interacting with NPC, hide interaction bubble and show talking bubble
+            if (!this.canStart) {
+                this.eToInteractBubble2.setVisible(false);
+                this.talkingBubble2.setVisible(true);
+            }
+        } else {
+            // Player is not overlapping with NPC, hide both bubbles
+            this.eToInteractBubble2.setVisible(false);
+            this.talkingBubble2.setVisible(false);
         }
         if (this.gameState.player.health <= 0) {
             // Player is dead, trigger death animation

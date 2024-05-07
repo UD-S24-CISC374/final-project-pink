@@ -10,6 +10,7 @@ import room04Scene from "./scenes/room04Scene";
 import ConsoleScene from "./scenes/consoleScene";
 import GameUI from "./scenes/uiScene";
 import MessageScene from "./scenes/messageScene";
+import HelpButton from "./scenes/helpScene";
 
 const DEFAULT_WIDTH = 400;
 const DEFAULT_HEIGHT = 250;
@@ -37,6 +38,7 @@ export const CONFIG = {
         room03Scene,
         room04Scene,
         ConsoleScene,
+        HelpButton,
     ],
     physics: {
         default: "arcade",
