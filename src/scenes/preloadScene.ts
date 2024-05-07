@@ -21,6 +21,10 @@ export default class PreloadScene extends Phaser.Scene {
             frameWidth: 28,
             frameHeight: 49,
         });
+        this.load.spritesheet("game_npc", "assets/sprites/game_npc.png", {
+            frameWidth: 37,
+            frameHeight: 32,
+        });
         this.load.spritesheet("robot_idle", "assets/sprites/robot_idle.png", {
             //all robot sprites from the game Enter the Gungeon. Accessed from https://www.spriters-resource.com/pc_computer/enterthegungeon/sheet/155565/
             frameWidth: 18,
@@ -222,6 +226,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("console", "assets/consoleTemp.png");
         this.load.image("eToInteractBubble", "assets/bubble_etointeract.png");
         this.load.image("talkingBubble", "assets/bubble_talking.png");
+        this.load.image("help_button", "assets/helpButton.png");
     }
 
     create() {

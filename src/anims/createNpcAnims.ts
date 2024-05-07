@@ -22,6 +22,24 @@ const createNpcAnims = (anims: Phaser.Animations.AnimationManager) => {
         repeat: -1,
     });
     anims.create({
+        key: "game_npc_idle",
+        frames: anims.generateFrameNumbers("game_npc", {
+            start: 0,
+            end: 4,
+        }),
+        frameRate: 10,
+        repeat: -1,
+    });
+    anims.create({
+        key: "game_npc_walk",
+        frames: anims.generateFrameNumbers("game_npc", {
+            start: 5,
+            end: 9,
+        }),
+        frameRate: 10,
+        repeat: -1,
+    });
+    anims.create({
         key: "wood_chest_closed",
         frames: anims.generateFrameNumbers("wood_chest", {
             start: 0,

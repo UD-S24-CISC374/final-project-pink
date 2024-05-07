@@ -31,6 +31,7 @@ export default class MessageScene extends Phaser.Scene {
     }
 
     showMessage(message: string) {
+        message = message += " (click)";
         // Disable pointer input during message display
         this.input.enabled = false;
 
@@ -88,7 +89,6 @@ export default class MessageScene extends Phaser.Scene {
             this.showMessage(this.messages[this.currentMessageIndex]);
         } else {
             // For now, just stop the scene
-            this.gameState.tutorialLevel++;
             this.gameState.interactingWithNpc = false;
             this.scene.stop();
         }

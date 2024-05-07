@@ -112,6 +112,7 @@ class ConsoleScene extends Phaser.Scene {
         this.scene.bringToTop(this.gameState.curRoom);
         this.scene.bringToTop("game-ui");
         this.scene.bringToTop("MessageScene");
+        this.scene.bringToTop("HelpButton");
         this.scene.pause("ConsoleScene");
     }
     makeVisible() {

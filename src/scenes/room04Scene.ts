@@ -209,6 +209,7 @@ class room04Scene extends Phaser.Scene {
             //camera follows player
             this.scene.run("game-ui", { gameState: this.gameState });
             this.scene.bringToTop("game-ui");
+            this.scene.bringToTop("HelpButton");
             this.cameras.main.startFollow(this.player, true);
 
             //decreases player hitbox size
