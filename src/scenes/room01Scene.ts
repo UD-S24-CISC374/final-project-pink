@@ -23,12 +23,12 @@ class room01Scene extends Phaser.Scene {
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
     private defaultGunBig?: Gun;
-    private allowConsole: boolean = false;
     constructor() {
         super({ key: "room01Scene" });
     }
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
+        this.chestOpened = false;
     }
     preload() {}
 
@@ -84,13 +84,13 @@ class room01Scene extends Phaser.Scene {
             });
 
             const chort1 = this.chorts.get(800, 700, "chort");
-            chort1.setProperties(30, 50, 200);
+            chort1.setProperties(27, 30, 200);
             const chort2 = this.chorts.get(800, 500, "chort");
-            chort2.setProperties(30, 75, 250);
+            chort2.setProperties(27, 50, 250); //health, speed, bulletSpeed
             const chort3 = this.chorts.get(1000, 700, "chort");
-            chort3.setProperties(30, 100, 200);
+            chort3.setProperties(27, 50, 200);
             const chort4 = this.chorts.get(800, 1000, "chort");
-            chort4.setProperties(30, 30, 300);
+            chort4.setProperties(27, 30, 200);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the chorts target x and y change
@@ -284,7 +284,7 @@ class room01Scene extends Phaser.Scene {
                         "gun_default_big", //gun texture
                         "bullet_blue", //bullet texture (same as from this.bullets)
                         300, //bullet speed
-                        4, //bullet damage
+                        5, //bullet damage
                         12, //shots per round
                         250 //miliseconds between shots
                     );
@@ -347,9 +347,6 @@ class room01Scene extends Phaser.Scene {
                             messages: tip2, // Pass the messages array to the message scene
                             gameState: this.gameState,
                         });
-                        setTimeout(() => {
-                            this.allowConsole = true;
-                        }, 5000);
                     }
                 }
             });
@@ -401,22 +398,20 @@ class room01Scene extends Phaser.Scene {
         });
     }
     private switchScene() {
-        if (this.allowConsole) {
-            console.log("it worked");
-            //this.characterMovement.stopX();
-            //this.characterMovement.stopY();
-            this.scene.setVisible(true, "ConsoleScene");
-            const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
-            this.scene.bringToTop("ConsoleScene");
-            consoleScene.makeVisible();
-            this.scene.run("ConsoleScene", {
-                gameState: this.gameState,
-            });
-            this.scene.pause("room01Scene");
-            sceneEvents.emit("player-opened-console");
-            this.characterMovement.stopX();
-            this.characterMovement.stopY();
-        }
+        console.log("it worked");
+        //this.characterMovement.stopX();
+        //this.characterMovement.stopY();
+        this.scene.setVisible(true, "ConsoleScene");
+        const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
+        this.scene.bringToTop("ConsoleScene");
+        consoleScene.makeVisible();
+        this.scene.run("ConsoleScene", {
+            gameState: this.gameState,
+        });
+        this.scene.pause("room01Scene");
+        sceneEvents.emit("player-opened-console");
+        this.characterMovement.stopX();
+        this.characterMovement.stopY();
     }
 
     //helper functions for colliders methods, need to make a seperate util file eventually
@@ -537,13 +532,23 @@ class room01Scene extends Phaser.Scene {
     update() {
         // Check for keyboard input and move the player accordingly
         if (this.gameState.player.health <= 0) {
-            // Player is dead, trigger death animation
             this.gameState.player.die();
-            this.scene.pause();
-            // You may also want to perform other actions, like respawning the player or ending the game
-        } else {
-            // Player is not dead, can move
 
+            // Player is dead, trigger death animation
+            this.tweens.add({
+                targets: this.player,
+                alpha: 0,
+                duration: 2500,
+                ease: "Quad",
+                onComplete: () => {
+                    // Transition to the next scene after a delay
+                    this.scene.stop;
+                    this.scene.start("GameOverScene", {
+                        gameState: this.gameState,
+                    });
+                },
+            });
+        } else {
             if (this.input.activePointer.leftButtonDown()) {
                 this.gameState.leftButtonPressed = true;
             } else if (
@@ -578,13 +583,11 @@ class room01Scene extends Phaser.Scene {
             }
 
             // Allow normal player movement only if not dodging
-            if (this.gameState.player.health > 0) {
-                this.keyboardManager.handleInput();
-                this.gameState.player.currentGun?.updatePosition(
-                    this.keyboardManager.lastHorizontalDirection,
-                    this.keyboardManager.lastVerticalDirection
-                );
-            }
+            this.keyboardManager.handleInput();
+            this.gameState.player.currentGun?.updatePosition(
+                this.keyboardManager.lastHorizontalDirection,
+                this.keyboardManager.lastVerticalDirection
+            );
         }
     }
 }

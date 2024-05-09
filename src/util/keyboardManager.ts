@@ -201,7 +201,8 @@ export class KeyboardManager {
                 this.lastVerticalDirection = "up";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -212,7 +213,8 @@ export class KeyboardManager {
                 this.lastHorizontalDirection = "left";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -223,7 +225,8 @@ export class KeyboardManager {
                 this.lastVerticalDirection = "down";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -234,7 +237,8 @@ export class KeyboardManager {
                 this.lastHorizontalDirection = "right";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -246,7 +250,8 @@ export class KeyboardManager {
                 this.lastVerticalDirection = "";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -257,7 +262,8 @@ export class KeyboardManager {
                 this.lastHorizontalDirection = "";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -268,7 +274,8 @@ export class KeyboardManager {
                 this.lastVerticalDirection = "";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
@@ -279,7 +286,8 @@ export class KeyboardManager {
                 this.lastHorizontalDirection = "";
                 if (
                     !this.characterMovement.gameState.isDodging &&
-                    !this.onConsole
+                    !this.onConsole &&
+                    !this.characterMovement.gameState.player.isDead
                 ) {
                     this.updateMovement();
                 }
