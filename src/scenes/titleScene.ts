@@ -1,4 +1,6 @@
 import Phaser from "phaser";
+import { gameState } from "../objects/gameState";
+import Player from "../objects/player";
 
 class TitleScene extends Phaser.Scene {
     constructor() {
@@ -15,6 +17,14 @@ class TitleScene extends Phaser.Scene {
     }
 
     create() {
+        const player = new Player(5, 5);
+        const initialGameState = new gameState(
+            player,
+            0, //level
+            0, //tutorial level
+            false,
+            "LobbyScene"
+        );
         // Add background image
         const background = this.add.image(
             this.cameras.main.width / 2,
@@ -60,7 +70,9 @@ class TitleScene extends Phaser.Scene {
         playButton.on("pointerdown", () => {
             this.cameras.main.fadeOut(500, 0, 0, 0, () => {
                 console.log("camera fade");
-                this.scene.start("LobbyScene");
+                this.scene.start("LobbyScene", {
+                    gameState: initialGameState,
+                });
             });
         });
 

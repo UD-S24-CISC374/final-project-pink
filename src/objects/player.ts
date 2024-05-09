@@ -4,20 +4,17 @@ class Player {
     hearts: number;
     health: number;
     isInvincible: boolean;
+    isDead: boolean;
     player: Phaser.Physics.Arcade.Sprite;
     currentGun?: Gun;
     currentGunIndex: number = 0;
     guns: Gun[];
 
-    constructor(
-        player: Phaser.Physics.Arcade.Sprite,
-        hearts: number,
-        health: number
-    ) {
+    constructor(hearts: number, health: number) {
         this.hearts = hearts;
         this.health = health;
         this.isInvincible = false;
-        this.player = player;
+        this.isDead = false;
         this.guns = [];
     }
 
@@ -93,7 +90,6 @@ class Player {
     }
 
     healToAmount(healTo: number) {
-        this.hearts = healTo;
         this.health = healTo;
     }
 
@@ -115,6 +111,9 @@ class Player {
     }
     die() {
         // Play death animation
+        this.player.removeFromUpdateList();
+        this.player.setImmovable();
+        this.isDead = true;
         this.playDeathAnimation();
         // Stop the player from moving
         this.player.setVelocity(0, 0);

@@ -1,6 +1,4 @@
 import Phaser from "phaser";
-import Player from "../objects/player";
-
 import { CONFIG } from "../config";
 import { CharacterMovement } from "../util/playerMovement";
 import { KeyboardManager } from "../util/keyboardManager";
@@ -13,6 +11,7 @@ import { Bullet } from "../objects/bullet";
 import { sceneEvents } from "../util/eventCenter";
 import { Fireball } from "../objects/fireball";
 import { Gun } from "../objects/gun";
+import ConsoleScene from "./consoleScene";
 
 class LobbyScene extends Phaser.Scene {
     private player?: Phaser.Physics.Arcade.Sprite;
@@ -31,13 +30,25 @@ class LobbyScene extends Phaser.Scene {
     private eToInteractBubble2: Phaser.GameObjects.Image;
     private talkingBubble2: Phaser.GameObjects.Image;
     private canStart: boolean = false;
+    private bypassTutorial = true;
+    private npcInteractions: number = 0;
 
     constructor() {
         super({ key: "LobbyScene" });
     }
 
-    preload() {}
+    preload() {
+        this.load.image("yes_button", "assets/yes_button.jpg");
+        this.load.image("no_button", "assets/no_button.jpg");
+    }
 
+    init(data: { gameState: gameState }) {
+        this.gameState = data.gameState;
+        this.canStart = false;
+        this.bypassTutorial = true;
+        this.npcInteractions = 0;
+        this.gameState.isDodging = true;
+    }
     create() {
         //setting up crosshair
         this.input.mouse?.disableContextMenu();
@@ -67,14 +78,10 @@ class LobbyScene extends Phaser.Scene {
 
             //setting up player after layers are created
             this.player = this.physics.add.sprite(176, 315, "robot_idle");
-            const player = new Player(this.player, 5, 5);
-            this.gameState = new gameState(
-                player,
-                0, //level
-                0, //tutorial level
-                false,
-                "lobbyScene"
-            );
+            this.gameState.player.player = this.player;
+            this.gameState.player.player.addToUpdateList();
+            this.gameState.player.player.setImmovable(false);
+            this.gameState.player.isDead = false;
             //sets up util for character movement
             this.characterMovement = new CharacterMovement(
                 this.player, //player
@@ -194,6 +201,7 @@ class LobbyScene extends Phaser.Scene {
                         this.events.off("player-moved");
                         sceneEvents.removeAllListeners();
                         this.scene.stop("game-ui");
+                        this.scene.stop("MessageScene");
                         this.gameState.player.healToAmount(5);
                         this.gameState.resetValuesOnSceneSwitch();
                         this.gameState.player.guns = [];
@@ -228,7 +236,15 @@ class LobbyScene extends Phaser.Scene {
                     bullet.destroy();
                 }
             );
-
+            this.player.alpha = 0;
+            this.tweens.add({
+                targets: [this.player],
+                alpha: 1,
+                duration: 3000,
+                onComplete: () => {
+                    this.gameState.isDodging = false;
+                },
+            });
             // NPC interaction
 
             this.eToInteractBubble = this.add
@@ -260,8 +276,8 @@ class LobbyScene extends Phaser.Scene {
                 "To exit, you must travel to all the floors and defeat all the enemies.",
                 "Notice in the top left, how you now have 5 hearts.",
                 "You can also right click to dodge roll.",
-                "you must be moving during a dodge roll, and ...",
-                "you become immune to damage, and move a little faster.",
+                "You must be moving too, for momentum.",
+                "It makes you faster, and immune to damage for its duration.",
             ];
             const messages3: string[] = [
                 "You can also shoot, now left clicking will shoot your gun.",
@@ -278,9 +294,19 @@ class LobbyScene extends Phaser.Scene {
                 "Upon taking damage you get invincible frames.",
                 "You will flash blue for this duration.",
             ];
-            const messages6: string[] = [
+            const messages7: string[] = [
                 "Now you can start, go talk to Rafiiki.",
                 "You will then gain access to the dungeon.",
+            ];
+            const messages6: string[] = [
+                "Now, for the most important and powerful tool you will use...",
+                "It is called the command prompt",
+                "Open it with 'Tab' and close it with '\\'.",
+                "Type 'help' for a list of commands.",
+                "Type 'help some_command' for more info on that command.",
+                "You will need to utilize this powerful tool for many things.",
+                "I will help you with learning commands while you play",
+                "Don't worry too much about them yet.",
             ];
             const end: string[] = [
                 "Got nothing left to tell ya, blame the devs",
@@ -359,6 +385,16 @@ class LobbyScene extends Phaser.Scene {
                             } else if (this.gameState.tutorialLevel == 5) {
                                 this.scene.run("MessageScene", {
                                     messages: messages6, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                                const tabKey = this.input.keyboard?.addKey(
+                                    Phaser.Input.Keyboard.KeyCodes.TAB
+                                );
+                                tabKey?.on("down", this.switchScene, this);
+                                this.gameState.tutorialLevel++;
+                            } else if (this.gameState.tutorialLevel == 6) {
+                                this.scene.run("MessageScene", {
+                                    messages: messages7, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
                                 this.gameState.tutorialLevel++;
@@ -465,8 +501,73 @@ class LobbyScene extends Phaser.Scene {
                         )
                     ) {
                         if (!this.gameState.interactingWithNpc) {
+                            this.npcInteractions += 1;
                             this.gameState.interactingWithNpc = true;
-                            if (this.gameState.tutorialLevel < 6) {
+                            if (this.npcInteractions == 1) {
+                                const bypassmessage = ["Do you know my name?"];
+                                this.scene.run("MessageScene", {
+                                    messages: bypassmessage, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                                const yesButton = this.add.image(
+                                    this.gameNpc.x - 20,
+                                    this.gameNpc.y + 30,
+                                    "yes_button"
+                                );
+                                const noButton = this.add.image(
+                                    this.gameNpc.x + 20,
+                                    this.gameNpc.y + 30,
+                                    "no_button"
+                                );
+                                yesButton.setScale(0.05);
+                                yesButton.setOrigin(0.5);
+                                yesButton.setInteractive();
+
+                                yesButton.on("pointerover", () => {
+                                    yesButton.setTint(0x3cff00);
+                                });
+
+                                yesButton.on("pointerout", () => {
+                                    yesButton.clearTint();
+                                });
+
+                                yesButton.on("pointerdown", () => {
+                                    this.npcAllowsVoid();
+                                    this.bypassTutorial = true;
+                                    noButton.destroy();
+                                    yesButton.destroy();
+                                });
+
+                                noButton.setScale(0.05);
+                                noButton.setOrigin(0.5);
+                                noButton.setInteractive();
+
+                                noButton.on("pointerover", () => {
+                                    noButton.setTint(0xc70039);
+                                });
+
+                                noButton.on("pointerout", () => {
+                                    noButton.clearTint();
+                                });
+
+                                noButton.on("pointerdown", () => {
+                                    this.bypassTutorial = false;
+                                    noButton.destroy();
+                                    yesButton.destroy();
+                                    const nomessage = [
+                                        "I am Rafiiki, the VOID gaurdian.",
+                                        "Now, go talk to Wozo, he is down in the room to the right",
+                                    ];
+                                    this.scene.run("MessageScene", {
+                                        messages: nomessage, // Pass the messages array to the message scene
+                                        gameState: this.gameState,
+                                    });
+                                });
+                            } else if (
+                                this.gameState.tutorialLevel < 7 &&
+                                !this.bypassTutorial &&
+                                this.npcInteractions > 1
+                            ) {
                                 const gamemessage1 = [
                                     "I am Rafiiki, the VOID gaurdian.",
                                     "I sense you may not be ready for what lurks ahead...",
@@ -477,46 +578,7 @@ class LobbyScene extends Phaser.Scene {
                                     gameState: this.gameState,
                                 });
                             } else {
-                                if (!this.canStart) {
-                                    this.gameNpc.anims.play(
-                                        "game_npc_walk",
-                                        true
-                                    );
-                                    this.tweens.add({
-                                        targets: this.gameNpc,
-                                        x: this.gameNpc.x + 50, // Adjust the value based on how far you want the NPC to move
-                                        duration: 2000, // Adjust the duration of the movement
-                                        onComplete: () => {
-                                            // Once the movement is complete, play the idle animation
-                                            this.gameNpc.anims.play(
-                                                "game_npc_idle",
-                                                true
-                                            );
-                                            // Set interactingWithNpc back to false after the movement
-                                            this.gameState.interactingWithNpc =
-                                                false;
-                                        },
-                                    });
-                                    this.tweens.add({
-                                        targets: this.talkingBubble2,
-                                        x: this.talkingBubble2.x + 50, // Adjust the value based on how far you want the NPC to move
-                                        duration: 2000, // Adjust the duration of the movement
-                                    });
-                                    this.tweens.add({
-                                        targets: this.eToInteractBubble2,
-                                        x: this.eToInteractBubble2.x + 50, // Adjust the value based on how far you want the NPC to move
-                                        duration: 2000, // Adjust the duration of the movement
-                                    });
-                                    const gamemessage2 = [
-                                        "You seem to be ready now, and also one more thing",
-                                        "Don't forget to dodge roll...  proceed to the VOID",
-                                    ];
-                                    this.scene.run("MessageScene", {
-                                        messages: gamemessage2, // Pass the messages array to the message scene
-                                        gameState: this.gameState,
-                                    });
-                                    this.canStart = true;
-                                }
+                                this.npcAllowsVoid();
                             }
                         }
                     }
@@ -553,6 +615,60 @@ class LobbyScene extends Phaser.Scene {
             this.scene.run("HelpButton");
         }
     }
+
+    private switchScene() {
+        console.log("it worked");
+        //this.characterMovement.stopX();
+        //this.characterMovement.stopY();
+        this.scene.setVisible(true, "ConsoleScene");
+        const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
+        this.scene.bringToTop("ConsoleScene");
+        consoleScene.makeVisible();
+        this.scene.run("ConsoleScene", {
+            gameState: this.gameState,
+        });
+        this.scene.pause("LobbyScene");
+        sceneEvents.emit("player-opened-console");
+        this.characterMovement.stopX();
+        this.characterMovement.stopY();
+    }
+
+    private npcAllowsVoid() {
+        if (!this.canStart) {
+            this.gameNpc.anims.play("game_npc_walk", true);
+            this.tweens.add({
+                targets: this.gameNpc,
+                x: this.gameNpc.x + 50, // Adjust the value based on how far you want the NPC to move
+                duration: 2000, // Adjust the duration of the movement
+                onComplete: () => {
+                    // Once the movement is complete, play the idle animation
+                    this.gameNpc.anims.play("game_npc_idle", true);
+                    // Set interactingWithNpc back to false after the movement
+                    this.gameState.interactingWithNpc = false;
+                },
+            });
+            this.tweens.add({
+                targets: this.talkingBubble2,
+                x: this.talkingBubble2.x + 50, // Adjust the value based on how far you want the NPC to move
+                duration: 2000, // Adjust the duration of the movement
+            });
+            this.tweens.add({
+                targets: this.eToInteractBubble2,
+                x: this.eToInteractBubble2.x + 50, // Adjust the value based on how far you want the NPC to move
+                duration: 2000, // Adjust the duration of the movement
+            });
+            const gamemessage2 = [
+                "You seem to be ready now, and also one more thing",
+                "Don't forget to dodge roll...  proceed to the VOID",
+            ];
+            this.scene.run("MessageScene", {
+                messages: gamemessage2, // Pass the messages array to the message scene
+                gameState: this.gameState,
+            });
+            this.canStart = true;
+        }
+    }
+
     private handleBulletTileCollision(
         obj1:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody
@@ -711,7 +827,6 @@ class LobbyScene extends Phaser.Scene {
         if (this.gameState.player.health <= 0) {
             // Player is dead, trigger death animation
             this.gameState.player.die();
-            // You may also want to perform other actions, like respawning the player or ending the game
         } else {
             // Player is not dead, can move
             // Check for keyboard input and move the player accordingly
@@ -726,7 +841,9 @@ class LobbyScene extends Phaser.Scene {
                 this.input.activePointer.leftButtonReleased() &&
                 this.gameState.tutorialLevel > 2
             ) {
-                this.gun?.shoot();
+                if (!this.gameState.interactingWithNpc) {
+                    this.gun?.shoot();
+                }
                 this.gameState.leftButtonPressed = false;
             }
 

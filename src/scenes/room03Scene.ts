@@ -25,6 +25,7 @@ class room03Scene extends Phaser.Scene {
     }
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
+        this.chestOpened = false;
     }
     preload() {}
 
@@ -79,9 +80,9 @@ class room03Scene extends Phaser.Scene {
             const chort3 = this.chorts.get(300, 500, "chort");
             chort3.setProperties(30, 100, 200);
             const chort4 = this.chorts.get(400, 200, "chort");
-            chort4.setProperties(30, 30, 300);
+            chort4.setProperties(40, 30, 300);
             const chort5 = this.chorts.get(400, 600, "chort");
-            chort5.setProperties(30, 30, 300);
+            chort5.setProperties(40, 30, 300);
 
             this.chest = this.physics.add.sprite(720, 200, "wood_chest");
             this.chest.setImmovable(true);
@@ -164,7 +165,9 @@ class room03Scene extends Phaser.Scene {
                 this.chorts,
                 (bullet, chort) => {
                     // Decrease chort health when hit by player bullets
-                    (chort as Chort).takeDamage(10); // Assuming each bullet does 10 damage
+                    (chort as Chort).takeDamage(
+                        this.gameState.player.getCurrentGunDamage()
+                    ); // Assuming each bullet does 10 damage
                     // Destroy the bullet
                     bullet.destroy();
                 }
@@ -241,8 +244,15 @@ class room03Scene extends Phaser.Scene {
 
                     this.chest.anims.play("wood_chest_open");
 
-                    this.gameState.player.health = 7; //increasing player health by one
-                    this.gameState.player.hearts = 7;
+                    if (
+                        this.gameState.player.health !=
+                        this.gameState.player.hearts
+                    ) {
+                        this.gameState.player.health += 1;
+                    } else {
+                        this.gameState.player.hearts += 1;
+                        this.gameState.player.health += 1;
+                    }
                     this.scene.run("game-ui", {
                         gameState: this.gameState,
                     });
@@ -413,10 +423,22 @@ class room03Scene extends Phaser.Scene {
     update() {
         // Check for keyboard input and move the player accordingly
         if (this.gameState.player.health <= 0) {
-            // Player is dead, trigger death animation
             this.gameState.player.die();
-            this.scene.pause();
-            // You may also want to perform other actions, like respawning the player or ending the game
+
+            // Player is dead, trigger death animation
+            this.tweens.add({
+                targets: this.player,
+                alpha: 0,
+                duration: 2500,
+                ease: "Quad",
+                onComplete: () => {
+                    // Transition to the next scene after a delay
+                    this.scene.stop;
+                    this.scene.start("GameOverScene", {
+                        gameState: this.gameState,
+                    });
+                },
+            });
         } else {
             // Player is not dead, can move
             // Check for keyboard input and move the player accordingly
@@ -455,13 +477,11 @@ class room03Scene extends Phaser.Scene {
             }
 
             // Allow normal player movement only if not dodging
-            if (this.gameState.player.health > 0) {
-                this.keyboardManager.handleInput();
-                this.gameState.player.currentGun?.updatePosition(
-                    this.keyboardManager.lastHorizontalDirection,
-                    this.keyboardManager.lastVerticalDirection
-                );
-            }
+            this.keyboardManager.handleInput();
+            this.gameState.player.currentGun?.updatePosition(
+                this.keyboardManager.lastHorizontalDirection,
+                this.keyboardManager.lastVerticalDirection
+            );
         }
     }
 }
