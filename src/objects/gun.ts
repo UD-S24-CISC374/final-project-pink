@@ -1,20 +1,25 @@
 import Phaser from "phaser";
 import { Bullet } from "./bullet";
 import { gameState } from "./gameState";
+import { sceneEvents } from "../util/eventCenter";
 
 export class Gun {
     public scene: Phaser.Scene;
     private gameState: gameState;
     private player: Phaser.Physics.Arcade.Sprite;
     private bullets: Phaser.Physics.Arcade.Group;
-    private texture: string;
-    private bulletTexture: string;
+    public texture: string;
+    public bulletTexture: string;
     private bulletSpeed: number;
     public bulletDamage: number;
-    private shotsPerRound: number;
+    public shotsPerRound: number;
+    public shotsFired: number = 0;
     private millisecondsBetweenShots: number;
+    private timeoutIds: globalThis.NodeJS.Timeout[] = []; // Initialize list to store timeout IDs
+
     public gunImage: Phaser.GameObjects.Image;
-    private shootingInProgress: boolean = false; //to stop shooting when ammo clip is used
+    public shootingInProgress: boolean = false; //to stop shooting when ammo clip is used
+    public isSingleShot: boolean = false;
     public isReloaded: boolean = true; //use this for the reload command, and to check if current gun is reloaded anywhere where gameState is accessible
 
     constructor(
@@ -27,7 +32,8 @@ export class Gun {
         bulletSpeed: number,
         bulletDamage: number,
         shotsPerRound: number,
-        millisecondsBetweenShots: number
+        millisecondsBetweenShots: number,
+        isSingleShot: boolean
     ) {
         this.scene = scene;
         this.gameState = gameState;
@@ -38,7 +44,9 @@ export class Gun {
         this.bulletSpeed = bulletSpeed;
         this.bulletDamage = bulletDamage;
         this.shotsPerRound = shotsPerRound;
+        this.shotsFired = 0;
         this.millisecondsBetweenShots = millisecondsBetweenShots;
+        this.isSingleShot = isSingleShot;
     }
     public setPlayer(player: Phaser.Physics.Arcade.Sprite) {
         this.player = player;
@@ -50,6 +58,13 @@ export class Gun {
     public reload() {
         //Jacob call this for the reload command, would be this.gameState.player.currentGun.reload() to do it
         this.isReloaded = true;
+        this.shotsFired = 0;
+        if (this.gameState.player.currentGun) {
+            sceneEvents.emit("bullets-changed", {
+                numBullets: this.shotsPerRound - this.shotsFired,
+                bulletTexture: this.bulletTexture,
+            });
+        }
     }
 
     public addToScene() {
@@ -66,77 +81,152 @@ export class Gun {
     // Method to handle shooting bullets
     // Method to handle shooting bullets
     public shoot() {
-        // Fire the bullet towards the target
-        this.shootBullets(
-            this.scene, // Scene where shoot() was called from
-            this.bullets!, // Bullets group
-            this.gunImage, // Gun image
-            this.bulletSpeed, // Bullet speed
-            this.shotsPerRound, // Shots per round
-            this.millisecondsBetweenShots, // Milliseconds between shots
-            this.bulletTexture // Image texture for bullet
-        );
+        // Call either shootBullets or shootSingle based on the isSingleShot property
+        if (this.isSingleShot) {
+            this.shootSingle();
+        } else {
+            this.shootBullets();
+        }
+    }
+    // Method to handle shooting single bullets
+    public shootSingle() {
+        // Ensure the gun is reloaded and shooting is not in progress
+        if (this.gameState.isDodging) {
+            return;
+        }
+        if (this.isReloaded) {
+            // Check if there are still available shots in the round
+            if (this.shotsFired < this.shotsPerRound) {
+                const worldPosition =
+                    this.scene.input.activePointer.positionToCamera(
+                        this.scene.cameras.main
+                    ) as Phaser.Math.Vector2;
+
+                // Get a new bullet
+                let bullet = this.bullets.get(
+                    this.gunImage.x,
+                    this.gunImage.y,
+                    this.bulletTexture
+                ) as Bullet;
+                bullet.setBulletSpeed(this.bulletSpeed);
+
+                // Fire the bullet towards the target
+                bullet.fire(worldPosition.x, worldPosition.y);
+
+                // Increment the number of shots fired
+                this.shotsFired++;
+                if (this.gameState.player.currentGun) {
+                    sceneEvents.emit("bullets-changed", {
+                        numBullets: this.shotsPerRound - this.shotsFired,
+                        bulletTexture: this.bulletTexture,
+                    });
+                }
+
+                // Check if this is the last shot in the round
+                if (this.shotsFired >= this.shotsPerRound) {
+                    // Update reloading status after the last shot
+                    this.isReloaded = false;
+                    this.reload(); //gives infinite reloads for now
+                }
+            } else {
+                // Prevent shooting if the round is empty
+                this.isReloaded = false;
+            }
+        }
     }
 
-    private shootBullets(
-        scene: Phaser.Scene,
-        bullets: Phaser.Physics.Arcade.Group,
-        gunImage: Phaser.GameObjects.Image,
-        speed: number,
-        numShots: number,
-        shotDelay: number,
-        texture: string
-    ) {
+    private shootBullets() {
+        if (this != this.gameState.player.currentGun) {
+            return;
+        }
         if (this.shootingInProgress) {
             return;
         }
-
         this.shootingInProgress = true;
 
-        let shotsFired = 0;
+        let x = 0; // Initialize x outside the loop
 
-        this.reload(); //for now just let the player shoot all the time until the command works, then use this to update and remove here
-        for (let i = 0; i < numShots; i++) {
+        for (let i = this.shotsFired; i < this.shotsPerRound; i++) {
             // Calculate the delay for this shot
-            let delay = i * shotDelay;
+            let delay = x * this.millisecondsBetweenShots;
 
             // Use setTimeout to delay each shot
-            setTimeout(() => {
+            const timeoutId = setTimeout(() => {
                 if (this.scene.scene.isActive()) {
                     if (this.isReloaded) {
+                        if (this.gameState.isDodging) {
+                            delay += 660;
+                        }
+                        if (this != this.gameState.player.currentGun) {
+                            this.clearTimeouts();
+                            this.shootingInProgress = false;
+                            this.isReloaded = true;
+                            return;
+                        }
                         // only fires bullets if gun is reloaded, also used to stop shooting when switching guns
                         // Ensure no errors if player is shooting while switching scenes
-                        const worldPosition =
-                            scene.input.activePointer.positionToCamera(
-                                scene.cameras.main
-                            ) as Phaser.Math.Vector2;
+                        if (!this.gameState.player.currentGun.isSingleShot) {
+                            const worldPosition =
+                                this.scene.input.activePointer.positionToCamera(
+                                    this.scene.cameras.main
+                                ) as Phaser.Math.Vector2;
 
-                        // Get new bullet
-                        let bullet = bullets.get(
-                            gunImage.x,
-                            gunImage.y,
-                            texture
-                        ) as Bullet;
-                        bullet.setBulletSpeed(speed);
+                            // Get new bullet
+                            let bullet = this.bullets.get(
+                                this.gunImage.x,
+                                this.gunImage.y,
+                                this.bulletTexture
+                            ) as Bullet;
+                            bullet.setBulletSpeed(this.bulletSpeed);
 
-                        // Fire the bullet towards the target
-                        bullet.fire(worldPosition.x, worldPosition.y);
+                            // Fire the bullet towards the target
+                            bullet.fire(worldPosition.x, worldPosition.y);
 
-                        shotsFired++;
+                            this.shotsFired++;
+                            sceneEvents.emit("bullets-changed", {
+                                numBullets:
+                                    this.shotsPerRound - this.shotsFired,
+                                bulletTexture: this.bulletTexture,
+                            });
 
-                        if (shotsFired === numShots) {
+                            if (this.shotsFired >= this.shotsPerRound) {
+                                this.shootingInProgress = false;
+                                this.isReloaded = false;
+                                this.reload(); //remove later gives infinite reloads
+                            }
+                        } else {
                             this.shootingInProgress = false;
+                            this.isReloaded = true;
+                            return;
                         }
                     } else {
                         this.shootingInProgress = false;
+                        this.isReloaded = false;
+
                         return;
                     }
                 } else {
                     this.shootingInProgress = false;
+                    this.isReloaded = false;
                     return;
                 }
             }, delay);
+            this.timeoutIds.push(timeoutId);
+            x++; // Increment x inside the loop
         }
+    }
+    private clearTimeouts() {
+        // Iterate through the list of timeout IDs and clear each timeout
+        this.timeoutIds.forEach((timeoutId) => {
+            clearTimeout(timeoutId);
+        });
+
+        // Clear the list of timeout IDs
+        this.timeoutIds = [];
+
+        // Reset any relevant variables or flags
+        this.shootingInProgress = false;
+        this.isReloaded = true;
     }
 
     public setInvisible() {

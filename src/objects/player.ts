@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Gun } from "./gun";
+import { sceneEvents } from "../util/eventCenter";
 class Player {
     hearts: number;
     health: number;
@@ -73,6 +74,12 @@ class Player {
         // Set the current gun to the gun at the updated current gun index
         this.currentGun = this.guns[this.currentGunIndex];
         this.setAllGunsInvisibleExceptCurrent();
+        sceneEvents.emit("gun-changed", this.currentGun.texture);
+        sceneEvents.emit("bullets-changed", {
+            numBullets:
+                this.currentGun.shotsPerRound - this.currentGun.shotsFired,
+            bulletTexture: this.currentGun.bulletTexture,
+        });
     }
 
     setAllGunsInvisibleExceptCurrent() {

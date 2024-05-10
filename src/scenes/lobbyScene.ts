@@ -358,7 +358,8 @@ class LobbyScene extends Phaser.Scene {
                                     300, //bullet speed
                                     10, //bullet damage
                                     5, //shots per round
-                                    600 //miliseconds between shots
+                                    600, //miliseconds between shots
+                                    true
                                 );
                                 this.gun.addToScene();
                                 this.gun.reload();
