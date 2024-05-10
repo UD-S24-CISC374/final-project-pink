@@ -118,14 +118,15 @@ class room01Scene extends Phaser.Scene {
                 this.bullets, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
                 "gun_default", //gun texture
                 "bullet_blue", //bullet texture (same as from this.bullets)
-                300, //bullet speed
+                400, //bullet speed
                 9, //bullet damage
                 5, //shots per round
-                600 //miliseconds between shots
+                600, //miliseconds between shots
+                true
             );
             defaultGun.addToScene();
-            defaultGun.reload();
             this.gameState.player.addGun(defaultGun);
+            defaultGun.reload();
 
             if (walls) {
                 this.physics.add.collider(this.player, walls);
@@ -286,10 +287,10 @@ class room01Scene extends Phaser.Scene {
                         300, //bullet speed
                         5, //bullet damage
                         12, //shots per round
-                        250 //miliseconds between shots
+                        250, //miliseconds between shots
+                        false
                     );
                     this.defaultGunBig.addToScene();
-                    this.defaultGunBig.reload();
                     this.defaultGunBig.setVisible();
                     this.gunHitBox = this.add.rectangle(
                         this.defaultGunBig.gunImage.x,
@@ -331,8 +332,10 @@ class room01Scene extends Phaser.Scene {
                         setTimeout(() => {
                             this.gunHitBox?.destroy();
                         }, 1000);
-                        if (this.defaultGunBig)
+                        if (this.defaultGunBig) {
                             this.gameState.player.addGun(this.defaultGunBig);
+                            this.defaultGunBig.reload();
+                        }
 
                         this.gameState.player.setAllGunsInvisibleExceptCurrent();
                         const tip2 = [
@@ -360,12 +363,6 @@ class room01Scene extends Phaser.Scene {
                 deltaX: number,
                 deltaY: number
             ) => {
-                if (
-                    this.gameState.player.currentGun &&
-                    this.gameState.player.guns.length > 1
-                ) {
-                    this.gameState.player.currentGun.isReloaded = false;
-                }
                 // Check for mouse wheel up event to switch to the next gun
                 if (deltaY < 0) {
                     this.gameState.player.changeGunIndex(1); // Move to the next gun
@@ -382,7 +379,6 @@ class room01Scene extends Phaser.Scene {
                 this.gameState.player.currentGun &&
                 this.gameState.player.guns.length > 1
             ) {
-                this.gameState.player.currentGun.isReloaded = false;
                 this.gameState.player.changeGunIndex(1); // Move to the next gun
             }
         });
@@ -392,7 +388,6 @@ class room01Scene extends Phaser.Scene {
                 this.gameState.player.currentGun &&
                 this.gameState.player.guns.length > 1
             ) {
-                this.gameState.player.currentGun.isReloaded = false;
                 this.gameState.player.changeGunIndex(-1); // Move to the previous gun
             }
         });
@@ -576,10 +571,6 @@ class room01Scene extends Phaser.Scene {
                     this.keyboardManager.lastVerticalDirection
                 );
                 this.gameState.rightButtonPressed = false;
-            }
-
-            if (this.gameState.isDodging && this.gameState.player.currentGun) {
-                this.gameState.player.currentGun.isReloaded = false;
             }
 
             // Allow normal player movement only if not dodging

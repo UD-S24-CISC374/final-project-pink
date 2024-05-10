@@ -278,12 +278,6 @@ class room03Scene extends Phaser.Scene {
                 deltaX: number,
                 deltaY: number
             ) => {
-                if (
-                    this.gameState.player.currentGun &&
-                    this.gameState.player.guns.length > 1
-                ) {
-                    this.gameState.player.currentGun.isReloaded = false;
-                }
                 // Check for mouse wheel up event to switch to the next gun
                 if (deltaY < 0) {
                     this.gameState.player.changeGunIndex(1); // Move to the next gun
@@ -300,7 +294,6 @@ class room03Scene extends Phaser.Scene {
                 this.gameState.player.currentGun &&
                 this.gameState.player.guns.length > 1
             ) {
-                this.gameState.player.currentGun.isReloaded = false;
                 this.gameState.player.changeGunIndex(1); // Move to the next gun
             }
         });
@@ -310,7 +303,6 @@ class room03Scene extends Phaser.Scene {
                 this.gameState.player.currentGun &&
                 this.gameState.player.guns.length > 1
             ) {
-                this.gameState.player.currentGun.isReloaded = false;
                 this.gameState.player.changeGunIndex(-1); // Move to the previous gun
             }
         });
@@ -470,10 +462,6 @@ class room03Scene extends Phaser.Scene {
                     this.keyboardManager.lastVerticalDirection
                 );
                 this.gameState.rightButtonPressed = false;
-            }
-
-            if (this.gameState.isDodging && this.gameState.player.currentGun) {
-                this.gameState.player.currentGun.isReloaded = false;
             }
 
             // Allow normal player movement only if not dodging
