@@ -55,7 +55,7 @@ class Player {
         this.guns.push(gun); // Add the provided gun instance to the guns array
         // If the current gun is null, set the current gun to the newly added gun
         this.currentGun = gun;
-        if (this.guns.length >= 1) {
+        if (this.guns.length > 1) {
             this.changeGunIndex(1);
         }
     }

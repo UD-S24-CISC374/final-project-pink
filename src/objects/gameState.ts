@@ -40,8 +40,10 @@ export class gameState {
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
         this.eButtonPressed = false;
-        if (this.player.currentGun) {
-            this.player.currentGun.isReloaded = false;
+        if (this.player.currentGun?.shootingInProgress) {
+            this.player.currentGun.clearTimeouts();
+            this.player.currentGun.isReloaded = true;
+            this.player.currentGun.shootingInProgress = false;
         }
     }
 }

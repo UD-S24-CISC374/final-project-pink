@@ -29,6 +29,7 @@ class room01Scene extends Phaser.Scene {
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
         this.chestOpened = false;
+        this.scene.stop("MessgaeScene");
     }
     preload() {}
 
@@ -118,8 +119,8 @@ class room01Scene extends Phaser.Scene {
                 this.bullets, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
                 "gun_default", //gun texture
                 "bullet_blue", //bullet texture (same as from this.bullets)
-                400, //bullet speed
-                9, //bullet damage
+                500, //bullet speed
+                8, //bullet damage
                 5, //shots per round
                 600, //miliseconds between shots
                 true
@@ -284,10 +285,10 @@ class room01Scene extends Phaser.Scene {
                         this.bullets!, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
                         "gun_default_big", //gun texture
                         "bullet_blue", //bullet texture (same as from this.bullets)
-                        300, //bullet speed
-                        5, //bullet damage
-                        12, //shots per round
-                        250, //miliseconds between shots
+                        400, //bullet speed
+                        3, //bullet damage
+                        20, //shots per round
+                        100, //miliseconds between shots
                         false
                     );
                     this.defaultGunBig.addToScene();
@@ -400,10 +401,13 @@ class room01Scene extends Phaser.Scene {
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
         consoleScene.makeVisible();
+        this.gameState.resetValuesOnSceneSwitch();
         this.scene.run("ConsoleScene", {
             gameState: this.gameState,
         });
         this.scene.pause("room01Scene");
+        this.scene.setVisible(false, "MessageScene");
+        this.scene.pause("MessageScene");
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
