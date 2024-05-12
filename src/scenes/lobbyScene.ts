@@ -48,6 +48,7 @@ class LobbyScene extends Phaser.Scene {
         this.bypassTutorial = true;
         this.npcInteractions = 0;
         this.gameState.isDodging = true;
+        this.scene.stop("MessgaeScene");
     }
     create() {
         //setting up crosshair
@@ -281,10 +282,10 @@ class LobbyScene extends Phaser.Scene {
             ];
             const messages3: string[] = [
                 "You can also shoot, now left clicking will shoot your gun.",
-                "One click shoots your entire round.",
+                "One click shoots one bullet for single shot guns.",
                 "Ammo is infinite too, you just need to worry about reloading.",
                 "Your bullets go towards your crosshair when fired.",
-            ];
+            ]; //add reload part to tutorial here before spawning
             const messages4: string[] = [
                 "I have spawned an abomination in the room above.",
                 "Go shoot and kill it now! We don't want to die yet.",
@@ -355,8 +356,8 @@ class LobbyScene extends Phaser.Scene {
                                     this.bullets!,
                                     "gun_default", //gun texture
                                     "bullet_blue", //bullet texture
-                                    300, //bullet speed
-                                    10, //bullet damage
+                                    400, //bullet speed
+                                    9, //bullet damage
                                     5, //shots per round
                                     600, //miliseconds between shots
                                     true
@@ -364,6 +365,8 @@ class LobbyScene extends Phaser.Scene {
                                 this.gun.addToScene();
                                 this.gun.reload();
                                 this.gameState.player.addGun(this.gun);
+
+                                this.gameState.player.setAllGunsInvisibleExceptCurrent();
                                 this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 3) {
                                 this.scene.run("MessageScene", {
@@ -376,6 +379,8 @@ class LobbyScene extends Phaser.Scene {
                                     "chort"
                                 ); //spawns a chort
                                 chort1.setProperties(30, 50, 350); //sets the health, speed, projectile speed
+                                this.gun?.reload();
+                                this.gameState.player.currentGun?.reload();
                                 this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 4) {
                                 this.scene.run("MessageScene", {
@@ -629,6 +634,8 @@ class LobbyScene extends Phaser.Scene {
             gameState: this.gameState,
         });
         this.scene.pause("LobbyScene");
+        this.scene.setVisible(false, "MessageScene");
+        this.scene.pause("MessageScene");
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
@@ -842,9 +849,9 @@ class LobbyScene extends Phaser.Scene {
                 this.input.activePointer.leftButtonReleased() &&
                 this.gameState.tutorialLevel > 2
             ) {
-                if (!this.gameState.interactingWithNpc) {
-                    this.gun?.shoot();
-                }
+                // if (!this.gameState.interactingWithNpc) {
+                this.gameState.player.currentGun?.shoot();
+                // }
                 this.gameState.leftButtonPressed = false;
             }
 
@@ -868,7 +875,7 @@ class LobbyScene extends Phaser.Scene {
 
             // Allow normal player movement only if not dodging
             this.keyboardManager.handleInput();
-            this.gun?.updatePosition(
+            this.gameState.player.currentGun?.updatePosition(
                 this.keyboardManager.lastHorizontalDirection,
                 this.keyboardManager.lastVerticalDirection
             );

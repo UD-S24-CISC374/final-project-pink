@@ -26,6 +26,7 @@ class room03Scene extends Phaser.Scene {
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
         this.chestOpened = false;
+        this.scene.stop("MessgaeScene");
     }
     preload() {}
 
@@ -260,6 +261,8 @@ class room03Scene extends Phaser.Scene {
                     const tip1 = [
                         "You have gained another heart, Remember to use mv player room04!",
                     ];
+                    this.scene.resume("MessageScene");
+                    this.scene.stop("MessageScene"); //bug fix idk
                     this.scene.bringToTop("MessageScene");
                     this.scene.run("MessageScene", {
                         messages: tip1, // Pass the messages array to the message scene
@@ -313,10 +316,13 @@ class room03Scene extends Phaser.Scene {
         const consoleScene = this.scene.get("ConsoleScene") as ConsoleScene;
         this.scene.bringToTop("ConsoleScene");
         consoleScene.makeVisible();
+        this.gameState.resetValuesOnSceneSwitch();
         this.scene.run("ConsoleScene", {
             gameState: this.gameState,
         });
         this.scene.pause("room03Scene");
+        this.scene.setVisible(false, "MessageScene");
+        this.scene.pause("MessageScene");
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();

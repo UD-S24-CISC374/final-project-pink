@@ -157,7 +157,10 @@ export class Gun {
                         if (this.gameState.isDodging) {
                             delay += 660;
                         }
-                        if (this != this.gameState.player.currentGun) {
+                        if (
+                            this != this.gameState.player.currentGun ||
+                            this.scene != this.gameState.player.currentGun.scene
+                        ) {
                             this.clearTimeouts();
                             this.shootingInProgress = false;
                             this.isReloaded = true;
@@ -215,7 +218,7 @@ export class Gun {
             x++; // Increment x inside the loop
         }
     }
-    private clearTimeouts() {
+    public clearTimeouts() {
         // Iterate through the list of timeout IDs and clear each timeout
         this.timeoutIds.forEach((timeoutId) => {
             clearTimeout(timeoutId);
