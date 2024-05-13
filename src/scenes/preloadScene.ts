@@ -170,26 +170,6 @@ export default class PreloadScene extends Phaser.Scene {
                 frameHeight: 23,
             }
         );
-        this.load.spritesheet("demon_idle", "assets/sprites/demon_idle.png", {
-            frameWidth: 16,
-            frameHeight: 23,
-        });
-        this.load.spritesheet(
-            "demon_walk_R",
-            "assets/sprites/demon_walk_right.png",
-            {
-                frameWidth: 16,
-                frameHeight: 23,
-            }
-        );
-        this.load.spritesheet(
-            "demon_walk_L",
-            "assets/sprites/demon_walk_left.png",
-            {
-                frameWidth: 16,
-                frameHeight: 23,
-            }
-        );
         this.load.spritesheet(
             "fireball_idle",
             "assets/attacks/fireball_idle.png",

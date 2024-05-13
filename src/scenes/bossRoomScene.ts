@@ -4,6 +4,7 @@ import { CONFIG } from "../config";
 import { CharacterMovement } from "../util/playerMovement";
 import { gameState } from "../objects/gameState";
 import ConsoleScene from "./consoleScene";
+import Demon from "../objects/demon";
 import { Bullet } from "../objects/bullet";
 import { KeyboardManager } from "../util/keyboardManager";
 import { sceneEvents } from "../util/eventCenter";
@@ -15,7 +16,7 @@ class bossRoomScene extends Phaser.Scene {
     private characterMovement: CharacterMovement;
     private keyboardManager: KeyboardManager;
     private bullets?: Phaser.Physics.Arcade.Group;
-    private demon?: Phaser.Physics.Arcade.Sprite;
+    private demons?: Phaser.Physics.Arcade.Group;
     constructor() {
         super({ key: "bossRoomScene" });
     }
@@ -50,8 +51,33 @@ class bossRoomScene extends Phaser.Scene {
                 });
             }
             this.player = this.physics.add.sprite(400, 725, "robot_idle");
-            this.demon = this.physics.add.sprite(400, 725, "demon_idle");
-            this.demon.anims.play("demon_idle", true);
+            this.demons = this.physics.add.group({
+                classType: Demon,
+                createCallback: (go) => {
+                    const demonGo = go as Demon;
+                    if (demonGo.body) {
+                        demonGo.body.onCollide = true;
+                    }
+                },
+            });
+
+            const demon1 = this.demons.get(400, 200, "demon");
+            demon1.setProperties(150, 30, 200);
+            const demon2 = this.demons.get(400, 150, "demon");
+            demon2.setProperties(150, 30, 200);
+
+            this.events.on("player-moved", (x: number, y: number) => {
+                //on player movement, the demons target x and y change
+                if (this.demons)
+                    this.demons.children.iterate(
+                        (c: Phaser.GameObjects.GameObject) => {
+                            const child = c as Demon;
+                            child.setTargetPosition(x, y);
+                            return true;
+                        }
+                    );
+            });
+
             this.gameState.player.player = this.player; //absolutely need this
             this.characterMovement = new CharacterMovement(
                 this.player,
@@ -77,7 +103,7 @@ class bossRoomScene extends Phaser.Scene {
 
             if (walls) {
                 this.physics.add.collider(this.player, walls);
-                this.physics.add.collider(this.demon, walls);
+                this.physics.add.collider(this.demons, walls);
                 this.physics.add.collider(
                     //player bullets
                     this.bullets,
@@ -86,11 +112,31 @@ class bossRoomScene extends Phaser.Scene {
                         this.handleBulletTileCollision(object1, object2);
                     }
                 );
-            }
+                this.demons.children.iterate(
+                    //demon bullets
+                    (demon: Phaser.GameObjects.GameObject) => {
+                        //iterates through our demon group
+                        const currentDemon = demon as Demon;
 
+                        this.physics.add.collider(
+                            //for each it adds a collider
+                            currentDemon.fireballs, //fireball group stored in each demon instance
+                            walls,
+                            (object1, object2) => {
+                                this.handleFireballTileCollision(
+                                    object1,
+                                    object2
+                                );
+                            }
+                        );
+                        return true;
+                    }
+                );
+            }
+            // collision between player and demons
             this.physics.add.collider(
                 this.player,
-                this.demon,
+                this.demons,
                 () => {
                     // Decrease player health when colliding with demon
                     this.handlePlayerEnemyCollision();
@@ -98,6 +144,42 @@ class bossRoomScene extends Phaser.Scene {
                 undefined,
                 this
             );
+
+            // Collision between player bullets and demons
+            this.physics.add.collider(
+                this.bullets,
+                this.demons,
+                (bullet, demon) => {
+                    // Decrease demon health when hit by player bullets
+                    (demon as Demon).takeDamage(
+                        this.gameState.player.getCurrentGunDamage()
+                    ); // damages demons with current guns damage
+                    // Destroy the bullet
+                    bullet.destroy();
+                }
+            );
+
+            // Collision between demon bullets and player
+            this.demons.children.iterate((demon) => {
+                const currentDemon = demon as Demon; // Cast to Demon type
+                // Check if fireballs group exists
+                this.physics.add.collider(
+                    this.player as Phaser.GameObjects.Sprite,
+                    currentDemon.fireballs, // Collider between player and fireballs
+                    (player, fireball) => {
+                        this.handlePlayerEnemyFireballCollision(
+                            this.player as
+                                | Phaser.Types.Physics.Arcade.GameObjectWithBody
+                                | Phaser.Tilemaps.Tile, //for type resolution...
+                            fireball
+                        );
+                    },
+                    undefined,
+                    this
+                );
+
+                return true;
+            });
 
             //camera follows player
             this.scene.run("game-ui", { gameState: this.gameState });
