@@ -15,6 +15,7 @@ class bossRoomScene extends Phaser.Scene {
     private characterMovement: CharacterMovement;
     private keyboardManager: KeyboardManager;
     private bullets?: Phaser.Physics.Arcade.Group;
+    private demon?: Phaser.Physics.Arcade.Sprite;
     constructor() {
         super({ key: "bossRoomScene" });
     }
@@ -49,6 +50,8 @@ class bossRoomScene extends Phaser.Scene {
                 });
             }
             this.player = this.physics.add.sprite(400, 725, "robot_idle");
+            this.demon = this.physics.add.sprite(400, 725, "demon_idle");
+            this.demon.anims.play("demon_idle", true);
             this.gameState.player.player = this.player; //absolutely need this
             this.characterMovement = new CharacterMovement(
                 this.player,
@@ -74,6 +77,7 @@ class bossRoomScene extends Phaser.Scene {
 
             if (walls) {
                 this.physics.add.collider(this.player, walls);
+                this.physics.add.collider(this.demon, walls);
                 this.physics.add.collider(
                     //player bullets
                     this.bullets,
@@ -83,6 +87,17 @@ class bossRoomScene extends Phaser.Scene {
                     }
                 );
             }
+
+            this.physics.add.collider(
+                this.player,
+                this.demon,
+                () => {
+                    // Decrease player health when colliding with demon
+                    this.handlePlayerEnemyCollision();
+                },
+                undefined,
+                this
+            );
 
             //camera follows player
             this.scene.run("game-ui", { gameState: this.gameState });
