@@ -223,6 +223,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.tilemapTiledJSON("room02", "assets/tilemaps/room02.json");
         this.load.tilemapTiledJSON("room03", "assets/tilemaps/room03.json");
         this.load.tilemapTiledJSON("room04", "assets/tilemaps/room04.json");
+        this.load.tilemapTiledJSON("bossRoom", "assets/tilemaps/bossRoom.json");
         this.load.image("console", "assets/consoleTemp.png");
         this.load.image("eToInteractBubble", "assets/bubble_etointeract.png");
         this.load.image("talkingBubble", "assets/bubble_talking.png");
