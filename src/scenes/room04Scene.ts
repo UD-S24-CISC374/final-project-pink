@@ -20,6 +20,7 @@ class room04Scene extends Phaser.Scene {
     private chest: Phaser.Physics.Arcade.Sprite;
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
+    private firstCollision: boolean = true;
     constructor() {
         super({ key: "room04Scene" });
     }
@@ -27,6 +28,7 @@ class room04Scene extends Phaser.Scene {
         this.gameState = data.gameState;
         this.chestOpened = false;
         this.scene.stop("MessgaeScene");
+        this.firstCollision = true;
     }
     preload() {}
 
@@ -76,16 +78,22 @@ class room04Scene extends Phaser.Scene {
 
             const chort = this.chorts.get(600, 500, "chort");
             chort.setProperties(30, 75, 200);
+            chort.setImmovable(true);
             const chort2 = this.chorts.get(400, 400, "chort");
             chort2.setProperties(40, 75, 200);
+            chort2.setImmovable(true);
             const chort3 = this.chorts.get(300, 500, "chort");
             chort3.setProperties(40, 100, 150);
+            chort3.setImmovable(true);
             const chort4 = this.chorts.get(400, 200, "chort");
             chort4.setProperties(40, 30, 300);
+            chort4.setImmovable(true);
             const chort5 = this.chorts.get(400, 600, "chort");
             chort5.setProperties(40, 30, 300);
+            chort5.setImmovable(true);
             const chort6 = this.chorts.get(725, 100, "chort");
             chort6.setProperties(50, 30, 300);
+            chort6.setImmovable(true);
 
             this.chest = this.physics.add.sprite(720, 25, "wood_chest");
             this.chest.setImmovable(true);
@@ -168,12 +176,18 @@ class room04Scene extends Phaser.Scene {
                 this.bullets,
                 this.chorts,
                 (bullet, chort) => {
-                    // Decrease chort health when hit by player bullets
-                    (chort as Chort).takeDamage(
-                        this.gameState.player.getCurrentGunDamage()
-                    ); // Assuming each bullet does 10 damage
-                    // Destroy the bullet
-                    bullet.destroy();
+                    if (bullet instanceof Bullet && bullet.firstCollision) {
+                        bullet.firstCollision = false;
+
+                        // Decrease chort health when hit by player bullets
+                        (chort as Chort).takeDamage(
+                            this.gameState.player.getCurrentGunDamage()
+                        ); // Assuming each bullet does 10 damage
+                        // Destroy the bullet
+                        if (!this.gameState.player.currentGun?.isPiercing) {
+                            bullet.destroy();
+                        }
+                    }
                 }
             );
             // Collision between chort bullets and player
@@ -240,6 +254,7 @@ class room04Scene extends Phaser.Scene {
                         this.chestZone.getBounds()
                     )
                 ) {
+                    this.sound.play("chest_open_sound");
                     this.chestOpened = true;
                     this.gameState.eButtonPressed = true;
                     setTimeout(() => {
@@ -261,16 +276,16 @@ class room04Scene extends Phaser.Scene {
                         gameState: this.gameState,
                     });
 
-                    const tip1 = [
-                        "You have gained another heart, Remember to use mv player bossRoom!",
-                    ];
-                    this.scene.resume("MessageScene");
-                    this.scene.stop("MessageScene");
-                    this.scene.bringToTop("MessageScene");
-                    this.scene.run("MessageScene", {
-                        messages: tip1, // Pass the messages array to the message scene
-                        gameState: this.gameState,
-                    });
+                    // const tip1 = [
+                    //     "You have gained another heart, Remember to use mv player bossRoom!",
+                    // ];
+                    // this.scene.resume("MessageScene");
+                    // this.scene.stop("MessageScene");
+                    // this.scene.bringToTop("MessageScene");
+                    // this.scene.run("MessageScene", {
+                    //     messages: tip1, // Pass the messages array to the message scene
+                    //     gameState: this.gameState,
+                    // });
                 }
             });
         }

@@ -21,6 +21,8 @@ export class Gun {
     public shootingInProgress: boolean = false; //to stop shooting when ammo clip is used
     public isSingleShot: boolean = false;
     public isReloaded: boolean = true; //use this for the reload command, and to check if current gun is reloaded anywhere where gameState is accessible
+    private scale: number;
+    public isPiercing: boolean;
 
     constructor(
         scene: Phaser.Scene,
@@ -33,7 +35,8 @@ export class Gun {
         bulletDamage: number,
         shotsPerRound: number,
         millisecondsBetweenShots: number,
-        isSingleShot: boolean
+        isSingleShot: boolean,
+        scale: number
     ) {
         this.scene = scene;
         this.gameState = gameState;
@@ -47,6 +50,8 @@ export class Gun {
         this.shotsFired = 0;
         this.millisecondsBetweenShots = millisecondsBetweenShots;
         this.isSingleShot = isSingleShot;
+        this.scale = scale;
+        this.isPiercing = false;
     }
     public setPlayer(player: Phaser.Physics.Arcade.Sprite) {
         this.player = player;
@@ -65,6 +70,7 @@ export class Gun {
                 bulletTexture: this.bulletTexture,
             });
         }
+        this.scene.sound.play("reload_sound");
     }
 
     public addToScene() {
@@ -75,7 +81,7 @@ export class Gun {
             this.player.y,
             this.texture
         );
-        this.gunImage.setScale(0.85);
+        this.gunImage.setScale(this.scale);
     }
 
     // Method to handle shooting bullets
@@ -111,6 +117,15 @@ export class Gun {
                 bullet.setBulletSpeed(this.bulletSpeed);
 
                 // Fire the bullet towards the target
+                if (
+                    this.gameState.player.currentGun?.texture === "gun_sniper"
+                ) {
+                    this.scene.sound.play("sniper_sound");
+                } else if (
+                    this.gameState.player.currentGun?.texture === "gun_default"
+                ) {
+                    this.scene.sound.play("pistol_sound");
+                }
                 bullet.fire(worldPosition.x, worldPosition.y);
 
                 // Increment the number of shots fired
@@ -184,6 +199,7 @@ export class Gun {
 
                             // Fire the bullet towards the target
                             bullet.fire(worldPosition.x, worldPosition.y);
+                            this.scene.sound.play("smg_sound");
 
                             this.shotsFired++;
                             sceneEvents.emit("bullets-changed", {

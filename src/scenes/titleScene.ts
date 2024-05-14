@@ -45,7 +45,7 @@ class TitleScene extends Phaser.Scene {
                 this.cameras.main.width / 2,
                 166,
                 "Created by Quinten Bettin, Jacob Marks, and Charles Gordinier",
-                { fontSize: "30px", color: "#fff" }
+                { fontSize: "33px", color: "#fff" }
             )
             .setAlpha(0);
         creatorText.setOrigin(0.5);
