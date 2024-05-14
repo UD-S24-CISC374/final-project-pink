@@ -21,10 +21,10 @@ export default class Demon extends Phaser.Physics.Arcade.Sprite {
     private moveEvent: Phaser.Time.TimerEvent;
     private targetPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
     public fireballs: Phaser.Physics.Arcade.Group; // Remove the initialization
-
     private health: number = 50; //default values... can be changed with the setter
     private speed: number = 75;
     private bulletSpeed: number = 200;
+    private demonCount: number = 2;
     constructor(
         scene: Phaser.Scene,
         x: number,
@@ -106,6 +106,7 @@ export default class Demon extends Phaser.Physics.Arcade.Sprite {
         this.playDamageAnimation();
         this.health -= damage;
         if (this.health <= 0) {
+            this.demonCount--;
             this.disableBody(true, true);
             const explosion = this.scene.add
                 .sprite(this.x, this.y, "fireball_explode")
@@ -115,8 +116,12 @@ export default class Demon extends Phaser.Physics.Arcade.Sprite {
                 this.destroy();
             });
         }
+    }
+
+    public getHealth() {
         return this.health;
     }
+
     private playDamageAnimation() {
         // Red tint animation
         this.setTint(0xff0001); // Set player to red tint

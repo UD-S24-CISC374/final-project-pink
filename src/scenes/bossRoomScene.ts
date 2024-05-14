@@ -17,7 +17,7 @@ class bossRoomScene extends Phaser.Scene {
     private keyboardManager: KeyboardManager;
     private bullets?: Phaser.Physics.Arcade.Group;
     private demons?: Phaser.Physics.Arcade.Group;
-    private demonCount = 2;
+    private demonCount: number = 2;
     constructor() {
         super({ key: "bossRoomScene" });
     }
@@ -153,12 +153,14 @@ class bossRoomScene extends Phaser.Scene {
                 (bullet, demon) => {
                     // Decrease demon health when hit by player bullets
                     if (
-                        (demon as Demon).takeDamage(
-                            this.gameState.player.getCurrentGunDamage()
-                        ) <= 0
+                        (demon as Demon).getHealth() <=
+                        this.gameState.player.getCurrentGunDamage()
                     ) {
-                        this.demonCount--;
+                        this.demonCount--; // Removes a demon from count if it will die from hit
                     }
+                    (demon as Demon).takeDamage(
+                        this.gameState.player.getCurrentGunDamage()
+                    );
                     bullet.destroy(); // Destroy the bullet
                 }
             );
