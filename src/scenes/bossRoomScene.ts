@@ -17,6 +17,7 @@ class bossRoomScene extends Phaser.Scene {
     private keyboardManager: KeyboardManager;
     private bullets?: Phaser.Physics.Arcade.Group;
     private demons?: Phaser.Physics.Arcade.Group;
+    private demonCount: number = 2;
     constructor() {
         super({ key: "bossRoomScene" });
     }
@@ -62,9 +63,9 @@ class bossRoomScene extends Phaser.Scene {
             });
 
             const demon1 = this.demons.get(400, 200, "demon");
-            demon1.setProperties(150, 30, 200);
+            demon1.setProperties(150, 20, 250);
             const demon2 = this.demons.get(400, 150, "demon");
-            demon2.setProperties(150, 30, 200);
+            demon2.setProperties(150, 20, 250);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the demons target x and y change
@@ -151,11 +152,16 @@ class bossRoomScene extends Phaser.Scene {
                 this.demons,
                 (bullet, demon) => {
                     // Decrease demon health when hit by player bullets
+                    if (
+                        (demon as Demon).getHealth() <=
+                        this.gameState.player.getCurrentGunDamage()
+                    ) {
+                        this.demonCount--; // Removes a demon from count if it will die from hit
+                    }
                     (demon as Demon).takeDamage(
                         this.gameState.player.getCurrentGunDamage()
-                    ); // damages demons with current guns damage
-                    // Destroy the bullet
-                    bullet.destroy();
+                    );
+                    bullet.destroy(); // Destroy the bullet
                 }
             );
 
@@ -362,6 +368,11 @@ class bossRoomScene extends Phaser.Scene {
                         gameState: this.gameState,
                     });
                 },
+            });
+        } else if (this.demonCount == 0) {
+            this.scene.stop;
+            this.scene.start("GameOverScene", {
+                gameState: this.gameState,
             });
         } else {
             // Player is not dead, can move
