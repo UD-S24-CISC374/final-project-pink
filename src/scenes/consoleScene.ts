@@ -94,11 +94,12 @@ class ConsoleScene extends Phaser.Scene {
         this.consoleDisplay = this.add
             .dom(220, 16)
             .createFromCache("consoleDisplay");
+        document.getElementById("consoleInput")?.focus();
         //change back to the game scene.
-        const slashKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.BACK_SLASH
+        const tabKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        slashKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
         const enterKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.ENTER
         );
@@ -215,6 +216,31 @@ class ConsoleScene extends Phaser.Scene {
             const pathList = command[1].split("/");
             const pathListTo = command[2].split("/");
             var tempScene: room01Scene;
+            if (pathListTo[pathList.length - 1] == "player") {
+                if (pathList[pathList.length - 1] == "gun.c") {
+                    if (
+                        (this.scene.get(this.gameState.curRoom) as room01Scene)
+                            .defaultGunBig
+                    ) {
+                        (
+                            this.scene.get(
+                                this.gameState.curRoom
+                            ) as room01Scene
+                        ).addGun();
+                        return ["gun.c moved to player"];
+                    } else {
+                        return [
+                            'Cannot find "gun.c" because it does not exist.',
+                        ];
+                    }
+                } else {
+                    return [
+                        'cannot find "' +
+                            pathList.join() +
+                            '" because it does not exist.',
+                    ];
+                }
+            }
             if (pathList[pathList.length - 1] == "player") {
                 console.log("moving");
                 if (pathListTo[pathListTo.length - 1] == "room05") {
@@ -383,6 +409,39 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop(this.gameState.curRoom);
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
+                } else if (pathListTo[pathListTo.length - 1] == "bossRoom") {
+                    this.currentNode.entities =
+                        this.currentNode.entities.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room01.entities.push("player");
+                    this.currentNode = room01;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "bossRoomScene";
+                    this.scene.start("bossRoomScene", {
+                        gameState: this.gameState,
+                    });
+
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "..") {
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
@@ -444,8 +503,17 @@ class ConsoleScene extends Phaser.Scene {
                 return ["Err cannot compile a non c file."]; // add to output
             }
             console.log(pathList);
-        } else if (command[0] == "./") {
-            const pathList = command[1].split("/"); //this will be where the weapoon reload happens
+        } else if (command[0].includes("./")) {
+            const pathList = command[0].split("/"); //this will be where the weapoon reload happens
+            if (command[0] == "./a.out") {
+                if (this.currentNode.entities.includes("a.out")) {
+                    this.gameState.player.currentGun?.reload();
+                    console.log("reloaded");
+                } else {
+                    return ["file does not exist or cannot be run"];
+                }
+            }
+
             console.log(pathList);
         } else if (command[0] == "cat") {
             const pathList = command[1].split("/"); //this will be where you can display weapon "files"
@@ -460,6 +528,9 @@ class ConsoleScene extends Phaser.Scene {
         } else if (command[0] == "rm") {
             const pathList = command[1].split("/");
             if (pathList[pathList.length - 1] == "bullets.c") {
+                (
+                    this.scene.get(this.gameState.curRoom) as room01Scene
+                ).destroyFireBalls();
                 return ["deleting bullets"];
             } else {
                 return ["you do not have permission to delete this"]; // add this to output

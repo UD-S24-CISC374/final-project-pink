@@ -17,13 +17,12 @@ class room01Scene extends Phaser.Scene {
     private characterMovement: CharacterMovement;
     private keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
-    private bullets?: Phaser.Physics.Arcade.Group;
+    public bullets?: Phaser.Physics.Arcade.Group;
     private chest: Phaser.Physics.Arcade.Sprite;
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
-    private defaultGunBig?: Gun;
-
+    public defaultGunBig?: Gun;
     constructor() {
         super({ key: "room01Scene" });
     }
@@ -271,7 +270,7 @@ class room01Scene extends Phaser.Scene {
         const tabKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        tabKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
 
         if (this.input.keyboard) {
             this.input.keyboard.on("keydown-E", () => {
@@ -319,7 +318,9 @@ class room01Scene extends Phaser.Scene {
                     this.physics.add.existing(this.gunHitBox);
                     this.gunHitBox.setOrigin(0.5, 0.5);
                     this.gunHitBox.setVisible(false); // Hide the hitbox
-                    const tip1 = ["Press 'e' on the gun to pick it up!"];
+                    const tip1 = [
+                        "Try moving the gun to the player in ther terminal to pick it up!",
+                    ];
                     this.scene.bringToTop("MessageScene");
                     this.scene.run("MessageScene", {
                         messages: tip1, // Pass the messages array to the message scene
@@ -360,7 +361,7 @@ class room01Scene extends Phaser.Scene {
                             "Your new gun has been added to your inventory.",
                             "New guns always come fully loaded, give it a shoot!",
                             "Use the scroll wheel or arrow keys to switch to your other guns.",
-                            "Press Tab to open your command prompt, and backslash \\ to close it.",
+                            "Press Tab to open and close your command prompt.",
                             "To get to the next room, type 'mv player room02' and hit enter",
                             "Change the room # for access to other rooms!",
                         ];
@@ -428,6 +429,7 @@ class room01Scene extends Phaser.Scene {
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
+        document.getElementById("consoleInput")?.focus();
     }
 
     //helper functions for colliders methods, need to make a seperate util file eventually
@@ -529,6 +531,22 @@ class room01Scene extends Phaser.Scene {
                 fireball.destroy();
             });
         }
+    }
+    public destroyFireBalls() {
+        if (this.chorts) {
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                currentChort.fireballs.clear(true, true);
+                return true;
+            });
+        }
+    }
+    public addGun() {
+        if (this.defaultGunBig) {
+            this.gameState.player.addGun(this.defaultGunBig);
+            this.defaultGunBig.reload();
+        }
+        this.gameState.player.setAllGunsInvisibleExceptCurrent();
     }
 
     private handlePlayerEnemyCollision() {
