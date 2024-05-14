@@ -56,7 +56,14 @@ class Player {
         // If the current gun is null, set the current gun to the newly added gun
         this.currentGun = gun;
         if (this.guns.length > 1) {
-            this.changeGunIndex(1);
+            this.currentGunIndex = this.guns.length - 1;
+            this.setAllGunsInvisibleExceptCurrent();
+            sceneEvents.emit("gun-changed", this.currentGun.texture);
+            sceneEvents.emit("bullets-changed", {
+                numBullets:
+                    this.currentGun.shotsPerRound - this.currentGun.shotsFired,
+                bulletTexture: this.currentGun.bulletTexture,
+            });
         }
     }
 
@@ -104,7 +111,8 @@ class Player {
         if (!this.isInvincible) {
             this.isInvincible = true;
 
-            // Play damage animation
+            // Play damage animationf
+            this.player.scene.sound.play("player_hit_sound");
             this.playDamageAnimation();
 
             // Set a timeout to disable invincibility after a certain duration

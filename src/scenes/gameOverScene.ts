@@ -18,10 +18,14 @@ export default class GameOverScene extends Phaser.Scene {
         this.scene.stop("HelpButton");
         this.gameState.player.healToAmount(5);
         this.gameState.resetValuesOnSceneSwitch();
+        this.gameState.player.currentGunIndex = 0;
         this.gameState.player.guns = [];
         this.gameState.player.currentGun = undefined;
         this.gameState.tutorialLevel = 0;
         this.gameState.interactingWithNpc = false;
+        this.scene.resume("MessageScene");
+        this.scene.stop("MessageScene");
+        this.scene.setVisible(false, "MessageScene");
     }
     preload() {
         this.load.image("game_over", "assets/game_over.png");
@@ -30,6 +34,8 @@ export default class GameOverScene extends Phaser.Scene {
 
     create() {
         // Add a black rectangle to cover the entire screen
+        this.sound.stopAll();
+        this.sound.play("player_death_sound");
         const background = this.add.image(
             this.cameras.main.width / 2,
             this.cameras.main.height / 2,
@@ -66,6 +72,7 @@ export default class GameOverScene extends Phaser.Scene {
                             this.scene.start("LobbyScene", {
                                 gameState: this.gameState,
                             });
+                            this.sound.stopAll();
                             this.scene.stop();
                         });
                     },
