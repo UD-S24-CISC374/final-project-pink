@@ -319,7 +319,8 @@ class room01Scene extends Phaser.Scene {
                     this.gunHitBox.setOrigin(0.5, 0.5);
                     this.gunHitBox.setVisible(false); // Hide the hitbox
                     const tip1 = [
-                        "Try moving the gun to the player in ther terminal to pick it up!",
+                        "Try moving the gun to the player in the terminal to pick it up!",
+                        "Type 'mv gun.c player', to move the gun into your inventory",
                     ];
                     this.scene.bringToTop("MessageScene");
                     this.scene.run("MessageScene", {
@@ -361,7 +362,7 @@ class room01Scene extends Phaser.Scene {
                             "Your new gun has been added to your inventory.",
                             "New guns always come fully loaded, give it a shoot!",
                             "Use the scroll wheel or arrow keys to switch to your other guns.",
-                            "Press Tab to open and close your command prompt.",
+                            "Remember press Tab to open and close your command prompt.",
                             "To get to the next room, type 'mv player room02' and hit enter",
                             "Change the room # for access to other rooms!",
                         ];
