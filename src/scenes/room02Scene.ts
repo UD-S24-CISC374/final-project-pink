@@ -238,7 +238,7 @@ class room02Scene extends Phaser.Scene {
         const tabKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        tabKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
 
         // if (this.input.keyboard) {
         //     this.input.keyboard.on("keydown-E", () => {
@@ -508,6 +508,15 @@ class room02Scene extends Phaser.Scene {
                 "player-health-changed",
                 this.gameState.player.health
             );
+        }
+    }
+    public destroyFireBalls() {
+        if (this.chorts) {
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                currentChort.fireballs.clear(true, true);
+                return true;
+            });
         }
     }
     update() {

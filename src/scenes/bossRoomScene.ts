@@ -202,7 +202,7 @@ class bossRoomScene extends Phaser.Scene {
         const tabKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        tabKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
 
         //changes current gun displayed and stops shooting on mouse wheel scroll
         this.input.on(

@@ -310,7 +310,7 @@ class LobbyScene extends Phaser.Scene {
             const messages6: string[] = [
                 "Now, for the most important and powerful tool you will use...",
                 "It is called the command prompt",
-                "Open it with 'Tab' and close it with '\\'.",
+                "Open and close it with 'Tab'.",
                 "Type 'help' for a list of commands.",
                 "Type 'help some_command' for more info on that command.",
                 "You will need to utilize this powerful tool for many things.",
