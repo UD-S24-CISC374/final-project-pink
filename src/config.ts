@@ -12,6 +12,7 @@ import GameUI from "./scenes/uiScene";
 import MessageScene from "./scenes/messageScene";
 import HelpButton from "./scenes/helpScene";
 import GameOverScene from "./scenes/gameOverScene";
+import bossRoomScene from "./scenes/bossRoomScene";
 
 const DEFAULT_WIDTH = 400;
 const DEFAULT_HEIGHT = 250;
@@ -41,6 +42,7 @@ export const CONFIG = {
         ConsoleScene,
         HelpButton,
         GameOverScene,
+        bossRoomScene,
     ],
     physics: {
         default: "arcade",
