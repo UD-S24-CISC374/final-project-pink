@@ -416,6 +416,15 @@ class room02Scene extends Phaser.Scene {
             );
         }
     }
+    public destroyFireBalls() {
+        if (this.chorts) {
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                currentChort.fireballs.clear(true, true);
+                return true;
+            });
+        }
+    }
     update() {
         // Check for keyboard input and move the player accordingly
         if (this.gameState.player.health <= 0) {

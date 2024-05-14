@@ -22,7 +22,7 @@ class room01Scene extends Phaser.Scene {
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
-    private defaultGunBig?: Gun;
+    public defaultGunBig?: Gun;
     constructor() {
         super({ key: "room01Scene" });
     }
@@ -302,7 +302,9 @@ class room01Scene extends Phaser.Scene {
                     this.physics.add.existing(this.gunHitBox);
                     this.gunHitBox.setOrigin(0.5, 0.5);
                     this.gunHitBox.setVisible(false); // Hide the hitbox
-                    const tip1 = ["Press 'e' on the gun to pick it up!"];
+                    const tip1 = [
+                        "Try moving the gun to the player in ther terminal to pick it up!",
+                    ];
                     this.scene.bringToTop("MessageScene");
                     this.scene.run("MessageScene", {
                         messages: tip1, // Pass the messages array to the message scene
@@ -522,6 +524,13 @@ class room01Scene extends Phaser.Scene {
                 return true;
             });
         }
+    }
+    public addGun() {
+        if (this.defaultGunBig) {
+            this.gameState.player.addGun(this.defaultGunBig);
+            this.defaultGunBig.reload();
+        }
+        this.gameState.player.setAllGunsInvisibleExceptCurrent();
     }
 
     private handlePlayerEnemyCollision() {

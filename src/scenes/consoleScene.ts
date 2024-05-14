@@ -217,9 +217,28 @@ class ConsoleScene extends Phaser.Scene {
             const pathListTo = command[2].split("/");
             var tempScene: room01Scene;
             if (pathListTo[pathList.length - 1] == "player") {
-                if (pathList[pathList.length - 1] == "gun") {
-                    //add gun to player
-                    return [""];
+                if (pathList[pathList.length - 1] == "gun.c") {
+                    if (
+                        (this.scene.get(this.gameState.curRoom) as room01Scene)
+                            .defaultGunBig
+                    ) {
+                        (
+                            this.scene.get(
+                                this.gameState.curRoom
+                            ) as room01Scene
+                        ).addGun();
+                        return ["gun.c moved to player"];
+                    } else {
+                        return [
+                            'Cannot find "gun.c" because it does not exist.',
+                        ];
+                    }
+                } else {
+                    return [
+                        'cannot find "' +
+                            pathList.join() +
+                            '" because it does not exist.',
+                    ];
                 }
             }
             if (pathList[pathList.length - 1] == "player") {
@@ -384,6 +403,39 @@ class ConsoleScene extends Phaser.Scene {
 
                     this.gameState.curRoom = "room01Scene";
                     this.scene.start("room01Scene", {
+                        gameState: this.gameState,
+                    });
+
+                    this.scene.bringToTop(this.gameState.curRoom);
+                    this.scene.bringToTop("game-ui");
+                    this.scene.pause("ConsoleScene");
+                } else if (pathListTo[pathListTo.length - 1] == "bossRoom") {
+                    this.currentNode.entities =
+                        this.currentNode.entities.filter(
+                            (str) => str !== "player"
+                        ) as string[];
+                    room01.entities.push("player");
+                    this.currentNode = room01;
+                    //hide console
+                    console.log(this.gameState.curRoom);
+                    this.makeVisible();
+                    this.scene.setVisible(false, "ConsoleScene");
+
+                    //stop previous room
+                    tempScene = this.scene.get(
+                        this.gameState.curRoom
+                    ) as room01Scene;
+                    console.log(this.gameState.curRoom, tempScene);
+                    tempScene.events.off("player-moved");
+                    sceneEvents.removeAllListeners();
+                    this.scene.stop("game-ui");
+                    this.scene.stop(this.gameState.curRoom);
+
+                    //reset gamestate
+                    this.gameState.resetValuesOnSceneSwitch();
+
+                    this.gameState.curRoom = "bossRoomScene";
+                    this.scene.start("bossRoomScene", {
                         gameState: this.gameState,
                     });
 
