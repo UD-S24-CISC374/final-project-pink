@@ -418,6 +418,7 @@ class room02Scene extends Phaser.Scene {
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
+        document.getElementById("consoleInput")?.focus();
     }
     private handleBulletTileCollision(
         obj1:
@@ -518,6 +519,9 @@ class room02Scene extends Phaser.Scene {
                 return true;
             });
         }
+    }
+    public roomComplete() {
+        return this.chorts?.getLength();
     }
     update() {
         // Check for keyboard input and move the player accordingly
