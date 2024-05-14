@@ -314,7 +314,7 @@ class LobbyScene extends Phaser.Scene {
                 "Type 'help' for a list of commands.",
                 "Type 'help some_command' for more info on that command.",
                 "You will use this to reload",
-                "Open the command prompt and type gcc gun.c to compile your weapon.",
+                "Open the command prompt and type 'gcc gun.c' to compile your weapon.",
                 "You will need to compile your weapon on each new room.",
                 "To reload, type './a.out', this will reload the weapon in your hand.",
                 "As long as you've compiled a weapon once, you can use ./a.out on any gun.",
