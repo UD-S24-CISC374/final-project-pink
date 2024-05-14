@@ -41,11 +41,9 @@ export default class HelpButton extends Phaser.Scene {
 
         Use mouse to aim and left click to shoot
 
-        'Tab' opens the command prompt
+        'Tab' opens and closes the command prompt
 
         'Enter' to execute a command
-
-        '\\' closes the command prompt
 
         Scroll or LR arrow keys to switch guns
     `;
