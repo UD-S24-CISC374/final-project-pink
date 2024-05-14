@@ -115,6 +115,7 @@ export default class Demon extends Phaser.Physics.Arcade.Sprite {
                 this.destroy();
             });
         }
+        return this.health;
     }
     private playDamageAnimation() {
         // Red tint animation
