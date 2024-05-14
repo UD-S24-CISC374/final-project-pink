@@ -78,6 +78,7 @@ export default class MessageScene extends Phaser.Scene {
 
     advanceMessage() {
         // Check if there are more messages to display
+        this.gameState.player.player.scene.sound.play("button_sound");
         if (this.currentMessageIndex < this.messages.length - 1) {
             // Move to the next message
             this.currentMessageIndex++;

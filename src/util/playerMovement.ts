@@ -334,6 +334,7 @@ export class CharacterMovement {
 
             // Apply velocity for dodge roll
             this.player.setVelocity(dodgeVelocityX, dodgeVelocityY);
+            this.scene.sound.play("roll_sound");
 
             // Set a timer to end the dodge roll animation
             this.scene.time.delayedCall(660, () => {
