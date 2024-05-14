@@ -8,7 +8,6 @@ export default class MessageScene extends Phaser.Scene {
     private messageText: Phaser.GameObjects.Text; // Text object to display messages
     private delayBetweenLetters: number = 20; // Delay between displaying each letter in milliseconds
     private letterTimer?: Phaser.Time.TimerEvent; // Timer to control letter-by-letter display
-
     constructor() {
         super({ key: "MessageScene" });
     }
@@ -21,8 +20,23 @@ export default class MessageScene extends Phaser.Scene {
 
     create() {
         // Display initial message
+        const textFrame = this.add.image(
+            this.cameras.main.centerX,
+            215,
+            "message_border"
+        );
+        textFrame.setScale(1.25, 1); //for now, i messed up
+        // Deisplay advance button
+        const advanceButton = this.add.image(
+            this.cameras.main.centerX + 82,
+            237,
+            "advance_button"
+        );
         this.showMessage(this.messages[this.currentMessageIndex]);
-        this.input.on("pointerdown", this.advanceMessage, this);
+        advanceButton.setScale(1.25, 1); //for now, i messed up
+
+        advanceButton.setInteractive(); // Enable interaction
+        advanceButton.on("pointerdown", this.advanceMessage, this); // Set up click event listener
     }
 
     update() {
@@ -39,15 +53,18 @@ export default class MessageScene extends Phaser.Scene {
         this.messageText = this.add
             .text(
                 this.cameras.main.centerX,
-                this.cameras.main.centerY + 100,
+                this.cameras.main.centerY + 86,
                 "",
                 {
                     fontSize: "12px",
                     color: "#ffffff",
                     fontFamily: "Arial",
+                    wordWrap: { width: 186 },
+                    lineSpacing: 4,
+                    align: "center",
                 }
             )
-            .setOrigin(0.5, 0.5); // Set origin to center the text
+            .setOrigin(0.5, 0.5);
 
         // Start timer to display message letter by letter
         this.letterTimer = this.time.addEvent({

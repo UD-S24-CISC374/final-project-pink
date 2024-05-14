@@ -525,7 +525,10 @@ class LobbyScene extends Phaser.Scene {
                             this.gameNpcZone.getBounds()
                         )
                     ) {
-                        if (!this.gameState.interactingWithNpc) {
+                        if (
+                            !this.gameState.interactingWithNpc &&
+                            !this.canStart
+                        ) {
                             this.npcInteractions += 1;
                             this.gameState.interactingWithNpc = true;
                             this.sound.play("npc_talking_sound");

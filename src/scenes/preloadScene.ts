@@ -9,22 +9,24 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.audio("lobby_music", "assets/sound/lobby_music.mp3"); //
-        this.load.audio("room_music", "assets/sound/room_music.mp3"); //
-        this.load.audio("smg_sound", "assets/sound/pistol.mp3"); //
-        this.load.audio("pistol_sound", "assets/sound/smg.mp3"); //
-        this.load.audio("sniper_sound", "assets/sound/sniper.mp3"); //
-        this.load.audio("reload_sound", "assets/sound/reload_sound.mp3"); //
-        this.load.audio("enemy_death_sound", "assets/sound/enemy_death.mp3"); //
-        this.load.audio("enemy_hit_sound", "assets/sound/enemy_hit.wav"); //
-        this.load.audio("player_death_sound", "assets/sound/death.mp3"); //
-        this.load.audio("player_hit_sound", "assets/sound/player_hit.wav"); //
-        this.load.audio("npc_talking_sound", "assets/sound/npc_talking.mp3"); //
-        this.load.audio("fireball_sound", "assets/sound/fireball.mp3"); //
-        this.load.audio("walking_sound", "assets/sound/walking.mp3");
-        this.load.audio("roll_sound", "assets/sound/roll.wav"); //
-        this.load.audio("chest_open_sound", "assets/sound/chest_open.mp3"); //
-        this.load.audio("button_sound", "assets/sound/click_button.mp3"); //
+        this.load.audio("lobby_music", "assets/sound/lobby_music.mp3");
+        this.load.audio("room_music", "assets/sound/room_music.mp3");
+        this.load.audio("smg_sound", "assets/sound/pistol.mp3");
+        this.load.audio("pistol_sound", "assets/sound/smg.mp3");
+        this.load.audio("sniper_sound", "assets/sound/sniper.mp3");
+        this.load.audio("reload_sound", "assets/sound/reload_sound.mp3");
+        this.load.audio("enemy_death_sound", "assets/sound/enemy_death.mp3");
+        this.load.audio("enemy_hit_sound", "assets/sound/enemy_hit.wav");
+        this.load.audio("player_death_sound", "assets/sound/death.mp3");
+        this.load.audio("player_hit_sound", "assets/sound/player_hit.wav");
+        this.load.audio("npc_talking_sound", "assets/sound/npc_talking.mp3");
+        this.load.audio("fireball_sound", "assets/sound/fireball.mp3");
+        this.load.audio("walking_sound", "assets/sound/walking.mp3"); //still not added
+        this.load.audio("roll_sound", "assets/sound/roll.wav");
+        this.load.audio("chest_open_sound", "assets/sound/chest_open.mp3");
+        this.load.audio("button_sound", "assets/sound/click_button.mp3");
+        this.load.image("advance_button", "assets/advance_button.png");
+        this.load.image("message_border", "assets/message_border.png");
         this.load.image("bullet_blue", "assets/bullets/bullet_blue.png");
         this.load.image("bullet_white", "assets/bullets/bullet_white.png");
         this.load.image(
