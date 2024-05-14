@@ -665,6 +665,7 @@ class LobbyScene extends Phaser.Scene {
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
+        document.getElementById("consoleInput")?.focus();
     }
 
     private npcAllowsVoid() {
