@@ -195,7 +195,7 @@ export class Gun {
                             if (this.shotsFired >= this.shotsPerRound) {
                                 this.shootingInProgress = false;
                                 this.isReloaded = false;
-                                this.reload(); //remove later gives infinite reloads
+                                //this.reload(); //remove later gives infinite reloads
                             }
                         } else {
                             this.shootingInProgress = false;

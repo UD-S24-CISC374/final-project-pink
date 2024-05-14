@@ -343,7 +343,7 @@ class room01Scene extends Phaser.Scene {
                             "Your new gun has been added to your inventory.",
                             "New guns always come fully loaded, give it a shoot!",
                             "Use the scroll wheel or arrow keys to switch to your other guns.",
-                            "Press Tab to open your command prompt, and backslash \\ to close it.",
+                            "Press Tab to open and close your command prompt.",
                             "To get to the next room, type 'mv player room02' and hit enter",
                             "Change the room # for access to other rooms!",
                         ];
@@ -411,6 +411,7 @@ class room01Scene extends Phaser.Scene {
         sceneEvents.emit("player-opened-console");
         this.characterMovement.stopX();
         this.characterMovement.stopY();
+        document.getElementById("consoleInput")?.focus();
     }
 
     //helper functions for colliders methods, need to make a seperate util file eventually
