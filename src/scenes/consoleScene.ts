@@ -94,11 +94,12 @@ class ConsoleScene extends Phaser.Scene {
         this.consoleDisplay = this.add
             .dom(220, 16)
             .createFromCache("consoleDisplay");
+        document.getElementById("consoleInput")?.focus();
         //change back to the game scene.
-        const slashKey = this.input.keyboard?.addKey(
-            Phaser.Input.Keyboard.KeyCodes.BACK_SLASH
+        const tabKey = this.input.keyboard?.addKey(
+            Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        slashKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
         const enterKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.ENTER
         );
@@ -215,6 +216,12 @@ class ConsoleScene extends Phaser.Scene {
             const pathList = command[1].split("/");
             const pathListTo = command[2].split("/");
             var tempScene: room01Scene;
+            if (pathListTo[pathList.length - 1] == "player") {
+                if (pathList[pathList.length - 1] == "gun") {
+                    //add gun to player
+                    return [""];
+                }
+            }
             if (pathList[pathList.length - 1] == "player") {
                 console.log("moving");
                 if (pathListTo[pathListTo.length - 1] == "room05") {
@@ -444,8 +451,17 @@ class ConsoleScene extends Phaser.Scene {
                 return ["Err cannot compile a non c file."]; // add to output
             }
             console.log(pathList);
-        } else if (command[0] == "./") {
-            const pathList = command[1].split("/"); //this will be where the weapoon reload happens
+        } else if (command[0].includes("./")) {
+            const pathList = command[0].split("/"); //this will be where the weapoon reload happens
+            if (command[0] == "./a.out") {
+                if (this.currentNode.entities.includes("a.out")) {
+                    this.gameState.player.currentGun?.reload();
+                    console.log("reloaded");
+                } else {
+                    return ["file does not exist or cannot be run"];
+                }
+            }
+
             console.log(pathList);
         } else if (command[0] == "cat") {
             const pathList = command[1].split("/"); //this will be where you can display weapon "files"
@@ -460,6 +476,9 @@ class ConsoleScene extends Phaser.Scene {
         } else if (command[0] == "rm") {
             const pathList = command[1].split("/");
             if (pathList[pathList.length - 1] == "bullets.c") {
+                (
+                    this.scene.get(this.gameState.curRoom) as room01Scene
+                ).destroyFireBalls();
                 return ["deleting bullets"];
             } else {
                 return ["you do not have permission to delete this"]; // add this to output

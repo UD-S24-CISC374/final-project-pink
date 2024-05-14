@@ -225,7 +225,7 @@ class room04Scene extends Phaser.Scene {
         const tabKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        tabKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
 
         if (this.input.keyboard) {
             this.input.keyboard.on("keydown-E", () => {

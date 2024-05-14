@@ -17,7 +17,7 @@ class room01Scene extends Phaser.Scene {
     private characterMovement: CharacterMovement;
     private keyboardManager: KeyboardManager;
     private chorts?: Phaser.Physics.Arcade.Group;
-    private bullets?: Phaser.Physics.Arcade.Group;
+    public bullets?: Phaser.Physics.Arcade.Group;
     private chest: Phaser.Physics.Arcade.Sprite;
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
@@ -256,7 +256,7 @@ class room01Scene extends Phaser.Scene {
         const tabKey = this.input.keyboard?.addKey(
             Phaser.Input.Keyboard.KeyCodes.TAB
         );
-        tabKey?.on("down", this.switchScene, this);
+        tabKey?.on("up", this.switchScene, this);
 
         if (this.input.keyboard) {
             this.input.keyboard.on("keydown-E", () => {
@@ -510,6 +510,15 @@ class room01Scene extends Phaser.Scene {
             explosion.once("animationcomplete", () => {
                 explosion.destroy(); // Destroy the explosion sprite when animation completes
                 fireball.destroy();
+            });
+        }
+    }
+    public destroyFireBalls() {
+        if (this.chorts) {
+            this.chorts.children.iterate((chort) => {
+                const currentChort = chort as Chort; // Cast to Chort type
+                currentChort.fireballs.clear(true, true);
+                return true;
             });
         }
     }

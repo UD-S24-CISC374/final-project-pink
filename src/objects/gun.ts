@@ -126,7 +126,7 @@ export class Gun {
                 if (this.shotsFired >= this.shotsPerRound) {
                     // Update reloading status after the last shot
                     this.isReloaded = false;
-                    this.reload(); //gives infinite reloads for now
+                    //this.reload(); //gives infinite reloads for now
                 }
             } else {
                 // Prevent shooting if the round is empty

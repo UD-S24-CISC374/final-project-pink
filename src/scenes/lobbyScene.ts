@@ -198,7 +198,7 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
                     if (this.canStart) {
-                        this.gameState.curRoom = "bossRoomScene";
+                        this.gameState.curRoom = "room01Scene";
                         this.events.off("player-moved");
                         sceneEvents.removeAllListeners();
                         this.scene.stop("game-ui");
@@ -207,7 +207,7 @@ class LobbyScene extends Phaser.Scene {
                         this.gameState.resetValuesOnSceneSwitch();
                         this.gameState.player.guns = [];
                         this.gameState.player.currentGun = undefined;
-                        this.scene.start("bossRoomScene", {
+                        this.scene.start("room01Scene", {
                             gameState: this.gameState,
                         });
                         this.scene.stop();
@@ -302,7 +302,7 @@ class LobbyScene extends Phaser.Scene {
             const messages6: string[] = [
                 "Now, for the most important and powerful tool you will use...",
                 "It is called the command prompt",
-                "Open it with 'Tab' and close it with '\\'.",
+                "Open and close it with 'Tab'.",
                 "Type 'help' for a list of commands.",
                 "Type 'help some_command' for more info on that command.",
                 "You will need to utilize this powerful tool for many things.",
