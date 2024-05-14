@@ -9,6 +9,7 @@ import { Bullet } from "../objects/bullet";
 import { KeyboardManager } from "../util/keyboardManager";
 import { sceneEvents } from "../util/eventCenter";
 import { Fireball } from "../objects/fireball";
+import { Gun } from "../objects/gun";
 
 class room02Scene extends Phaser.Scene {
     private gameState: gameState;
@@ -20,6 +21,9 @@ class room02Scene extends Phaser.Scene {
     private chest: Phaser.Physics.Arcade.Sprite;
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
+    private gunHitBox?: Phaser.GameObjects.Rectangle;
+    private sniper: Gun;
+    private firstCollision = true;
     constructor() {
         super({ key: "room02Scene" });
     }
@@ -27,6 +31,7 @@ class room02Scene extends Phaser.Scene {
         this.gameState = data.gameState;
         this.chestOpened = false;
         this.scene.stop("MessgaeScene");
+        this.firstCollision = true;
     }
     preload() {}
 
@@ -76,14 +81,19 @@ class room02Scene extends Phaser.Scene {
 
             const chort1 = this.chorts.get(550, 400, "chort");
             chort1.setProperties(30, 50, 250);
+            chort1.setImmovable(true);
             const chort2 = this.chorts.get(400, 400, "chort");
             chort2.setProperties(30, 75, 200);
+            chort2.setImmovable(true);
             const chort3 = this.chorts.get(300, 500, "chort");
             chort3.setProperties(30, 100, 150);
+            chort3.setImmovable(true);
             const chort4 = this.chorts.get(400, 200, "chort");
             chort4.setProperties(30, 30, 300);
+            chort4.setImmovable(true);
             const chort5 = this.chorts.get(400, 600, "chort");
             chort5.setProperties(30, 30, 300);
+            chort5.setImmovable(true);
 
             this.chest = this.physics.add.sprite(235, 200, "wood_chest");
             this.chest.setImmovable(true);
@@ -165,12 +175,18 @@ class room02Scene extends Phaser.Scene {
                 this.bullets,
                 this.chorts,
                 (bullet, chort) => {
-                    // Decrease chort health when hit by player bullets
-                    (chort as Chort).takeDamage(
-                        this.gameState.player.getCurrentGunDamage()
-                    ); // Assuming each bullet does 10 damage
-                    // Destroy the bullet
-                    bullet.destroy();
+                    if (bullet instanceof Bullet && bullet.firstCollision) {
+                        bullet.firstCollision = false;
+                        // Decrease chort health when hit by player bullets
+
+                        (chort as Chort).takeDamage(
+                            this.gameState.player.getCurrentGunDamage()
+                        ); // Assuming each bullet does 10 damage
+                        // Destroy the bullet
+                        if (!this.gameState.player.currentGun?.isPiercing) {
+                            bullet.destroy();
+                        }
+                    }
                 }
             );
             // Collision between chort bullets and player
@@ -224,6 +240,51 @@ class room02Scene extends Phaser.Scene {
         );
         tabKey?.on("down", this.switchScene, this);
 
+        // if (this.input.keyboard) {
+        //     this.input.keyboard.on("keydown-E", () => {
+        //         //opens chest and creates gun on e press
+        //         // Check if the player is overlapping with the collision area
+        //         if (
+        //             !this.chestOpened &&
+        //             !this.gameState.eButtonPressed &&
+        //             this.player &&
+        //             Phaser.Geom.Intersects.RectangleToRectangle(
+        //                 this.player.getBounds(),
+        //                 this.chestZone.getBounds()
+        //             )
+        //         ) {
+        //             this.chestOpened = true;
+        //             this.gameState.eButtonPressed = true;
+        //             setTimeout(() => {
+        //                 this.gameState.eButtonPressed = false;
+        //             }, 500);
+
+        //             this.chest.anims.play("wood_chest_open");
+        //             if (
+        //                 this.gameState.player.health !=
+        //                 this.gameState.player.hearts
+        //             ) {
+        //                 this.gameState.player.health += 1;
+        //             } else {
+        //                 this.gameState.player.hearts += 1;
+        //                 this.gameState.player.health += 1;
+        //             }
+        //             this.scene.run("game-ui", {
+        //                 gameState: this.gameState,
+        //             });
+        //             const tip1 = [
+        //                 "You have gained another heart, Remember to use mv player room03!",
+        //             ];
+        //             this.scene.resume("MessageScene");
+        //             this.scene.stop("MessageScene");
+        //             this.scene.bringToTop("MessageScene");
+        //             this.scene.run("MessageScene", {
+        //                 messages: tip1, // Pass the messages array to the message scene
+        //                 gameState: this.gameState,
+        //             });
+        //         }
+        //     });
+        // }
         if (this.input.keyboard) {
             this.input.keyboard.on("keydown-E", () => {
                 //opens chest and creates gun on e press
@@ -237,6 +298,7 @@ class room02Scene extends Phaser.Scene {
                         this.chestZone.getBounds()
                     )
                 ) {
+                    this.sound.play("chest_open_sound");
                     this.chestOpened = true;
                     this.gameState.eButtonPressed = true;
                     setTimeout(() => {
@@ -244,32 +306,63 @@ class room02Scene extends Phaser.Scene {
                     }, 500);
 
                     this.chest.anims.play("wood_chest_open");
+                    this.sniper = new Gun(
+                        this,
+                        this.gameState,
+                        this.player,
+                        this.bullets!, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
+                        "gun_sniper", //gun texture
+                        "bullet_white", //bullet texture (same as from this.bullets)
+                        650, //bullet speed
+                        15, //bullet damage
+                        3, //shots per round
+                        100, //miliseconds between shots
+                        true,
+                        0.7
+                    );
+                    this.sniper.isPiercing = true;
+                    this.sniper.addToScene();
+                    this.sniper.setVisible();
+                    this.gunHitBox = this.add.rectangle(
+                        this.sniper.gunImage.x,
+                        this.sniper.gunImage.y,
+                        this.sniper.gunImage.width,
+                        this.sniper.gunImage.height
+                    );
+                    this.physics.add.existing(this.gunHitBox);
+                    this.gunHitBox.setOrigin(0.5, 0.5);
+                    this.gunHitBox.setVisible(false); // Hide the hitbox
+                    // teach player how to realod all guns at once
+                }
+            });
+            this.input.keyboard.on("keydown-E", () => {
+                //adds gun to inventory when pressing e on it
+                if (this.gunHitBox) {
+                    // Check if the player is overlapping with the collision area
                     if (
-                        this.gameState.player.health !=
-                        this.gameState.player.hearts
+                        this.chestOpened &&
+                        !this.gameState.eButtonPressed &&
+                        this.player &&
+                        Phaser.Geom.Intersects.RectangleToRectangle(
+                            this.player.getBounds(),
+                            this.gunHitBox.getBounds()
+                        )
                     ) {
-                        this.gameState.player.health += 1;
-                    } else {
-                        this.gameState.player.hearts += 1;
-                        this.gameState.player.health += 1;
+                        this.gameState.eButtonPressed = true;
+                        setTimeout(() => {
+                            this.gameState.eButtonPressed = false;
+                        }, 500);
+
+                        // Destroy the hitbox after a short delay
+                        this.gameState.player.addGun(this.sniper);
+
+                        this.gameState.player.setAllGunsInvisibleExceptCurrent();
+                        this.gameState.player.currentGun?.reload();
+                        this.gunHitBox.destroy();
                     }
-                    this.scene.run("game-ui", {
-                        gameState: this.gameState,
-                    });
-                    const tip1 = [
-                        "You have gained another heart, Remember to use mv player room03!",
-                    ];
-                    this.scene.resume("MessageScene");
-                    this.scene.stop("MessageScene");
-                    this.scene.bringToTop("MessageScene");
-                    this.scene.run("MessageScene", {
-                        messages: tip1, // Pass the messages array to the message scene
-                        gameState: this.gameState,
-                    });
                 }
             });
         }
-
         //changes current gun displayed and stops shooting on mouse wheel scroll
         this.input.on(
             "wheel",
@@ -308,6 +401,7 @@ class room02Scene extends Phaser.Scene {
             }
         });
     }
+
     private switchScene() {
         console.log("it worked");
         this.scene.setVisible(true, "ConsoleScene");

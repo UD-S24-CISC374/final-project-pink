@@ -52,6 +52,8 @@ class LobbyScene extends Phaser.Scene {
     }
     create() {
         //setting up crosshair
+        const lobbyMusic = this.sound.add("lobby_music", { loop: true });
+        lobbyMusic.play();
         this.input.mouse?.disableContextMenu();
         this.input.setDefaultCursor("crosshair");
         //setting up tilemap
@@ -144,6 +146,11 @@ class LobbyScene extends Phaser.Scene {
                 runChildUpdate: true,
             });
             this.bullets.maxSize = 100; //need to declare maxsize outside the group scope so it doesnt spawn an initial bullet in the top left
+            this.gameState.player.changeGunPlayer(this.player);
+            this.gameState.player.changeBulletsGroup(this.bullets);
+            this.gameState.player.changeGunScenes(this);
+            this.gameState.player.addAllGunsToScene();
+            this.gameState.player.setAllGunsInvisibleExceptCurrent();
 
             // Colliders for walls
             if (walls) {
@@ -205,6 +212,7 @@ class LobbyScene extends Phaser.Scene {
                         this.scene.stop("MessageScene");
                         this.gameState.player.healToAmount(5);
                         this.gameState.resetValuesOnSceneSwitch();
+                        this.gameState.player.currentGunIndex = 0;
                         this.gameState.player.guns = [];
                         this.gameState.player.currentGun = undefined;
                         this.scene.start("room01Scene", {
@@ -326,6 +334,7 @@ class LobbyScene extends Phaser.Scene {
                         )
                     ) {
                         if (!this.gameState.interactingWithNpc) {
+                            this.sound.play("npc_talking_sound");
                             this.gameState.interactingWithNpc = true;
                             // Start the message scene when 'e' key is pressed and player is overlapping with NPC
                             if (this.gameState.tutorialLevel == 0) {
@@ -360,13 +369,23 @@ class LobbyScene extends Phaser.Scene {
                                     9, //bullet damage
                                     5, //shots per round
                                     600, //miliseconds between shots
-                                    true
+                                    true,
+                                    0.6
                                 );
                                 this.gun.addToScene();
+                                this.gun.setInvisible();
                                 this.gun.reload();
                                 this.gameState.player.addGun(this.gun);
-
+                                this.gameState.player.changeGunPlayer(
+                                    this.player
+                                );
+                                this.gameState.player.changeBulletsGroup(
+                                    this.bullets!
+                                );
+                                this.gameState.player.changeGunScenes(this);
+                                this.gameState.player.addAllGunsToScene();
                                 this.gameState.player.setAllGunsInvisibleExceptCurrent();
+
                                 this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 3) {
                                 this.scene.run("MessageScene", {
@@ -509,6 +528,7 @@ class LobbyScene extends Phaser.Scene {
                         if (!this.gameState.interactingWithNpc) {
                             this.npcInteractions += 1;
                             this.gameState.interactingWithNpc = true;
+                            this.sound.play("npc_talking_sound");
                             if (this.npcInteractions == 1) {
                                 const bypassmessage = ["Do you know my name?"];
                                 this.scene.run("MessageScene", {

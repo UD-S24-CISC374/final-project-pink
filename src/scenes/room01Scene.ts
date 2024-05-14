@@ -23,6 +23,7 @@ class room01Scene extends Phaser.Scene {
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
     private defaultGunBig?: Gun;
+
     constructor() {
         super({ key: "room01Scene" });
     }
@@ -34,6 +35,9 @@ class room01Scene extends Phaser.Scene {
     preload() {}
 
     create() {
+        this.sound.stopAll();
+        const roomMusic = this.sound.add("room_music", { loop: true });
+        roomMusic.play();
         this.scene.bringToTop("room01Scene");
         const map = this.make.tilemap({ key: "room01" });
         const tileset = map.addTilesetImage("tilemap", "tiles"); //name of tilemap ON TILED, then name of key in preloader scene
@@ -86,12 +90,16 @@ class room01Scene extends Phaser.Scene {
 
             const chort1 = this.chorts.get(800, 700, "chort");
             chort1.setProperties(27, 30, 200);
+            chort1.setImmovable(true);
             const chort2 = this.chorts.get(800, 500, "chort");
             chort2.setProperties(27, 50, 250); //health, speed, bulletSpeed
+            chort2.setImmovable(true);
             const chort3 = this.chorts.get(1000, 700, "chort");
             chort3.setProperties(27, 50, 200);
+            chort3.setImmovable(true);
             const chort4 = this.chorts.get(800, 1000, "chort");
             chort4.setProperties(27, 30, 200);
+            chort4.setImmovable(true);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the chorts target x and y change
@@ -123,7 +131,8 @@ class room01Scene extends Phaser.Scene {
                 8, //bullet damage
                 5, //shots per round
                 600, //miliseconds between shots
-                true
+                true,
+                0.6
             );
             defaultGun.addToScene();
             this.gameState.player.addGun(defaultGun);
@@ -179,12 +188,18 @@ class room01Scene extends Phaser.Scene {
                 this.bullets,
                 this.chorts,
                 (bullet, chort) => {
-                    // Decrease chort health when hit by player bullets
-                    (chort as Chort).takeDamage(
-                        this.gameState.player.getCurrentGunDamage()
-                    ); // damages chorts with current guns damage
-                    // Destroy the bullet
-                    bullet.destroy();
+                    if (bullet instanceof Bullet && bullet.firstCollision) {
+                        bullet.firstCollision = false;
+
+                        // Decrease chort health when hit by player bullets
+                        (chort as Chort).takeDamage(
+                            this.gameState.player.getCurrentGunDamage()
+                        ); // Assuming each bullet does 10 damage
+                        // Destroy the bullet
+                        if (!this.gameState.player.currentGun?.isPiercing) {
+                            bullet.destroy();
+                        }
+                    }
                 }
             );
             // Collision between chort bullets and player
@@ -271,6 +286,7 @@ class room01Scene extends Phaser.Scene {
                         this.chestZone.getBounds()
                     )
                 ) {
+                    this.sound.play("chest_open_sound");
                     this.chestOpened = true;
                     this.gameState.eButtonPressed = true;
                     setTimeout(() => {
@@ -284,12 +300,13 @@ class room01Scene extends Phaser.Scene {
                         this.player,
                         this.bullets!, //bullet group (has to have same texture in this function (below), as the texture used in creating this.bullets)
                         "gun_default_big", //gun texture
-                        "bullet_blue", //bullet texture (same as from this.bullets)
+                        "bullet_blue_small", //bullet texture (same as from this.bullets)
                         400, //bullet speed
                         3, //bullet damage
                         20, //shots per round
                         100, //miliseconds between shots
-                        false
+                        false,
+                        0.85
                     );
                     this.defaultGunBig.addToScene();
                     this.defaultGunBig.setVisible();

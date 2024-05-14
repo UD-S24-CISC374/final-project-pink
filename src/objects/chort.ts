@@ -100,9 +100,11 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
 
         // Fire the fireball towards the player
         fireball.fire(this.targetPosition.x, this.targetPosition.y);
+        this.scene.sound.play("fireball_sound");
     }
 
     public takeDamage(damage: number) {
+        this.scene.sound.play("enemy_hit_sound");
         this.playDamageAnimation();
         this.health -= damage;
         if (this.health <= 0) {
@@ -110,6 +112,7 @@ export default class Chort extends Phaser.Physics.Arcade.Sprite {
             const explosion = this.scene.add
                 .sprite(this.x, this.y, "fireball_explode")
                 .play("fireball_explode");
+            this.scene.sound.play("enemy_death_sound");
             explosion.once("animationcomplete", () => {
                 explosion.destroy(); // Destroy the explosion sprite when animation completes
                 this.destroy();
