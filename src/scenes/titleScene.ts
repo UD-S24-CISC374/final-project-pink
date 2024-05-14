@@ -14,6 +14,7 @@ class TitleScene extends Phaser.Scene {
             "titleScreenBackground",
             "assets/titleScreenBackground.png"
         );
+        this.load.image("titleSceneCreators", "assets/titleSceneCreators.png");
     }
 
     create() {
@@ -39,18 +40,11 @@ class TitleScene extends Phaser.Scene {
             .image(this.cameras.main.width / 2, 80, "logo")
             .setAlpha(0);
         logo.setScale(0.46);
-
         const creatorText = this.add
-            .text(
-                this.cameras.main.width / 2,
-                166,
-                "Created by Quinten Bettin, Jacob Marks, and Charles Gordinier",
-                { fontSize: "33px", color: "#fff" }
-            )
+            .image(this.cameras.main.width / 2, 166, "titleSceneCreators")
             .setAlpha(0);
         creatorText.setOrigin(0.5);
         creatorText.setScale(0.3125);
-
         const playButton = this.add
             .image(this.cameras.main.width / 2, 220, "playButton")
             .setAlpha(0);
@@ -70,6 +64,7 @@ class TitleScene extends Phaser.Scene {
         playButton.on("pointerdown", () => {
             this.cameras.main.fadeOut(500, 0, 0, 0, () => {
                 console.log("camera fade");
+                this.sound.play("button_sound");
                 this.scene.start("LobbyScene", {
                     gameState: initialGameState,
                 });

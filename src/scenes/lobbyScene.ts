@@ -304,7 +304,7 @@ class LobbyScene extends Phaser.Scene {
                 "You will flash blue for this duration.",
             ];
             const messages7: string[] = [
-                "Now you can start, go talk to Rafiiki.",
+                "Now you can start, go talk to Rafiiki, he is in the top left gaurding the VOID.",
                 "You will then gain access to the dungeon.",
             ];
             const messages6: string[] = [
@@ -313,9 +313,12 @@ class LobbyScene extends Phaser.Scene {
                 "Open and close it with 'Tab'.",
                 "Type 'help' for a list of commands.",
                 "Type 'help some_command' for more info on that command.",
-                "You will need to utilize this powerful tool for many things.",
-                "I will help you with learning commands while you play",
-                "Don't worry too much about them yet.",
+                "You will use this to reload",
+                "Open the command prompt and type gcc gun.c to compile your weapon.",
+                "You will need to compile your weapon on each new room.",
+                "To reload, type './a.out', this will reload the weapon in your hand.",
+                "As long as you've compiled a weapon once, you can use ./a.out on any gun.",
+                "I will help you with learning other commands while you play",
             ];
             const end: string[] = [
                 "Got nothing left to tell ya, blame the devs",
@@ -389,6 +392,16 @@ class LobbyScene extends Phaser.Scene {
                                 this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 3) {
                                 this.scene.run("MessageScene", {
+                                    messages: messages6, // Pass the messages array to the message scene
+                                    gameState: this.gameState,
+                                });
+                                const tabKey = this.input.keyboard?.addKey(
+                                    Phaser.Input.Keyboard.KeyCodes.TAB
+                                );
+                                tabKey?.on("up", this.switchScene, this);
+                                this.gameState.tutorialLevel++;
+                            } else if (this.gameState.tutorialLevel == 4) {
+                                this.scene.run("MessageScene", {
                                     messages: messages4, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
@@ -401,21 +414,11 @@ class LobbyScene extends Phaser.Scene {
                                 this.gun?.reload();
                                 this.gameState.player.currentGun?.reload();
                                 this.gameState.tutorialLevel++;
-                            } else if (this.gameState.tutorialLevel == 4) {
+                            } else if (this.gameState.tutorialLevel == 5) {
                                 this.scene.run("MessageScene", {
                                     messages: messages5, // Pass the messages array to the message scene
                                     gameState: this.gameState,
                                 });
-                                this.gameState.tutorialLevel++;
-                            } else if (this.gameState.tutorialLevel == 5) {
-                                this.scene.run("MessageScene", {
-                                    messages: messages6, // Pass the messages array to the message scene
-                                    gameState: this.gameState,
-                                });
-                                const tabKey = this.input.keyboard?.addKey(
-                                    Phaser.Input.Keyboard.KeyCodes.TAB
-                                );
-                                tabKey?.on("down", this.switchScene, this);
                                 this.gameState.tutorialLevel++;
                             } else if (this.gameState.tutorialLevel == 6) {
                                 this.scene.run("MessageScene", {
@@ -525,7 +528,10 @@ class LobbyScene extends Phaser.Scene {
                             this.gameNpcZone.getBounds()
                         )
                     ) {
-                        if (!this.gameState.interactingWithNpc) {
+                        if (
+                            !this.gameState.interactingWithNpc &&
+                            !this.canStart
+                        ) {
                             this.npcInteractions += 1;
                             this.gameState.interactingWithNpc = true;
                             this.sound.play("npc_talking_sound");
