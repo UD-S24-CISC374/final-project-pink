@@ -525,6 +525,9 @@ class room01Scene extends Phaser.Scene {
             });
         }
     }
+    public roomComplete() {
+        return this.chorts?.getLength();
+    }
     public addGun() {
         if (this.defaultGunBig) {
             this.gameState.player.addGun(this.defaultGunBig);

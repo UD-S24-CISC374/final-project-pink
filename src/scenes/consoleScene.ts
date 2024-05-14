@@ -45,8 +45,15 @@ var room05: node = {
     childNodes: null,
     entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
 };
+var bossRoom: node = {
+    nodeName: "bossRoom",
+    parentNode: null,
+    childNodes: null,
+    entities: ["demon1", "demon2", "bullets.c"],
+};
 room01.childNodes = [room02, room03, room04];
 room02.childNodes = [room05];
+room05.childNodes = [bossRoom];
 
 const g = grammar(`
 Command {
@@ -243,6 +250,29 @@ class ConsoleScene extends Phaser.Scene {
             }
             if (pathList[pathList.length - 1] == "player") {
                 console.log("moving");
+                if (
+                    !(
+                        (
+                            this.scene.get(
+                                this.gameState.curRoom
+                            ) as room01Scene
+                        ).roomComplete() == 0
+                    )
+                ) {
+                    return [
+                        "Clear out all enemies before moving to the next room",
+                        "There are " +
+                            (
+                                this.scene.get(
+                                    this.gameState.curRoom
+                                ) as room01Scene
+                            ).roomComplete() +
+                            " enemies remaining",
+                    ];
+                }
+                (
+                    this.scene.get(this.gameState.curRoom) as room01Scene
+                ).roomComplete();
                 if (pathListTo[pathListTo.length - 1] == "room05") {
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
