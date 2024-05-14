@@ -28,29 +28,44 @@ export default class WinScene extends Phaser.Scene {
         this.scene.setVisible(false, "MessageScene");
     }
     preload() {
-        this.load.image("game_over", "assets/game_over.png");
+        this.load.image("win_background", "assets/win_background.png");
+        this.load.image("win_text", "assets/wintext.png");
+        this.load.image("you_win", "assets/you_win.png");
         this.load.image("redo_button", "assets/restart_button.png");
+        this.load.audio("win_sound", "assets/sound/win.mp3");
     }
 
     create() {
         // Add a black rectangle to cover the entire screen
         this.sound.stopAll();
-        this.sound.play("player_death_sound");
+        this.sound.play("win_sound");
         const background = this.add.image(
             this.cameras.main.width / 2,
             this.cameras.main.height / 2,
-            "game_over"
+            "win_background"
         );
         background.setOrigin(0.5);
-        background.setScale(0.33);
         background.setAlpha(0);
+        background.setScale(0.6);
 
+        const youWin = this.add.image(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 75,
+            "you_win"
+        );
+        youWin.setAlpha(0);
+        const winText = this.add.image(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 30,
+            "win_text"
+        );
+        winText.setScale(0.5);
+        winText.setAlpha(0);
         const redoButton = this.add
-            .image(this.cameras.main.width / 2, 220, "redo_button")
+            .image(this.cameras.main.width / 2 + 150, 220, "redo_button")
             .setAlpha(0);
-        redoButton.setScale(0.05);
-        redoButton.setOrigin(0.5);
         redoButton.setInteractive();
+        redoButton.setScale(0.05);
 
         redoButton.on("pointerover", () => {
             redoButton.setTint(0xffc300);
@@ -63,7 +78,7 @@ export default class WinScene extends Phaser.Scene {
         redoButton.on("pointerdown", () => {
             this.cameras.main.fadeOut(500, 0, 0, 0, () => {
                 this.tweens.add({
-                    targets: [background, redoButton],
+                    targets: [background, redoButton, youWin, winText],
                     alpha: 0,
                     duration: 1300,
                     onComplete: () => {
@@ -82,7 +97,7 @@ export default class WinScene extends Phaser.Scene {
 
         // Fade in the game over text and the black rectangle
         this.tweens.add({
-            targets: [background, redoButton],
+            targets: [background, redoButton, youWin, winText],
             alpha: 1,
             duration: 1000,
             onComplete: () => {
