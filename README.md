@@ -9,8 +9,8 @@ Pink
 # Developers
 
 -   Quinten Bettin (qbettin@udel.edu)
--   Name (email)
--   Name (email)
+-   Jacob Marks (jfmarks@udel.edu)
+-   Charles Gordiner (cwgiii@udel.edu)
 
 # Blurb
 
@@ -57,7 +57,7 @@ A top down shooter based on the game Enter the Gungeon. You are stuck within the
 
 # Educational Game Design Document
 
-Link to our [egdd](/docs/egdd.md)
+Link to our [egdd](https://ud-s24-cisc374.github.io/final-project-pink/docs/egdd.html)
 
 # Credits
 
@@ -69,6 +69,22 @@ Link to our [egdd](/docs/egdd.md)
 -   [Pixel Art Dungeon Tiles](https://mythic-nemesis.itch.io/pixel-dungeon-assets)
 -   ![A dungeon themed tileset](/assets/tiles/tilemap.png "A description of the floor layout and map")
 -   [DYA Games Dungeon Background](https://www.instagram.com/p/BhUirX5h-K7/)
--   [enemy death sfx](https://www.youtube.com/watch?v=JJClRjDYFL0) -[player hit sfx](https://www.youtube.com/watch?v=5oHHIyDA91U) -[weapon reload sfx](https://pixabay.com/sound-effects/1911-reload-6248/) -[pistol sfx](https://www.fesliyanstudios.com/play-mp3/7143)
+-   [enemy death sfx](https://www.youtube.com/watch?v=JJClRjDYFL0)
+-   [player hit sfx](https://www.youtube.com/watch?v=5oHHIyDA91U)
+-   [weapon reload sfx](https://pixabay.com/sound-effects/1911-reload-6248/)
+-   [pistol sfx](https://www.fesliyanstudios.com/play-mp3/7143)
 -   [smg sfx](https://www.fesliyanstudios.com/play-mp3/7126)
--   [sniper sfx | far distance](https://www.fesliyanstudios.com/play-mp3/7156) -[npc talked sfx](https://www.youtube.com/watch?v=7OdFGaaWmzo) -[button sfx](https://www.youtube.com/watch?v=5UHmxWsPNzg) -[enemy shooting sfx](https://pixabay.com/sound-effects/fireball-whoosh-1-179125/) -[dodge rolling sfx |'arrow whoosh'](https://mixkit.co/free-sound-effects/whoosh/) -[chest opening sfx](https://www.youtube.com/watch?v=1DfN9fNuXmM) -[weapon and bullet images"](https://free-game-assets.itch.io/free-guns-pack-2-for-main-characters-pixel-art) -[restart button image](https://www.pixilart.com/art/ui-restart-button-4e55c102013b890) -[yes no buttons](https://static.vecteezy.com/system/resources/previews/009/877/869/original/pixel-art-blue-square-buttons-for-game-interface-and-apps-icon-for-8bit-game-on-white-background-vector.jpg) -[win background](https://www.freepik.com/premium-ai-image/pixel-art-cave-entrance-natural-tunnel-landscape-retro-style-8-bit-game-ai_62869952.htm) -[win music](https://drive.google.com/file/d/1QgMqL8h9WWaoGJjKOJEyqFewsunN2xda/view?usp=drive_link) -[lobby music](https://www.youtube.com/watch?v=OUCH8B-BMoc) -[game music](https://www.youtube.com/watch?v=7md_gd3HuMQ) -[death sound](https://pixabay.com/sound-effects/the-terror-of-flatlining-34031/)
+-   [sniper sfx | far distance](https://www.fesliyanstudios.com/play-mp3/7156)
+-   [npc talked sfx](https://www.youtube.com/watch?v=7OdFGaaWmzo)
+-   [button sfx](https://www.youtube.com/watch?v=5UHmxWsPNzg)
+-   [enemy shooting sfx](https://pixabay.com/sound-effects/fireball-whoosh-1-179125/)
+-   [dodge rolling sfx |'arrow whoosh'](https://mixkit.co/free-sound-effects/whoosh/)
+-   [chest opening sfx](https://www.youtube.com/watch?v=1DfN9fNuXmM)
+-   [weapon and bullet images"](https://free-game-assets.itch.io/free-guns-pack-2-for-main-characters-pixel-art)
+-   [restart button image](https://www.pixilart.com/art/ui-restart-button-4e55c102013b890)
+-   [yes no buttons](https://static.vecteezy.com/system/resources/previews/009/877/869/original/pixel-art-blue-square-buttons-for-game-interface-and-apps-icon-for-8bit-game-on-white-background-vector.jpg)
+-   [win background](https://www.freepik.com/premium-ai-image/pixel-art-cave-entrance-natural-tunnel-landscape-retro-style-8-bit-game-ai_62869952.htm)
+-   [lobby music](https://www.youtube.com/watch?v=OUCH8B-BMoc)
+-   [game music](https://www.youtube.com/watch?v=7md_gd3HuMQ)
+-   [death sound](https://pixabay.com/sound-effects/the-terror-of-flatlining-34031/)
+-   [win music](https://drive.google.com/file/d/1QgMqL8h9WWaoGJjKOJEyqFewsunN2xda/view?usp=drive_link)
