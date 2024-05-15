@@ -314,7 +314,7 @@ class room02Scene extends Phaser.Scene {
                         "gun_sniper", //gun texture
                         "bullet_white", //bullet texture (same as from this.bullets)
                         650, //bullet speed
-                        15, //bullet damage
+                        21, //bullet damage
                         3, //shots per round
                         100, //miliseconds between shots
                         true,

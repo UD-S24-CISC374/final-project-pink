@@ -127,7 +127,7 @@ class room01Scene extends Phaser.Scene {
                 "gun_default", //gun texture
                 "bullet_blue", //bullet texture (same as from this.bullets)
                 500, //bullet speed
-                8, //bullet damage
+                10, //bullet damage
                 5, //shots per round
                 600, //miliseconds between shots
                 true,
@@ -301,7 +301,7 @@ class room01Scene extends Phaser.Scene {
                         "gun_default_big", //gun texture
                         "bullet_blue_small", //bullet texture (same as from this.bullets)
                         400, //bullet speed
-                        3, //bullet damage
+                        5, //bullet damage
                         20, //shots per round
                         100, //miliseconds between shots
                         false,

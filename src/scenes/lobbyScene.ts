@@ -369,7 +369,7 @@ class LobbyScene extends Phaser.Scene {
                                     "gun_default", //gun texture
                                     "bullet_blue", //bullet texture
                                     400, //bullet speed
-                                    9, //bullet damage
+                                    10, //bullet damage
                                     5, //shots per round
                                     600, //miliseconds between shots
                                     true,
