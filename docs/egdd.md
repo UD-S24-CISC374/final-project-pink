@@ -2,7 +2,7 @@
 
 ## Elevator Pitch
 
-A top down shooter based on the game Enter the Gungeon, with built in learning of basic bash and git commands that progressively get harder as you get farther into the game. The enemies that you fight will also get progressively harder, with boss fights along the way. In order to successfully fight the enemies you will need to operate your weapon with various commands including running/compiling files, cd, ls, cat, echo, etc. Additionally interacting with the map/objects/items in the game must be done with commands similar to that of the weapon functionality. Ultimately the objective of the game is to escape the dungeon and learn some bash and git commands along the way.
+A top down shooter based on the game Enter the Gungeon, with built in learning of basic bash commands that progressively get harder as you get farther into the game. The enemies that you fight will also get progressively harder, with boss fights along the way. In order to successfully fight the enemies you will need to operate your weapon with various commands including running/compiling files, cd, ls, cat, etc. Additionally interacting with the map/objects/items in the game must be done with commands similar to that of the weapon functionality. Ultimately the objective of the game is to escape the dungeon and learn some bash commands along the way.
 
 ## Influences (Brief)
 
@@ -12,7 +12,7 @@ A top down shooter based on the game Enter the Gungeon, with built in learning o
 
 ## Core Gameplay Mechanics (Brief)
 
--   Players can pause the game by opening a terminal that allows them to interact with the game through git and bash commands.
+-   Players can pause the game by opening a terminal that allows them to interact with the game through bash commands.
 -   Players can use mv, cd and ls to teleport to different rooms and print the map of rooms respectfully
 -   Players will gain weapons and abilities in the form of programs that will need to be compiled and run to shoot/use abilities.
 -   Players can execute their compiled weapon/ability compilations and are able to use them for a specified number of times before needing to re-execute
@@ -29,7 +29,7 @@ Git and bash Commands.
 
 ## Target Audiences
 
-Novice programmers that desire to learn bash and git commands.
+Novice programmers that desire to learn bash commands.
 
 ## Target Contexts
 
@@ -37,12 +37,12 @@ Free time, Computer labs / special class periods
 
 ## Learning Objectives
 
--   Command recognition: After playing, players will be able to identify git and bash commands and describe what they do.
--   Git/Bash Efficiency: After playing, players will be able to input git/bash commands faster and with less errors than they would have prior to playing.
+-   Command recognition: After playing, players will be able to identify bash commands and describe what they do.
+-   Git/Bash Efficiency: After playing, players will be able to input bash commands faster and with less errors than they would have prior to playing.
 
 ## Prerequisite Knowledge
 
-Students should be able to understand the purpose of git and bash commands and how to open a command prompt.
+Students should be able to understand the purpose of bash commands and how to open a command prompt.
 
 ## Assessment Measures
 
@@ -159,21 +159,12 @@ The aesthetic of our game is pixel art dungeon: dark-colored and weathered brick
 
 -   Characters List
 -   Player model (possibility of adding a character select screen time permitting)
--   [Robot Player](https://www.spriters-resource.com/pc_computer/enterthegungeon/sheet/155565/)
 -   Basic enemy (possibility of adding more variety of enemies based on boss completion time permitting)
--   [Chort, Demon Enemy Sprites](https://0x72.itch.io/dungeontileset-ii)
--   Enemy Attacks
--   [Fireball](https://msfrantz.itch.io/free-fire-ball-pixel-art)
 -   Boss enemy (possibility of adding more bosses time permitting)
 -   Tutorial NPC - a similar model to the player that will walk to them through the mechanics of the game
-    [Tutorial NPC](https://pedrodis.itch.io/theforestcharacterpack2)
--   Git Cat NPC - a cat that will give the player more commands to input that will allow for saving progress. It will spawn after the first boss is defeated.
--   Textures:
-    -   [Pixel Art Dungeon Tiles](https://mythic-nemesis.itch.io/pixel-dungeon-assets)
-    -   ![A dungeon themed tileset](/assets/tiles/tilemap.png "A description of the floor layout and map")
+    -
 -   Environment Art/Textures:
     -   Opening screen: a basic start screen with the title and a stone brick background
-    -   [DYA Games Dungeon Background](https://www.instagram.com/p/BhUirX5h-K7/)
     -   Tutorial room: a well lit room mimicking the entrance to a dungeon with a single npc that teaches the player the controls
     -   Basic floor: a dungeon-like room made from stone/brick with dim lighting containing enemies
     -   Boss floor: a large room with a boss, excessive flames and other threatening looking items (bones, broken weapons, defeated enemies, etc.) scattered around
@@ -184,11 +175,12 @@ The aesthetic of our game is pixel art dungeon: dark-colored and weathered brick
 
     -   menu music: chill relaxing music
     -   standard floor music: not relaxing, but not really stress inducing.
-    -   boss music: faster tempo, more stressful [KENTENSHI - paranoia](https://www.youtube.com/watch?v=VgrnEVnZ4xU)
+    -   boss music: faster tempo, more stressful
 
 -   Sound List (SFX)
     -   Weapon SFX: sound of gun shooting
-    -   Bullet Clearing SFX: sound of blank being used (to clear bullets)
+    -   Enemy sound effects: sound for enemies dying, being hit, shooting
+    -   Player sound effects: sound for player dying, being hit, dodge rolling, reloading, clicking buttons.
     -   NPC talking: npc gibberish sounds.
     -   Boss: Special boss sfx for different attacks, or kill conditions.
     -   Boss/Enemy death SFX: death sounds to confirm player has eliminated said enemy/boss
