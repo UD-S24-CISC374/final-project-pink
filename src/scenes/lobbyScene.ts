@@ -205,7 +205,7 @@ class LobbyScene extends Phaser.Scene {
                 this.physics.add.collider(this.player, floor, () => {
                     // Transition to room01Scene.ts when collision occurs
                     if (this.canStart) {
-                        this.gameState.curRoom = "room01";
+                        this.gameState.curRoom = "room01Scene";
                         this.events.off("player-moved");
                         sceneEvents.removeAllListeners();
                         this.scene.stop("game-ui");
@@ -215,7 +215,7 @@ class LobbyScene extends Phaser.Scene {
                         this.gameState.player.currentGunIndex = 0;
                         this.gameState.player.guns = [];
                         this.gameState.player.currentGun = undefined;
-                        this.scene.start("room01Scene", {
+                        this.scene.start("bossRoomScene", {
                             gameState: this.gameState,
                         });
                         this.scene.stop();
