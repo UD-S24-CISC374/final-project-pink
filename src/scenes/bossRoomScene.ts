@@ -365,14 +365,14 @@ class bossRoomScene extends Phaser.Scene {
                 onComplete: () => {
                     // Transition to the next scene after a delay
                     this.scene.stop;
-                    this.scene.start("winScene", {
+                    this.scene.start("WinScene", {
                         gameState: this.gameState,
                     });
                 },
             });
         } else if (this.demonCount == 0) {
             this.scene.stop;
-            this.scene.start("winScene", {
+            this.scene.start("WinScene", {
                 gameState: this.gameState,
             });
         } else {
