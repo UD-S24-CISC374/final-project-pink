@@ -21,6 +21,7 @@ class room03Scene extends Phaser.Scene {
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
     private firstCollision = true;
+    private finalMessagePlayed: boolean = false;
 
     constructor() {
         super({ key: "room03Scene" });
@@ -30,6 +31,7 @@ class room03Scene extends Phaser.Scene {
         this.chestOpened = false;
         this.scene.stop("MessgaeScene");
         this.firstCollision = true;
+        this.finalMessagePlayed = false;
     }
     preload() {}
 
@@ -446,6 +448,22 @@ class room03Scene extends Phaser.Scene {
         return this.chorts?.getLength();
     }
     update() {
+        if (
+            this.roomComplete() == 0 &&
+            !this.chestOpened &&
+            !this.finalMessagePlayed
+        ) {
+            this.finalMessagePlayed = true;
+            const chestTip = [
+                "Time for a new secret command!",
+                "Type 'rm bullets.c' to clear all of the enemy bullets on the screen!",
+                "This is especially useful when reloading, to ensure you dont take a hit when resuming to play.",
+            ];
+            this.scene.run("MessageScene", {
+                messages: chestTip, // Pass the messages array to the message scene
+                gameState: this.gameState,
+            });
+        }
         // Check for keyboard input and move the player accordingly
         if (this.gameState.player.health <= 0) {
             this.gameState.player.die();

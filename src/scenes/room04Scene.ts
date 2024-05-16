@@ -21,6 +21,7 @@ class room04Scene extends Phaser.Scene {
     private chestZone: Phaser.GameObjects.Zone;
     private chestOpened: boolean = false;
     private firstCollision: boolean = true;
+    private finalMessagePlayed: boolean = false;
     constructor() {
         super({ key: "room04Scene" });
     }
@@ -29,6 +30,7 @@ class room04Scene extends Phaser.Scene {
         this.chestOpened = false;
         this.scene.stop("MessgaeScene");
         this.firstCollision = true;
+        this.finalMessagePlayed = false;
     }
     preload() {}
 
@@ -450,6 +452,21 @@ class room04Scene extends Phaser.Scene {
         return this.chorts?.getLength();
     }
     update() {
+        if (
+            this.roomComplete() == 0 &&
+            !this.chestOpened &&
+            !this.finalMessagePlayed
+        ) {
+            this.finalMessagePlayed = true;
+            const chestTip = [
+                "Time for the Boss Fight now! You're so close to bashing the dungeon",
+                "type 'mv player bossRoom' in the terminal to get there!",
+            ];
+            this.scene.run("MessageScene", {
+                messages: chestTip, // Pass the messages array to the message scene
+                gameState: this.gameState,
+            });
+        }
         // Check for keyboard input and move the player accordingly
         if (this.gameState.player.health <= 0) {
             this.gameState.player.die();

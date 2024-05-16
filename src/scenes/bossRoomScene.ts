@@ -66,9 +66,11 @@ class bossRoomScene extends Phaser.Scene {
             });
 
             const demon1 = this.demons.get(400, 200, "demon");
-            demon1.setProperties(200, 40, 150); //health, speed, bulletSpeed
+            demon1.setProperties(175, 40, 150); //health, speed, bulletSpeed
+            demon1.setImmovable(true);
             const demon2 = this.demons.get(400, 150, "demon");
-            demon2.setProperties(200, 20, 300);
+            demon2.setProperties(125, 20, 300);
+            demon2.setImmovable(true);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the demons target x and y change
@@ -369,15 +371,24 @@ class bossRoomScene extends Phaser.Scene {
                 onComplete: () => {
                     // Transition to the next scene after a delay
                     this.scene.stop;
-                    this.scene.start("winScene", {
+                    this.scene.start("GameOverScene", {
                         gameState: this.gameState,
                     });
                 },
             });
         } else if (this.demonCount == 0) {
-            this.scene.stop;
-            this.scene.start("winScene", {
-                gameState: this.gameState,
+            this.tweens.add({
+                targets: this.player,
+                alpha: 0,
+                duration: 2500,
+                ease: "Quad",
+                onComplete: () => {
+                    // Transition to the next scene after a delay
+                    this.scene.stop;
+                    this.scene.start("WinScene", {
+                        gameState: this.gameState,
+                    });
+                },
             });
         } else {
             // Player is not dead, can move
