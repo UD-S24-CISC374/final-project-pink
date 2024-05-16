@@ -215,7 +215,7 @@ class LobbyScene extends Phaser.Scene {
                         this.gameState.player.currentGunIndex = 0;
                         this.gameState.player.guns = [];
                         this.gameState.player.currentGun = undefined;
-                        this.scene.start("bossRoomScene", {
+                        this.scene.start("room01Scene", {
                             gameState: this.gameState,
                         });
                         this.scene.stop();
