@@ -154,6 +154,10 @@ class ConsoleScene extends Phaser.Scene {
     public resetConsole() {
         this.numCommands = 0;
         this.currentNode = room01;
+        const textBlockDiv = document.getElementById("textBlock");
+        while (textBlockDiv?.firstChild) {
+            textBlockDiv.removeChild(textBlockDiv.firstChild);
+        }
     }
     private handleEnterKey() {
         if (this.consoleText) {
@@ -196,12 +200,7 @@ class ConsoleScene extends Phaser.Scene {
             }
         }
     }
-    update() {
-        if (this.gameState.player.health <= 0) {
-            this.numCommands = 0;
-            this.currentNode = room01;
-        }
-    }
+    update() {}
 
     private executeCommand(command: string[]): string[] {
         if (command[0] == "cd") {
