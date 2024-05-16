@@ -2,7 +2,17 @@
 import Phaser from "phaser";
 import { gameState } from "../objects/gameState";
 import { sceneEvents } from "../util/eventCenter";
+import Player from "../objects/player";
+import ConsoleScene from "./consoleScene";
 
+const player = new Player(5, 5);
+const initialGameState = new gameState(
+    player,
+    0, //level
+    0, //tutorial level
+    false,
+    "LobbyScene"
+);
 export default class GameOverScene extends Phaser.Scene {
     private gameState: gameState;
     constructor() {
@@ -68,9 +78,12 @@ export default class GameOverScene extends Phaser.Scene {
                     duration: 1300,
                     onComplete: () => {
                         // Transition to the next scene after a delay
+                        (
+                            this.scene.get("ConsoleScene") as ConsoleScene
+                        ).resetConsole();
                         this.time.delayedCall(1300, () => {
                             this.scene.start("LobbyScene", {
-                                gameState: this.gameState,
+                                gameState: initialGameState,
                             });
                             this.sound.stopAll();
                             this.scene.stop();
