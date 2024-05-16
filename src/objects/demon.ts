@@ -50,7 +50,7 @@ export default class Demon extends Phaser.Physics.Arcade.Sprite {
         });
 
         scene.time.addEvent({
-            delay: Phaser.Math.Between(3000, 6000),
+            delay: Phaser.Math.Between(1500, 4000),
             callback: this.shootFireball,
             callbackScope: this,
             loop: true,
