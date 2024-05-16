@@ -23,6 +23,7 @@ export default class GameOverScene extends Phaser.Scene {
         this.gameState.player.isDead = false;
         this.gameState.curRoom = "LobbyScene";
         this.events.off("player-moved");
+        sceneEvents.off("player-finished-dodge");
         sceneEvents.removeAllListeners();
         this.scene.stop("game-ui");
         this.scene.stop("HelpButton");
@@ -77,10 +78,10 @@ export default class GameOverScene extends Phaser.Scene {
                     alpha: 0,
                     duration: 1300,
                     onComplete: () => {
-                        // Transition to the next scene after a delay
                         (
                             this.scene.get("ConsoleScene") as ConsoleScene
                         ).resetConsole();
+                        // Transition to the next scene after a delay
                         this.time.delayedCall(1300, () => {
                             this.scene.start("LobbyScene", {
                                 gameState: initialGameState,

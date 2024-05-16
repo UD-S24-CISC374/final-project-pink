@@ -83,10 +83,10 @@ export default class WinScene extends Phaser.Scene {
                     alpha: 0,
                     duration: 1300,
                     onComplete: () => {
-                        // Transition to the next scene after a delay
                         (
                             this.scene.get("ConsoleScene") as ConsoleScene
                         ).resetConsole();
+                        // Transition to the next scene after a delay
                         this.time.delayedCall(1300, () => {
                             this.scene.start("LobbyScene", {
                                 gameState: this.gameState,

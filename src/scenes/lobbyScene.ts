@@ -45,7 +45,7 @@ class LobbyScene extends Phaser.Scene {
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
         this.canStart = false;
-        this.bypassTutorial = true;
+        this.bypassTutorial = false;
         this.npcInteractions = 0;
         this.gameState.isDodging = true;
         this.scene.stop("MessgaeScene");
@@ -304,7 +304,7 @@ class LobbyScene extends Phaser.Scene {
                 "You will flash blue for this duration.",
             ];
             const messages7: string[] = [
-                "Now you can start, go talk to Rafiiki, he is in the top left gaurding the VOID.",
+                "Now you can start, go talk to Rafiiki, he is in the top left guarding the VOID.",
                 "You will then gain access to the dungeon.",
             ];
             const messages6: string[] = [
@@ -535,7 +535,9 @@ class LobbyScene extends Phaser.Scene {
                             this.gameState.interactingWithNpc = true;
                             this.sound.play("npc_talking_sound");
                             if (this.npcInteractions == 1) {
-                                const bypassmessage = ["Do you know my name?"];
+                                const bypassmessage = [
+                                    "Do you know my name? Click the ✓ (yes) or X (no) button",
+                                ];
                                 this.scene.run("MessageScene", {
                                     messages: bypassmessage, // Pass the messages array to the message scene
                                     gameState: this.gameState,
@@ -563,11 +565,11 @@ class LobbyScene extends Phaser.Scene {
                                 });
 
                                 yesButton.on("pointerdown", () => {
+                                    this.sound.play("button_sound");
                                     this.npcAllowsVoid();
                                     this.bypassTutorial = true;
                                     noButton.destroy();
                                     yesButton.destroy();
-                                    this.sound.play("button_sound");
                                 });
 
                                 noButton.setScale(0.05);
@@ -588,7 +590,7 @@ class LobbyScene extends Phaser.Scene {
                                     noButton.destroy();
                                     yesButton.destroy();
                                     const nomessage = [
-                                        "I am Rafiiki, the VOID gaurdian.",
+                                        "I am Rafiiki, the VOID guardian.",
                                         "Now, go talk to Wozo, he is down in the room to the right",
                                     ];
                                     this.scene.run("MessageScene", {
@@ -602,7 +604,7 @@ class LobbyScene extends Phaser.Scene {
                                 this.npcInteractions > 1
                             ) {
                                 const gamemessage1 = [
-                                    "I am Rafiiki, the VOID gaurdian.",
+                                    "I am Rafiiki, the VOID guardian.",
                                     "I sense you may not be ready for what lurks ahead...",
                                     "Talk or keep talking to Wozo, he is down in the other room",
                                 ];
