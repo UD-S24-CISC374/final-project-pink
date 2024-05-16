@@ -154,6 +154,10 @@ class ConsoleScene extends Phaser.Scene {
     public resetConsole() {
         this.numCommands = 0;
         this.currentNode = room01;
+        const textBlockDiv = document.getElementById("textBlock");
+        while (textBlockDiv?.firstChild) {
+            textBlockDiv.removeChild(textBlockDiv.firstChild);
+        }
     }
     private handleEnterKey() {
         if (this.consoleText) {
