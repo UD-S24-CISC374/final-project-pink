@@ -329,50 +329,6 @@ class room01Scene extends Phaser.Scene {
                     });
                 }
             });
-            this.input.keyboard.on("keydown-E", () => {
-                //adds gun to inventory when pressing e on it
-                if (this.gunHitBox) {
-                    // Check if the player is overlapping with the collision area
-                    if (
-                        this.gameState.player.guns.length == 1 &&
-                        this.chestOpened &&
-                        !this.gameState.eButtonPressed &&
-                        this.player &&
-                        Phaser.Geom.Intersects.RectangleToRectangle(
-                            this.player.getBounds(),
-                            this.gunHitBox.getBounds()
-                        )
-                    ) {
-                        this.gameState.eButtonPressed = true;
-                        setTimeout(() => {
-                            this.gameState.eButtonPressed = false;
-                        }, 500);
-
-                        // Destroy the hitbox after a short delay
-                        setTimeout(() => {
-                            this.gunHitBox?.destroy();
-                        }, 1000);
-                        if (this.defaultGunBig) {
-                            this.gameState.player.addGun(this.defaultGunBig);
-                            this.defaultGunBig.reload();
-                        }
-
-                        this.gameState.player.setAllGunsInvisibleExceptCurrent();
-                        const tip2 = [
-                            "Your new gun has been added to your inventory.",
-                            "New guns always come fully loaded, give it a shoot!",
-                            "Use the scroll wheel or arrow keys to switch to your other guns.",
-                            "Remember press Tab to open and close your command prompt.",
-                            "To get to the next room, type 'mv player room02' and hit enter",
-                            "Change the room # for access to other rooms!",
-                        ];
-                        this.scene.run("MessageScene", {
-                            messages: tip2, // Pass the messages array to the message scene
-                            gameState: this.gameState,
-                        });
-                    }
-                }
-            });
         }
         //changes current gun displayed and stops shooting on mouse wheel scroll
         this.input.on(
@@ -413,7 +369,6 @@ class room01Scene extends Phaser.Scene {
         });
     }
     private switchScene() {
-        console.log("it worked");
         //this.characterMovement.stopX();
         //this.characterMovement.stopY();
         this.scene.setVisible(true, "ConsoleScene");
@@ -546,11 +501,23 @@ class room01Scene extends Phaser.Scene {
         return this.chorts?.getLength();
     }
     public addGun() {
-        if (this.defaultGunBig) {
+        if (this.defaultGunBig && this.gameState.player.guns.length == 1) {
             this.gameState.player.addGun(this.defaultGunBig);
             this.defaultGunBig.reload();
         }
         this.gameState.player.setAllGunsInvisibleExceptCurrent();
+        const tip2 = [
+            "Your new gun has been added to your inventory.",
+            "New guns always come fully loaded, give it a shoot!",
+            "Use the scroll wheel or arrow keys to switch to your other guns.",
+            "Remember press Tab to open and close your command prompt.",
+            "To get to the next room, type 'mv player room02' and hit enter",
+            "Change the room # for access to other rooms!",
+        ];
+        this.scene.run("MessageScene", {
+            messages: tip2, // Pass the messages array to the message scene
+            gameState: this.gameState,
+        });
     }
 
     private handlePlayerEnemyCollision() {
