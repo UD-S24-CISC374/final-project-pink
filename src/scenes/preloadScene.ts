@@ -11,6 +11,7 @@ export default class PreloadScene extends Phaser.Scene {
     preload() {
         this.load.audio("lobby_music", "assets/sound/lobby_music.mp3");
         this.load.audio("room_music", "assets/sound/room_music.mp3");
+        this.load.audio("boss_music", "assets/sound/boss_music.mp3");
         this.load.audio("smg_sound", "assets/sound/pistol.mp3");
         this.load.audio("pistol_sound", "assets/sound/smg.mp3");
         this.load.audio("sniper_sound", "assets/sound/sniper.mp3");

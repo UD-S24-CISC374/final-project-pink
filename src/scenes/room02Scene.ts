@@ -306,6 +306,18 @@ class room02Scene extends Phaser.Scene {
                     }, 500);
 
                     this.chest.anims.play("wood_chest_open");
+                    if (
+                        this.gameState.player.health !=
+                        this.gameState.player.hearts
+                    ) {
+                        this.gameState.player.health += 1;
+                    } else {
+                        this.gameState.player.hearts += 1;
+                        this.gameState.player.health += 1;
+                    }
+                    this.scene.run("game-ui", {
+                        gameState: this.gameState,
+                    });
                     this.sniper = new Gun(
                         this,
                         this.gameState,

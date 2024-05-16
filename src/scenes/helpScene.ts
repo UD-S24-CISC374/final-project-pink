@@ -35,7 +35,7 @@ export default class HelpButton extends Phaser.Scene {
         const controlsText = `
         WASD to move
 
-        'E' to interact (open chests, talk to npcs, pick up items)
+        'E' to interact (open chests, talk to npcs)
 
         Right mouse click (while moving) to dodge roll
 
@@ -63,6 +63,7 @@ export default class HelpButton extends Phaser.Scene {
 
         // Toggle help menu visibility when help button is clicked
         helpButton.on("pointerdown", () => {
+            this.sound.play("button_sound");
             helpMenuContainer.setVisible(!helpMenuContainer.visible);
         });
 

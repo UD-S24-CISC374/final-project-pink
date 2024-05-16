@@ -23,12 +23,14 @@ class room01Scene extends Phaser.Scene {
     private chestOpened: boolean = false;
     private gunHitBox?: Phaser.GameObjects.Rectangle;
     public defaultGunBig?: Gun;
+    private chestMessagePlayed: boolean = false;
     constructor() {
         super({ key: "room01Scene" });
     }
     init(data: { gameState: gameState }) {
         this.gameState = data.gameState;
         this.chestOpened = false;
+        this.chestMessagePlayed = false;
         this.scene.stop("MessgaeScene");
     }
     preload() {}
@@ -291,8 +293,20 @@ class room01Scene extends Phaser.Scene {
                     setTimeout(() => {
                         this.gameState.eButtonPressed = false;
                     }, 500);
-
                     this.chest.anims.play("wood_chest_open");
+
+                    if (
+                        this.gameState.player.health !=
+                        this.gameState.player.hearts
+                    ) {
+                        this.gameState.player.health += 1;
+                    } else {
+                        this.gameState.player.hearts += 1;
+                        this.gameState.player.health += 1;
+                    }
+                    this.scene.run("game-ui", {
+                        gameState: this.gameState,
+                    });
                     this.defaultGunBig = new Gun(
                         this,
                         this.gameState,
@@ -536,6 +550,21 @@ class room01Scene extends Phaser.Scene {
 
     update() {
         // Check for keyboard input and move the player accordingly
+        if (
+            this.roomComplete() == 0 &&
+            !this.chestOpened &&
+            !this.chestMessagePlayed
+        ) {
+            this.chestMessagePlayed = true;
+            const chestTip = [
+                "Chests always give you an extra heart!",
+                "Press 'e' on the chest in the bottom left to open it!",
+            ];
+            this.scene.run("MessageScene", {
+                messages: chestTip, // Pass the messages array to the message scene
+                gameState: this.gameState,
+            });
+        }
         if (this.gameState.player.health <= 0) {
             this.gameState.player.die();
 

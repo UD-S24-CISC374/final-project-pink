@@ -312,8 +312,7 @@ class LobbyScene extends Phaser.Scene {
                 "It is called the command prompt",
                 "Open and close it with 'Tab'.",
                 "Type 'help' for a list of commands.",
-                "Type 'help some_command' for more info on that command.",
-                "You will use this to reload",
+                "You will use this tool to reload",
                 "Open the command prompt and type 'gcc gun.c' to compile your weapon.",
                 "You will need to compile your weapon on each new room.",
                 "To reload, type './a.out', this will reload the weapon in your hand.",
@@ -568,6 +567,7 @@ class LobbyScene extends Phaser.Scene {
                                     this.bypassTutorial = true;
                                     noButton.destroy();
                                     yesButton.destroy();
+                                    this.sound.play("button_sound");
                                 });
 
                                 noButton.setScale(0.05);
@@ -583,6 +583,7 @@ class LobbyScene extends Phaser.Scene {
                                 });
 
                                 noButton.on("pointerdown", () => {
+                                    this.sound.play("button_sound");
                                     this.bypassTutorial = false;
                                     noButton.destroy();
                                     yesButton.destroy();

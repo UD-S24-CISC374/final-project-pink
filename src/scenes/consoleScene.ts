@@ -196,7 +196,12 @@ class ConsoleScene extends Phaser.Scene {
             }
         }
     }
-    update() {}
+    update() {
+        if (this.gameState.player.health <= 0) {
+            this.numCommands = 0;
+            this.currentNode = room01;
+        }
+    }
 
     private executeCommand(command: string[]): string[] {
         if (command[0] == "cd") {

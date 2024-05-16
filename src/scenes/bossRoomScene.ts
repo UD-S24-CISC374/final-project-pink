@@ -28,6 +28,9 @@ class bossRoomScene extends Phaser.Scene {
     preload() {}
 
     create() {
+        this.sound.stopAll();
+        const bossMusic = this.sound.add("boss_music", { loop: true });
+        bossMusic.play();
         this.scene.bringToTop("bossRoomScene");
         const map = this.make.tilemap({ key: "bossRoom" });
         const tileset = map.addTilesetImage("tilemap", "tiles"); //name of tilemap ON TILED, then name of key in preloader scene
@@ -63,10 +66,10 @@ class bossRoomScene extends Phaser.Scene {
             });
 
             const demon1 = this.demons.get(400, 200, "demon");
-            demon1.setProperties(150, 20, 250);
+            demon1.setProperties(175, 40, 150); //health, speed, bulletSpeed
             demon1.setImmovable(true);
             const demon2 = this.demons.get(400, 150, "demon");
-            demon2.setProperties(150, 20, 250);
+            demon2.setProperties(125, 20, 300);
             demon2.setImmovable(true);
 
             this.events.on("player-moved", (x: number, y: number) => {
@@ -152,18 +155,19 @@ class bossRoomScene extends Phaser.Scene {
             this.physics.add.collider(
                 this.bullets,
                 this.demons,
-                (bullet, demon) => {
-                    // Decrease demon health when hit by player bullets
-                    if (
-                        (demon as Demon).getHealth() <=
-                        this.gameState.player.getCurrentGunDamage()
-                    ) {
-                        this.demonCount--; // Removes a demon from count if it will die from hit
+                (bullet, chort) => {
+                    if (bullet instanceof Bullet && bullet.firstCollision) {
+                        bullet.firstCollision = false;
+
+                        // Decrease chort health when hit by player bullets
+                        (chort as Demon).takeDamage(
+                            this.gameState.player.getCurrentGunDamage()
+                        );
+                        // Destroy the bullet
+                        if (!this.gameState.player.currentGun?.isPiercing) {
+                            bullet.destroy();
+                        }
                     }
-                    (demon as Demon).takeDamage(
-                        this.gameState.player.getCurrentGunDamage()
-                    );
-                    bullet.destroy(); // Destroy the bullet
                 }
             );
 
@@ -367,15 +371,24 @@ class bossRoomScene extends Phaser.Scene {
                 onComplete: () => {
                     // Transition to the next scene after a delay
                     this.scene.stop;
-                    this.scene.start("WinScene", {
+                    this.scene.start("GameOverScene", {
                         gameState: this.gameState,
                     });
                 },
             });
         } else if (this.demonCount == 0) {
-            this.scene.stop;
-            this.scene.start("WinScene", {
-                gameState: this.gameState,
+            this.tweens.add({
+                targets: this.player,
+                alpha: 0,
+                duration: 2500,
+                ease: "Quad",
+                onComplete: () => {
+                    // Transition to the next scene after a delay
+                    this.scene.stop;
+                    this.scene.start("WinScene", {
+                        gameState: this.gameState,
+                    });
+                },
             });
         } else {
             // Player is not dead, can move
