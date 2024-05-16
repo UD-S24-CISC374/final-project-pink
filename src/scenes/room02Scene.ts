@@ -335,33 +335,6 @@ class room02Scene extends Phaser.Scene {
                     // teach player how to realod all guns at once
                 }
             });
-            this.input.keyboard.on("keydown-E", () => {
-                //adds gun to inventory when pressing e on it
-                if (this.gunHitBox) {
-                    // Check if the player is overlapping with the collision area
-                    if (
-                        this.chestOpened &&
-                        !this.gameState.eButtonPressed &&
-                        this.player &&
-                        Phaser.Geom.Intersects.RectangleToRectangle(
-                            this.player.getBounds(),
-                            this.gunHitBox.getBounds()
-                        )
-                    ) {
-                        this.gameState.eButtonPressed = true;
-                        setTimeout(() => {
-                            this.gameState.eButtonPressed = false;
-                        }, 500);
-
-                        // Destroy the hitbox after a short delay
-                        this.gameState.player.addGun(this.sniper);
-
-                        this.gameState.player.setAllGunsInvisibleExceptCurrent();
-                        this.gameState.player.currentGun?.reload();
-                        this.gunHitBox.destroy();
-                    }
-                }
-            });
         }
         //changes current gun displayed and stops shooting on mouse wheel scroll
         this.input.on(
@@ -463,7 +436,13 @@ class room02Scene extends Phaser.Scene {
             });
         }
     }
-
+    public addGun() {
+        if (this.gameState.player.guns.length <= 2 && this.chestOpened) {
+            this.gameState.player.addGun(this.sniper);
+            this.sniper.reload();
+        }
+        this.gameState.player.setAllGunsInvisibleExceptCurrent();
+    }
     private handlePlayerEnemyFireballCollision(
         player:
             | Phaser.Types.Physics.Arcade.GameObjectWithBody

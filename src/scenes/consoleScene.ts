@@ -6,6 +6,7 @@ import { gameState } from "../objects/gameState";
 import { grammar } from "ohm-js";
 import { sceneEvents } from "../util/eventCenter";
 import room01Scene from "./room01Scene";
+import room02Scene from "./room02Scene";
 
 class node {
     nodeName: string;
@@ -19,41 +20,45 @@ var room01: node = {
     nodeName: "room01",
     parentNode: null,
     childNodes: null,
-    entities: ["player", "chort1", "chort2", "chort3", "chort4", "bullets.c"],
+    entities: [
+        "player",
+        "chort1",
+        "chort2",
+        "chort3",
+        "chort4",
+        "bullets.c",
+        "gun.c",
+    ],
 };
 var room02: node = {
     nodeName: "room02",
     parentNode: room01,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c", "gun.c"],
 };
 var room03: node = {
     nodeName: "room03",
-    parentNode: room01,
+    parentNode: room02,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c", "gun.c"],
 };
 var room04: node = {
     nodeName: "room04",
-    parentNode: room01,
+    parentNode: room03,
     childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
+    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c", "gun.c"],
 };
-var room05: node = {
-    nodeName: "room05",
-    parentNode: room02,
-    childNodes: null,
-    entities: ["chort1", "chort2", "chort3", "chort4", "bullets.c"],
-};
+
 var bossRoom: node = {
     nodeName: "bossRoom",
-    parentNode: null,
+    parentNode: room04,
     childNodes: null,
-    entities: ["demon1", "demon2", "bullets.c"],
+    entities: ["demon1", "demon2", "bullets.c", "gun.c"],
 };
-room01.childNodes = [room02, room03, room04];
-room02.childNodes = [room05];
-room05.childNodes = [bossRoom];
+room01.childNodes = [room02];
+room02.childNodes = [room03];
+room03.childNodes = [room04];
+room04.childNodes = [bossRoom];
 
 const g = grammar(`
 Command {
@@ -146,6 +151,10 @@ class ConsoleScene extends Phaser.Scene {
         }
         //this.consoleDisplay?.setVisible(flag);
     }
+    public resetConsole() {
+        this.numCommands = 0;
+        this.currentNode = room01;
+    }
     private handleEnterKey() {
         if (this.consoleText) {
             const inputField = this.consoleText.getChildByID(
@@ -168,6 +177,7 @@ class ConsoleScene extends Phaser.Scene {
             const textBlockDiv = document.getElementById("textBlock");
             if (textBlockDiv) {
                 for (var i = 0; i < newText.length; i++) {
+                    console.log(this.numCommands);
                     if (this.numCommands == 11) {
                         const newParagraph = document.createElement("p");
                         newParagraph.textContent = newText[i];
@@ -225,6 +235,7 @@ class ConsoleScene extends Phaser.Scene {
             var tempScene: room01Scene;
             if (pathListTo[pathList.length - 1] == "player") {
                 if (pathList[pathList.length - 1] == "gun.c") {
+                    console.log(this.gameState.curRoom);
                     if (
                         (this.scene.get(this.gameState.curRoom) as room01Scene)
                             .defaultGunBig
@@ -233,6 +244,13 @@ class ConsoleScene extends Phaser.Scene {
                             this.scene.get(
                                 this.gameState.curRoom
                             ) as room01Scene
+                        ).addGun();
+                        return ["gun.c moved to player"];
+                    } else if (this.gameState.curRoom == "room02Scene") {
+                        (
+                            this.scene.get(
+                                this.gameState.curRoom
+                            ) as room02Scene
                         ).addGun();
                         return ["gun.c moved to player"];
                     } else {
@@ -273,40 +291,11 @@ class ConsoleScene extends Phaser.Scene {
                 (
                     this.scene.get(this.gameState.curRoom) as room01Scene
                 ).roomComplete();
-                if (pathListTo[pathListTo.length - 1] == "room05") {
-                    this.currentNode.entities =
-                        this.currentNode.entities.filter(
-                            (str) => str !== "player"
-                        ) as string[];
-                    room05.entities.push("player");
-                    this.currentNode = room05;
-                    //hide console
-                    console.log(this.gameState.curRoom);
-                    this.makeVisible();
-                    this.scene.setVisible(false, "ConsoleScene");
-
-                    //stop previous room
-                    tempScene = this.scene.get(
-                        this.gameState.curRoom
-                    ) as room01Scene;
-                    console.log(this.gameState.curRoom, tempScene);
-                    tempScene.events.off("player-moved");
-                    sceneEvents.removeAllListeners();
-                    this.scene.stop("game-ui");
-                    this.scene.stop(this.gameState.curRoom);
-
-                    //reset gamestate
-                    this.gameState.resetValuesOnSceneSwitch();
-
-                    this.gameState.curRoom = "room05Scene";
-                    this.scene.start("room05Scene", {
-                        gameState: this.gameState,
-                    });
-
-                    this.scene.bringToTop(this.gameState.curRoom);
-                    this.scene.bringToTop("game-ui");
-                    this.scene.pause("ConsoleScene");
-                } else if (pathListTo[pathListTo.length - 1] == "room04") {
+                if (
+                    pathListTo[pathListTo.length - 1] == "room04" &&
+                    this.currentNode == room03
+                ) {
+                    this.numCommands = 0;
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
                             (str) => str !== "player"
@@ -339,7 +328,11 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop(this.gameState.curRoom);
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
-                } else if (pathListTo[pathListTo.length - 1] == "room03") {
+                } else if (
+                    pathListTo[pathListTo.length - 1] == "room03" &&
+                    this.currentNode == room02
+                ) {
+                    this.numCommands = 0;
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
                             (str) => str !== "player"
@@ -372,7 +365,11 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop(this.gameState.curRoom);
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
-                } else if (pathListTo[pathListTo.length - 1] == "room02") {
+                } else if (
+                    pathListTo[pathListTo.length - 1] == "room02" &&
+                    this.currentNode == room01
+                ) {
+                    this.numCommands = 0;
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
                             (str) => str !== "player"
@@ -407,6 +404,7 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "room01") {
+                    this.numCommands = 0;
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
                             (str) => str !== "player"
@@ -439,7 +437,11 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop(this.gameState.curRoom);
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
-                } else if (pathListTo[pathListTo.length - 1] == "bossRoom") {
+                } else if (
+                    pathListTo[pathListTo.length - 1] == "bossRoom" &&
+                    this.currentNode == room04
+                ) {
+                    this.numCommands = 0;
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
                             (str) => str !== "player"
@@ -473,6 +475,8 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
                 } else if (pathListTo[pathListTo.length - 1] == "..") {
+                    return ["you cannot revisit rooms"];
+                    /**
                     this.currentNode.entities =
                         this.currentNode.entities.filter(
                             (str) => str !== "player"
@@ -510,11 +514,12 @@ class ConsoleScene extends Phaser.Scene {
                     this.scene.bringToTop(this.gameState.curRoom);
                     this.scene.bringToTop("game-ui");
                     this.scene.pause("ConsoleScene");
+                     */
                 } else {
-                    console.log("destination not found");
+                    return ["path does not exist. Don't try to skip rooms!"];
                 }
             } else {
-                console.log("you do not have permission to move this");
+                return ["you do not have permission to move this"];
             }
             console.log(pathList);
         } else if (command[0] == "gcc") {
@@ -581,7 +586,7 @@ class ConsoleScene extends Phaser.Scene {
                 "./",
                 "rm",
                 "cat (not implemented yet)",
-                "press '\\' to exit the terminal",
+                "press tab to open and close the terminal",
             ];
         }
         //console.log(this.currentNode);
