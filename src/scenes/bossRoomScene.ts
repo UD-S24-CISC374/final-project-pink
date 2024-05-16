@@ -66,9 +66,9 @@ class bossRoomScene extends Phaser.Scene {
             });
 
             const demon1 = this.demons.get(400, 200, "demon");
-            demon1.setProperties(150, 20, 250);
+            demon1.setProperties(200, 40, 150); //health, speed, bulletSpeed
             const demon2 = this.demons.get(400, 150, "demon");
-            demon2.setProperties(150, 20, 250);
+            demon2.setProperties(200, 20, 300);
 
             this.events.on("player-moved", (x: number, y: number) => {
                 //on player movement, the demons target x and y change

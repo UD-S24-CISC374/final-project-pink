@@ -557,8 +557,8 @@ class room01Scene extends Phaser.Scene {
         ) {
             this.chestMessagePlayed = true;
             const chestTip = [
-                "Press 'e' on the chest to open it!",
-                "Chests always give you an extra heart too!",
+                "Chests always give you an extra heart!",
+                "Press 'e' on the chest in the bottom left to open it!",
             ];
             this.scene.run("MessageScene", {
                 messages: chestTip, // Pass the messages array to the message scene
