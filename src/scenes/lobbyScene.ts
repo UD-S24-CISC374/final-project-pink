@@ -568,6 +568,7 @@ class LobbyScene extends Phaser.Scene {
                                     this.bypassTutorial = true;
                                     noButton.destroy();
                                     yesButton.destroy();
+                                    this.sound.play("button_sound");
                                 });
 
                                 noButton.setScale(0.05);
@@ -583,6 +584,7 @@ class LobbyScene extends Phaser.Scene {
                                 });
 
                                 noButton.on("pointerdown", () => {
+                                    this.sound.play("button_sound");
                                     this.bypassTutorial = false;
                                     noButton.destroy();
                                     yesButton.destroy();

@@ -63,6 +63,7 @@ export default class HelpButton extends Phaser.Scene {
 
         // Toggle help menu visibility when help button is clicked
         helpButton.on("pointerdown", () => {
+            this.sound.play("button_sound");
             helpMenuContainer.setVisible(!helpMenuContainer.visible);
         });
 

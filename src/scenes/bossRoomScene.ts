@@ -28,6 +28,9 @@ class bossRoomScene extends Phaser.Scene {
     preload() {}
 
     create() {
+        this.sound.stopAll();
+        const bossMusic = this.sound.add("boss_music", { loop: true });
+        bossMusic.play();
         this.scene.bringToTop("bossRoomScene");
         const map = this.make.tilemap({ key: "bossRoom" });
         const tileset = map.addTilesetImage("tilemap", "tiles"); //name of tilemap ON TILED, then name of key in preloader scene
@@ -150,18 +153,19 @@ class bossRoomScene extends Phaser.Scene {
             this.physics.add.collider(
                 this.bullets,
                 this.demons,
-                (bullet, demon) => {
-                    // Decrease demon health when hit by player bullets
-                    if (
-                        (demon as Demon).getHealth() <=
-                        this.gameState.player.getCurrentGunDamage()
-                    ) {
-                        this.demonCount--; // Removes a demon from count if it will die from hit
+                (bullet, chort) => {
+                    if (bullet instanceof Bullet && bullet.firstCollision) {
+                        bullet.firstCollision = false;
+
+                        // Decrease chort health when hit by player bullets
+                        (chort as Demon).takeDamage(
+                            this.gameState.player.getCurrentGunDamage()
+                        );
+                        // Destroy the bullet
+                        if (!this.gameState.player.currentGun?.isPiercing) {
+                            bullet.destroy();
+                        }
                     }
-                    (demon as Demon).takeDamage(
-                        this.gameState.player.getCurrentGunDamage()
-                    );
-                    bullet.destroy(); // Destroy the bullet
                 }
             );
 
