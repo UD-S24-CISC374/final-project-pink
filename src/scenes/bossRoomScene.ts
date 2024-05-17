@@ -376,7 +376,8 @@ class bossRoomScene extends Phaser.Scene {
                     });
                 },
             });
-        } else if (this.demonCount == 0) {
+        }
+        if (this.demons?.getLength() == 0) {
             this.tweens.add({
                 targets: this.player,
                 alpha: 0,
