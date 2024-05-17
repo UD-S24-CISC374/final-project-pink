@@ -1,15 +1,28 @@
 import Phaser from "phaser";
-import MainScene from "./scenes/mainScene";
 import PreloadScene from "./scenes/preloadScene";
+import TitleScene from "./scenes/titleScene";
 
-const DEFAULT_WIDTH = 1280;
-const DEFAULT_HEIGHT = 720;
+import LobbyScene from "./scenes/lobbyScene";
+import room01Scene from "./scenes/room01Scene";
+import room02Scene from "./scenes/room02Scene";
+import room03Scene from "./scenes/room03Scene";
+import room04Scene from "./scenes/room04Scene";
+import ConsoleScene from "./scenes/consoleScene";
+import GameUI from "./scenes/uiScene";
+import MessageScene from "./scenes/messageScene";
+import HelpButton from "./scenes/helpScene";
+import GameOverScene from "./scenes/gameOverScene";
+import bossRoomScene from "./scenes/bossRoomScene";
+import WinScene from "./scenes/winScene";
+
+const DEFAULT_WIDTH = 400;
+const DEFAULT_HEIGHT = 250;
 
 export const CONFIG = {
-    title: "My Untitled Phaser 3 Game",
+    title: "Bash The Dungeon",
     version: "0.0.1",
     type: Phaser.AUTO,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#000000",
     scale: {
         parent: "phaser-game",
         mode: Phaser.Scale.FIT,
@@ -17,12 +30,27 @@ export const CONFIG = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [PreloadScene, MainScene],
+    scene: [
+        PreloadScene,
+        TitleScene,
+        LobbyScene,
+        GameUI,
+        MessageScene,
+        room01Scene,
+        room02Scene,
+        room03Scene,
+        room04Scene,
+        ConsoleScene,
+        HelpButton,
+        GameOverScene,
+        bossRoomScene,
+        WinScene,
+    ],
     physics: {
         default: "arcade",
         arcade: {
             debug: false,
-            gravity: { y: 300 },
+            gravity: { y: 0 },
         },
     },
     input: {
@@ -32,7 +60,10 @@ export const CONFIG = {
         gamepad: false,
     },
     render: {
-        pixelArt: false,
+        pixelArt: true,
         antialias: true,
+    },
+    dom: {
+        createContainer: true,
     },
 };
